@@ -1,0 +1,106 @@
+# Publica la web en GitHub Pages y compila la app Android (APK firmado) en cada cambio.
+# Resultado:
+#   Web:  https://<tu-usuario>.github.io/<este-repositorio>/
+#   APK:  https://github.com/<tu-usuario>/<este-repositorio>/releases/latest/download/ProCoaching.apk
+name: Publicar web y app Android
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: write     # crear la versión (Release) con el APK
+  pages: write        # publicar la web
+  id-token: write
+
+concurrency:
+  group: publicar
+  cancel-in-progress: false
+
+jobs:
+  web:
+    name: Publicar la web
+    runs-on: ubuntu-latest
+    environment:
+      name: github-pages
+      url: ${{ steps.despliegue.outputs.page_url }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+      - name: Versión de la interfaz y biblioteca de ejercicios
+        env:
+          VERSION_APP: ${{ github.run_number }}
+        run: node scripts/preparar-web.mjs
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: despliegue
+        uses: actions/deploy-pages@v4
+
+  apk:
+    name: Compilar APK
+    needs: web
+    runs-on: ubuntu-latest
+    env:
+      # La app abre la web publicada (se actualiza sola). Puedes fijar otra dirección
+      # creando la variable WEB_URL en Settings → Secrets and variables → Actions → Variables.
+      WEB_URL: ${{ vars.WEB_URL != '' && vars.WEB_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Revisar la llave de firma
+        env:
+          PC_LLAVE_BASE64: ${{ secrets.PC_LLAVE_BASE64 }}
+          PC_LLAVE_CLAVE: ${{ secrets.PC_LLAVE_CLAVE }}
+        run: |
+          if [ -z "$PC_LLAVE_BASE64" ] || [ -z "$PC_LLAVE_CLAVE" ]; then
+            echo "::error::Faltan los secretos PC_LLAVE_BASE64 y PC_LLAVE_CLAVE (ver LEEME.md, paso 4)."
+            exit 1
+          fi
+          echo "$PC_LLAVE_BASE64" | base64 -d > "$RUNNER_TEMP/procoaching.p12"
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+          cache: npm
+
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: 21
+          cache: gradle
+
+      - uses: android-actions/setup-android@v3
+
+      - name: Instalar dependencias
+        run: npm ci
+
+      - name: Preparar la app
+        run: |
+          npm run configurar
+          npx cap sync android
+
+      - name: Compilar APK firmado
+        working-directory: android
+        env:
+          PC_LLAVE_RUTA: ${{ runner.temp }}/procoaching.p12
+          PC_LLAVE_CLAVE: ${{ secrets.PC_LLAVE_CLAVE }}
+        run: |
+          chmod +x gradlew
+          ./gradlew assembleRelease --no-daemon
+          cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/ProCoaching.apk"
+
+      - name: Publicar el APK
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: v1.0.${{ github.run_number }}
+          name: PRO COACHING 1.0.${{ github.run_number }}
+          body: |
+            Instala o actualiza la app descargando **ProCoaching.apk** en tu teléfono Android.
+            Enlace fijo a la última versión: https://github.com/${{ github.repository }}/releases/latest/download/ProCoaching.apk
+          files: ProCoaching.apk
+          make_latest: true
