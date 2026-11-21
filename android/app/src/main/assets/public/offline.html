@@ -1,0 +1,30 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Sin conexión · PRO COACHING</title>
+  <style>
+    html, body { margin: 0; height: 100%; background: #020617; color: #e2e8f0; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif; }
+    main { min-height: 100%; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 24px; text-align: center; box-sizing: border-box; }
+    h1 { font-size: 20px; margin: 16px 0 8px; color: #fff; }
+    p { font-size: 14px; color: #94a3b8; max-width: 320px; line-height: 1.5; margin: 0 0 24px; }
+    button { background: #10b981; color: #020617; border: 0; border-radius: 14px; font-weight: 800; font-size: 15px; padding: 14px 28px; }
+  </style>
+</head>
+<body>
+  <main>
+    <div style="font-size:44px">📶</div>
+    <h1>Sin conexión a internet</h1>
+    <p>PRO COACHING necesita internet para cargar tu rutina y guardar tu progreso. Revisa tu Wi-Fi o datos móviles.</p>
+    <button onclick="reintentar()">Reintentar</button>
+  </main>
+  <script src="destino.js"></script>
+  <script>
+    function reintentar() {
+      var url = window.PROCOACHING_WEB_URL;
+      if (url) window.location.replace(url); else window.location.reload();
+    }
+  </script>
+</body>
+</html>

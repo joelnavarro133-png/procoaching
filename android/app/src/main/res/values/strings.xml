@@ -1,0 +1,7 @@
+<?xml version='1.0' encoding='utf-8'?>
+<resources>
+    <string name="app_name">PRO COACHING</string>
+    <string name="title_activity_main">PRO COACHING</string>
+    <string name="package_name">pe.bjproyectos.procoaching</string>
+    <string name="custom_url_scheme">pe.bjproyectos.procoaching</string>
+</resources>
