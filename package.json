@@ -1,0 +1,23 @@
+{
+  "name": "procoaching",
+  "version": "1.0.0",
+  "private": true,
+  "description": "PRO COACHING | BJPROYECTOS — web y app Android (Capacitor)",
+  "scripts": {
+    "configurar": "node scripts/configurar-capacitor.mjs",
+    "sync": "npm run configurar && npx cap sync android",
+    "iconos": "npx @capacitor/assets generate --android --iconBackgroundColor '#020617' --splashBackgroundColor '#020617'"
+  },
+  "dependencies": {
+    "@capacitor/android": "^8.6.2",
+    "@capacitor/app": "^8.1.2",
+    "@capacitor/core": "^8.6.2",
+    "@capacitor/filesystem": "^8.1.5",
+    "@capacitor/haptics": "^8.0.2",
+    "@capacitor/local-notifications": "^8.3.1",
+    "@capacitor/share": "^8.0.3"
+  },
+  "devDependencies": {
+    "@capacitor/cli": "^8.6.2"
+  }
+}

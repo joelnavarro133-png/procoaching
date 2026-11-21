@@ -1,0 +1,10 @@
+  html, body { -webkit-tap-highlight-color: transparent; overflow-x: hidden; background-color: #020617; }
+  body { font-feature-settings: 'tnum' 1, 'cv11' 1; }   /* números tabulares: pesos y tiempos alineados */
+  .no-scrollbar::-webkit-scrollbar { display: none; }
+  .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+  .safe-bottom { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
+  button, [onclick] { touch-action: manipulation; }
+  /* GIF de ejercicios (originales de 180×180 px): sin filtros y con escalado suave.
+     Se muestran a 180 px en la tarjeta (tamaño original) y a 360 px en el modal (2× exacto). */
+  .gif-inteligente, #ejGif { image-rendering: auto; filter: none; }
+  .gif-nativo { width: 180px; height: 180px; }

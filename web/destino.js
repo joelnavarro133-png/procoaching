@@ -1,0 +1,1 @@
+window.PROCOACHING_WEB_URL = '';
