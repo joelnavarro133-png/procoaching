@@ -42,47 +42,47 @@
     
     const listadoFechas = progreso.map(p => 
       `<li class="text-[11px] border-b border-slate-700 py-1.5 last:border-0 flex justify-between">
-        <span class="text-emerald-400 font-bold">${p.fecha}</span> 
-        <span class="text-slate-400">${p.peso}kg</span>
+        <span class="text-emerald-400 font-bold">${escHtml(p.fecha)}</span> 
+        <span class="text-slate-400">${escHtml(p.peso)}kg</span>
       </li>`
     ).reverse().join('');
 
     contenedorCards.innerHTML = `
   <!-- Tarjeta Peso (Cyan) -->
-  <div onclick="abrirModalComposicion('${ultimaEval ? ultimaEval.peso : '-'}', '${ultimaEval ? ultimaEval.grasaCorporal : '-'}', '${ultimaEval ? (ultimaEval.sexo || '') : ''}')" 
+  <div onclick="abrirModalComposicion(${argJs(ultimaEval ? ultimaEval.peso : '-')}, ${argJs(ultimaEval ? ultimaEval.grasaCorporal : '-')}, ${argJs(ultimaEval ? ultimaEval.sexo : '')})" 
        class="bg-panel p-4 rounded-2xl border border-neon-cyan/30 flex flex-col justify-center cursor-pointer transition-all relative overflow-hidden group">
     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-cyan to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
     <span class="text-[10px] uppercase text-neon-cyan/80 font-bold tracking-widest block mb-1">Masa Total</span>
-    <span class="text-3xl font-black text-white">${ultimaEval && ultimaEval.peso ? ultimaEval.peso + '<span class="text-sm text-neon-cyan">KG</span>' : '-'}</span>
+    <span class="text-3xl font-black text-white">${ultimaEval && ultimaEval.peso ? escHtml(ultimaEval.peso) + '<span class="text-sm text-neon-cyan">KG</span>' : '-'}</span>
     <span class="text-[9px] text-neon-cyan font-bold uppercase mt-2 tracking-[0.2em]">Escaneo HUD ▾</span>
   </div>
   
   <!-- Tarjeta Grasa (Orange Neon) -->
-  <div onclick="abrirModalMetrica('GRASA', '${ultimaEval ? ultimaEval.grasaCorporal : '-'}', '${ultimaEval ? ultimaEval.sexo : ''}', '${ultimaEval ? ultimaEval.edad : ''}')" 
+  <div onclick="abrirModalMetrica('GRASA', ${argJs(ultimaEval ? ultimaEval.grasaCorporal : '-')}, ${argJs(ultimaEval ? ultimaEval.sexo : '')}, ${argJs(ultimaEval ? ultimaEval.edad : '')})" 
        class="bg-panel p-4 rounded-2xl border border-neon-orange/30 flex flex-col justify-center cursor-pointer transition-all relative group">
     <div class="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-neon-orange to-transparent opacity-50"></div>
     <span class="text-[10px] uppercase text-neon-orange/80 font-bold tracking-widest block mb-1">Tejido Adiposo</span>
-    <span class="text-3xl font-black text-white">${grasaData.val}</span>
-    <span class="text-[10px] text-neon-orange font-black mt-2 tracking-wider bg-neon-orange/10 px-2 py-0.5 rounded inline-block w-max border border-neon-orange/30">${grasaData.class}</span>
+    <span class="text-3xl font-black text-white">${escHtml(grasaData.val)}</span>
+    <span class="text-[10px] text-neon-orange font-black mt-2 tracking-wider bg-neon-orange/10 px-2 py-0.5 rounded inline-block w-max border border-neon-orange/30">${escHtml(grasaData.class)}</span>
   </div>
 
   <!-- Tarjeta IMC (Green Neon) -->
-  <div onclick="abrirModalMetrica('IMC', '${ultimaEval ? ultimaEval.imc : '-'}', '${ultimaEval ? ultimaEval.sexo : ''}')" 
+  <div onclick="abrirModalMetrica('IMC', ${argJs(ultimaEval ? ultimaEval.imc : '-')}, ${argJs(ultimaEval ? ultimaEval.sexo : '')})" 
        class="bg-panel p-4 rounded-2xl border border-[#34d399]/30 flex flex-col justify-center cursor-pointer transition-all relative group">
     <span class="text-[10px] uppercase text-[#34d399]/80 font-bold tracking-widest block mb-1">Índice IMC</span>
-    <span class="text-3xl font-black text-white">${imcData.val}</span>
+    <span class="text-3xl font-black text-white">${escHtml(imcData.val)}</span>
     <div class="mt-2 w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-[#34d399]/20">
         <div class="bg-[#34d399] h-full" style="width: ${imcPct}%;"></div>
     </div>
-    <span class="text-[9px] text-[#34d399] mt-1.5 tracking-widest uppercase">Rango: ${imcData.class}</span>
+    <span class="text-[9px] text-[#34d399] mt-1.5 tracking-widest uppercase">Rango: ${escHtml(imcData.class)}</span>
   </div>
 
   <!-- Tarjeta V-Taper (Purple Neon) -->
-  <div onclick="abrirModalMetrica('VTAPER', '${vTaperRatio}', '${ultimaEval ? ultimaEval.sexo : ''}')" 
+  <div onclick="abrirModalMetrica('VTAPER', ${argJs(vTaperRatio)}, ${argJs(ultimaEval ? ultimaEval.sexo : '')})" 
        class="bg-panel p-4 rounded-2xl border border-purple-500/30 flex flex-col justify-center cursor-pointer transition-all relative group">
     <span class="text-[10px] uppercase text-purple-400/80 font-bold tracking-widest block mb-1">Ratio V-Taper</span>
-    <span class="text-3xl font-black text-white">${vTaperRatio}</span>
-    <span class="text-[10px] text-purple-400 font-black mt-2 tracking-wider bg-purple-500/10 px-2 py-0.5 rounded inline-block w-max border border-purple-500/30">${vTaperData.class}</span>
+    <span class="text-3xl font-black text-white">${escHtml(vTaperRatio)}</span>
+    <span class="text-[10px] text-purple-400 font-black mt-2 tracking-wider bg-purple-500/10 px-2 py-0.5 rounded inline-block w-max border border-purple-500/30">${escHtml(vTaperData.class)}</span>
   </div>
 
   <!-- Tarjeta Día Actual (Tech Estándar) -->
@@ -468,7 +468,7 @@
       progreso = Array.isArray(progreso) ? progreso : [];
       const tienePliegues = progreso.some(p => parseFloat(p.tricipital) > 0 || parseFloat(p.subescapular) > 0);
       
-      const opcionesFecha = progreso.map((p, idx) => `<option value="${idx}">${p.fecha} (Peso: ${p.peso || '-'} kg | Grasa: ${p.grasaCorporal || '-'}%)</option>`).join('');
+      const opcionesFecha = progreso.map((p, idx) => `<option value="${idx}">${escHtml(p.fecha)} (Peso: ${escHtml(p.peso || '-')} kg | Grasa: ${escHtml(p.grasaCorporal || '-')}%)</option>`).join('');
       
       const htmlComparador = progreso.length > 0 ? `
         <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
@@ -490,13 +490,13 @@
 
       const filasPerimetros = progreso.map(p => `
         <tr class="border-b border-slate-800/80 hover:bg-slate-800/40 whitespace-nowrap">
-          <td class="p-3 font-bold text-emerald-400">${p.fecha}</td><td class="p-3 font-semibold">${p.peso} kg</td><td class="p-3">${p.imc}</td><td class="p-3 font-semibold text-amber-400">${p.grasaCorporal}%</td><td class="p-3">${p.pecho}</td><td class="p-3">${p.hombros}</td><td class="p-3">${p.brazoRelajado} / ${p.brazoFlexionado}</td><td class="p-3 font-semibold text-emerald-300">${p.cintura}</td><td class="p-3">${p.cadera}</td><td class="p-3">${p.gluteos}</td><td class="p-3">${p.muslo}</td><td class="p-3">${p.pantorrilla}</td>
+          <td class="p-3 font-bold text-emerald-400">${escHtml(p.fecha)}</td><td class="p-3 font-semibold">${escHtml(p.peso)} kg</td><td class="p-3">${escHtml(p.imc)}</td><td class="p-3 font-semibold text-amber-400">${escHtml(p.grasaCorporal)}%</td><td class="p-3">${escHtml(p.pecho)}</td><td class="p-3">${escHtml(p.hombros)}</td><td class="p-3">${escHtml(p.brazoRelajado)} / ${escHtml(p.brazoFlexionado)}</td><td class="p-3 font-semibold text-emerald-300">${escHtml(p.cintura)}</td><td class="p-3">${escHtml(p.cadera)}</td><td class="p-3">${escHtml(p.gluteos)}</td><td class="p-3">${escHtml(p.muslo)}</td><td class="p-3">${escHtml(p.pantorrilla)}</td>
         </tr>
       `).join('');
       const tarjetasPerimetros = progreso.slice().reverse().map(p => {
-        const m = (et, v, u) => `<div class="bg-slate-950 rounded-lg px-2 py-1.5"><p class="text-[9px] text-slate-500 font-bold uppercase">${et}</p><p class="text-sm font-extrabold text-white">${(v === '' || v === undefined || v === null) ? '—' : v}<span class="text-[10px] text-slate-500 font-semibold"> ${u}</span></p></div>`;
+        const m = (et, v, u) => `<div class="bg-slate-950 rounded-lg px-2 py-1.5"><p class="text-[9px] text-slate-500 font-bold uppercase">${et}</p><p class="text-sm font-extrabold text-white">${(v === '' || v === undefined || v === null) ? '—' : escHtml(v)}<span class="text-[10px] text-slate-500 font-semibold"> ${u}</span></p></div>`;
         return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
-          <div class="flex items-center justify-between mb-2"><span class="text-xs font-extrabold text-emerald-400">${p.fecha}</span><span class="text-[11px] font-bold text-amber-400">${p.grasaCorporal}% grasa</span></div>
+          <div class="flex items-center justify-between mb-2"><span class="text-xs font-extrabold text-emerald-400">${escHtml(p.fecha)}</span><span class="text-[11px] font-bold text-amber-400">${escHtml(p.grasaCorporal)}% grasa</span></div>
           <div class="grid grid-cols-3 gap-1.5">${m('Peso', p.peso, 'kg')}${m('IMC', p.imc, '')}${m('Pecho', p.pecho, 'cm')}${m('Hombros', p.hombros, 'cm')}${m('Brazo', (p.brazoRelajado || '') + ' / ' + (p.brazoFlexionado || ''), 'cm')}${m('Cintura', p.cintura, 'cm')}${m('Cadera', p.cadera, 'cm')}${m('Glúteos', p.gluteos, 'cm')}${m('Muslo', p.muslo, 'cm')}${m('Pantorrilla', p.pantorrilla, 'cm')}</div>
         </div>`;
       }).join('');
@@ -1030,7 +1030,7 @@
         // ==================== FILA DE ESPECIFICACIONES ====================
     // Reemplaza los chips sueltos por una tabla compacta de 4 columnas.
     function filaEspecs(r, segDescanso, etiquetaSeries) {
-      const tempo = `${r.excentrica || 0}-${r.pausaExcentrica || 0}-${r.concentrica || 0}-${r.pausaConcentrica || 0}`;
+      const tempo = escHtml(`${r.excentrica || 0}-${r.pausaExcentrica || 0}-${r.concentrica || 0}-${r.pausaConcentrica || 0}`);
       const desc = (r.descanso !== undefined && r.descanso !== '') ? r.descanso : 0;
       const cel = (et, val) => `
         <div class="px-0.5 sm:px-1 py-2 text-center min-w-0">

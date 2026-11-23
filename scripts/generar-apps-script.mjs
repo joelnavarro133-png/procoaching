@@ -20,6 +20,15 @@ const quitar = [
 ];
 quitar.forEach(re => { indice = indice.replace(re, ''); });
 
+// Apps Script no puede servir archivos sueltos como js/vendor/…: se usa el CDN con versión fija y
+// comprobación de integridad (SRI). Si el archivo del CDN cambiara, el navegador no lo ejecuta.
+// El hash corresponde a chart.js@4.4.1/dist/chart.umd.js (el mismo archivo que web/js/vendor/chart.umd.js).
+const chartLocal = '<script src="js/vendor/chart.umd.js"></script>';
+if (!indice.includes(chartLocal)) throw new Error('No encontré Chart.js (js/vendor/chart.umd.js) en index.html');
+indice = indice.replace(chartLocal,
+  '<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.js" ' +
+  'integrity="sha384-dug+JxfBvklEQdJ4AYuBBAIScUz0bVN73xpy273gcAwHjb3qI0fXmuYNaNfdyYJG" crossorigin="anonymous"></script>');
+
 const css = '<link rel="stylesheet" href="css/estilos.css?v=__VERSION__">';
 if (!indice.includes(css)) throw new Error('No encontré la hoja de estilos en index.html');
 indice = indice.replace(css, "<?!= incluir('Estilos'); ?>");

@@ -415,6 +415,11 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
       return String(v === null || v === undefined ? '' : v)
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
     }
+    // Argumento de texto para un onclick="fn(...)": se pasa como cadena JSON y luego se escapa para el atributo.
+    // (escHtml solo no basta ahí: el navegador vuelve a convertir &#39; en ' antes de ejecutar el código).
+    function argJs(v) {
+      return escHtml(JSON.stringify(String(v === null || v === undefined ? '' : v)));
+    }
 
     const LS = {
       get(k) { try { return window.localStorage.getItem(k); } catch (e) { return null; } },
