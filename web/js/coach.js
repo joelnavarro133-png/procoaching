@@ -7,16 +7,27 @@
       actualizarSelectorPlantillas();
       renumerarConstructor();
       document.getElementById('evFecha').value = fechaLocalISO();
+      cambiarTabCoach('tabNuevoAlumno');
     }
 
     function cambiarTabCoach(tabId) {
       document.querySelectorAll('.tab-coach').forEach(el => el.classList.add('hidden'));
-      document.getElementById(tabId).classList.remove('hidden');
+      const target = document.getElementById(tabId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.btn-tab-coach').forEach(btn => {
+        btn.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800';
+      });
+      const btnActivo = document.getElementById('btnTab-' + tabId);
+      if (btnActivo) {
+        btnActivo.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-extrabold transition bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20';
+      }
     }
 
     function actualizarSelectoresAlumnos() {
       const html = estadoGlobal.alumnos.map(a => `<option value="${escHtml(a.id)}">${escHtml(a.nombre)} (${escHtml(a.nivel)})</option>`).join('');
       document.querySelectorAll('.select-alumnos').forEach(s => s.innerHTML = html);
+      renderListaMisAlumnosTab1();
       renderTarjetasAlumnos();
     }
 
@@ -34,7 +45,7 @@
 
       GS()
         .withSuccessHandler(res => {
-          btn.innerText = 'Guardar Alumno';
+          btn.innerText = 'Crear Alumno';
           btn.disabled = false;
           alert(res.mensaje || res.error);
           if (res.success) {
@@ -578,20 +589,45 @@
 
     function generarReportePDFCliente(idAlumno, paraCoach) {
       const btn = document.getElementById('btnReporte-' + idAlumno);
-      if (btn) { btn.disabled = true; btn.innerText = '⏳ Generando... (puede tardar)'; btn.classList.add('opacity-60'); }
+      const txtPrev = btn ? btn.innerText : '📄 Generar reporte PDF';
+      if (btn) { btn.disabled = true; btn.innerText = '⏳ Generando PDF...'; btn.classList.add('opacity-60'); }
       GS().withSuccessHandler(res => {
         if (!res || !res.success) {
-          if (btn) { btn.disabled = false; btn.innerText = '📄 Generar reporte PDF'; btn.classList.remove('opacity-60'); }
+          if (btn) { btn.disabled = false; btn.innerText = txtPrev; btn.classList.remove('opacity-60'); }
           return alert((res && res.error) || 'No se pudo generar el reporte.');
         }
         const previo = reportesGenerados[idAlumno];
         if (previo && previo.url) { try { URL.revokeObjectURL(previo.url); } catch (e) {} }
         const blob = blobDesdeBase64(res.pdfBase64 || '', 'application/pdf');
         reportesGenerados[idAlumno] = { nombre: res.nombre, blob: blob, url: URL.createObjectURL(blob) };
-        const cont = document.getElementById('bloqueReportePDF-' + idAlumno);
-        if (cont) cont.outerHTML = bloqueReportePDF(idAlumno, paraCoach);
+
+        const contClasico = document.getElementById('bloqueReportePDF-' + idAlumno);
+        if (contClasico) contClasico.outerHTML = bloqueReportePDF(idAlumno, paraCoach);
+
+        const contCoach = document.getElementById('estadoReporteCoach-' + idAlumno);
+        if (contCoach) {
+          if (btn) { btn.disabled = false; btn.innerText = '🔄 Volver a generar PDF'; btn.classList.remove('opacity-60'); }
+          contCoach.innerHTML = barraDescargaReporteCoach(idAlumno);
+        }
         mostrarToast('✅ Reporte listo para descargar o enviar');
       }).generarReportePDF({ idAlumno: idAlumno, incluirFotos: true });
+    }
+
+    function barraDescargaReporteCoach(idAlumno) {
+      const hecho = reportesGenerados[idAlumno];
+      if (!hecho) return '';
+      const a = alumnoPorId(idAlumno) || {};
+      return `
+        <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
+          <div class="min-w-0">
+            <p class="text-xs font-extrabold text-emerald-400 truncate">📄 ${escHtml(hecho.nombre)}</p>
+            <p class="text-[10px] text-slate-500">🔒 Privado en Drive · Se comparte como archivo adjunto</p>
+          </div>
+          <div class="flex gap-2 w-full sm:w-auto">
+            <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 sm:flex-none bg-slate-950 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">📥 Descargar</button>
+            ${a.whatsapp ? `<button onclick="enviarReportePorWhatsApp('${escHtml(idAlumno)}', true)" class="flex-1 sm:flex-none bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl">💬 Enviar WhatsApp</button>` : ''}
+          </div>
+        </div>`;
     }
 
     /**
@@ -667,47 +703,227 @@
       }).actualizarWhatsAppAlumno(idAlumno, valor);
     }
 
-    // ---- Tarjetas de alumnos (pestaña «4. Analizar Alumno») ----
+    // ---- Listas de alumnos (Pestaña 1 y Pestaña 4) ----
     let alumnoCoachActivo = null;
     function inicialesDe(nombre) {
       const p = String(nombre || '').trim().split(/\s+/);
-      return ((p[0] || '')[0] || '' ) + ((p[1] || '')[0] || '');
+      return ((p[0] || '')[0] || '') + ((p[1] || '')[0] || '');
     }
+
+    function toggleDrawerAlumnos(drawerId, abrir) {
+      const dr = document.getElementById(drawerId);
+      const ov = document.getElementById('overlay-' + drawerId);
+      if (!dr || !ov) return;
+      if (abrir) {
+        dr.classList.remove('-translate-x-full');
+        ov.classList.remove('hidden');
+      } else {
+        dr.classList.add('-translate-x-full');
+        ov.classList.add('hidden');
+      }
+    }
+
+    /** Formato único de tarjeta de alumno para Pestaña 1 y Pestaña 4. */
+    function htmlTarjetaAlumnoCoach(a, { activo = false, onclick = '' }) {
+      const avatar = a.foto
+        ? `<img src="${escHtml(urlFotoConCache(a.foto))}" data-mini="1" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" alt="" loading="lazy" class="w-10 h-10 rounded-full object-cover border-2 ${activo ? 'border-emerald-400' : 'border-slate-700'} shrink-0">`
+        : `<span class="w-10 h-10 rounded-full font-black text-xs flex items-center justify-center shrink-0 ${activo ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-200'}">${escHtml(inicialesDe(a.nombre).toUpperCase())}</span>`;
+
+      return `
+        <button type="button" onclick="${onclick}"
+          class="w-full text-left p-3 rounded-2xl border transition flex items-center gap-3 active:scale-[0.99] ${activo ? 'bg-emerald-500/10 border-emerald-500/60 shadow-md shadow-emerald-500/10' : 'bg-slate-900/90 hover:bg-slate-900 border-slate-800 hover:border-slate-700'}">
+          ${avatar}
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-extrabold text-white truncate">${escHtml(a.nombre)}</span>
+            <span class="block text-[11px] font-semibold truncate mt-0.5 ${activo ? 'text-emerald-300' : 'text-slate-400'}">${escHtml(a.nivel || 'Sin nivel')}</span>
+          </span>
+          <span class="${activo ? 'text-emerald-400' : 'text-slate-600'} font-bold text-sm shrink-0">›</span>
+        </button>`;
+    }
+
+    function renderListaMisAlumnosTab1() {
+      const cont = document.getElementById('listaMisAlumnosTab1');
+      if (!cont) return;
+      const lista = estadoGlobal.alumnos || [];
+      const txtCnt = lista.length + (lista.length === 1 ? ' alumno' : ' alumnos');
+      ['contadorMisAlumnos', 'contadorMisAlumnosMovil', 'contadorAnalizarMovil'].forEach(id => {
+        const el = document.getElementById(id); if (el) el.textContent = txtCnt;
+      });
+      if (!lista.length) {
+        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-500">Aún no tienes alumnos registrados.</div>';
+        return;
+      }
+      cont.innerHTML = lista.map(a => htmlTarjetaAlumnoCoach(a, {
+        activo: false,
+        onclick: `toggleDrawerAlumnos('drawerAlumnosTab1', false); cambiarTabCoach('tabComparativaCoach'); cargarProgresoParaCoach('${escHtml(a.id)}')`
+      })).join('');
+    }
+
+    function mostrarVistaAnalizarMovil(verExpediente) {
+      const lista = document.getElementById('panelListaAnalizar');
+      const exp = document.getElementById('panelExpedienteAnalizar');
+      if (!lista || !exp) return;
+      if (verExpediente) {
+        lista.classList.add('hidden', 'sm:flex');
+        exp.classList.remove('hidden');
+      } else {
+        lista.classList.remove('hidden');
+        exp.classList.add('hidden');
+      }
+    }
+
+    function volverAListaAlumnosMovil() {
+      mostrarVistaAnalizarMovil(false);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }
+
     function renderTarjetasAlumnos() {
       const cont = document.getElementById('tarjetasAlumnosCoach');
       if (!cont) return;
       const lista = estadoGlobal.alumnos || [];
       if (!lista.length) {
-        cont.innerHTML = '<p class="col-span-full text-sm text-slate-500">Aún no tienes alumnos registrados.</p>';
+        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-500">Aún no tienes alumnos registrados.</div>';
         return;
       }
-      cont.innerHTML = lista.map(a => {
-        const activo = a.id === alumnoCoachActivo;
-        const foto = a.foto
-          ? `<img src="${escHtml(urlFotoConCache(a.foto))}" data-mini="1" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" alt="" loading="lazy" class="w-14 h-14 rounded-full object-cover border-2 ${activo ? 'border-emerald-400' : 'border-slate-700'}">`
-          : `<span class="w-14 h-14 rounded-full flex items-center justify-center text-base font-black ${activo ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-300'}">${escHtml(inicialesDe(a.nombre).toUpperCase())}</span>`;
+      cont.innerHTML = lista.map(a => htmlTarjetaAlumnoCoach(a, {
+        activo: a.id === alumnoCoachActivo,
+        onclick: `cargarProgresoParaCoach('${escHtml(a.id)}')`
+      })).join('');
+    }
+
+    // ---- KPIs del expediente del Coach ----
+    function calcularKPIsAlumno(progreso, semanas) {
+      // 1. Adherencia (última semana registrada)
+      let adherencia = '—';
+      if (semanas && semanas.length) {
+        const ultSem = semanas[semanas.length - 1];
+        const g = agruparSemana(ultSem);
+        const claves = Object.keys(g);
+        if (claves.length) {
+          const ok = claves.filter(k => ejercicioHecho(g[k])).length;
+          adherencia = Math.round((ok / claves.length) * 100) + '%';
+        }
+      }
+
+      // 2. Masa magra y 3. % Grasa (delta entre primera y última evaluación, o valor actual si hay 1)
+      let masaTxt = '—', masaPos = true, grasaTxt = '—', grasaPos = true;
+      const evals = (progreso || []).filter(p => p && (p.peso || p.grasaCorporal || p.masaCorporal));
+      const magraDe = e => {
+        const m = parseFloat(e.masaCorporal);
+        if (!isNaN(m) && m > 0) return m;
+        const p = parseFloat(e.peso), gr = parseFloat(e.grasaCorporal);
+        return (!isNaN(p) && !isNaN(gr)) ? p * (1 - gr / 100) : NaN;
+      };
+      if (evals.length >= 2) {
+        const pri = evals[0], ult = evals[evals.length - 1];
+        const m0 = magraDe(pri), m1 = magraDe(ult);
+        if (!isNaN(m0) && !isNaN(m1)) {
+          const dm = Math.round((m1 - m0) * 10) / 10;
+          masaTxt = (dm > 0 ? '+' : '') + dm.toFixed(1) + ' kg';
+          masaPos = dm >= 0;
+        }
+        const g0 = parseFloat(pri.grasaCorporal), g1 = parseFloat(ult.grasaCorporal);
+        if (!isNaN(g0) && !isNaN(g1)) {
+          const dg = Math.round((g1 - g0) * 10) / 10;
+          grasaTxt = (dg > 0 ? '+' : '') + dg.toFixed(1) + '%';
+          grasaPos = dg <= 0;
+        }
+      } else if (evals.length === 1) {
+        const m1 = magraDe(evals[0]), g1 = parseFloat(evals[0].grasaCorporal);
+        if (!isNaN(m1)) masaTxt = m1.toFixed(1) + ' kg';
+        if (!isNaN(g1)) grasaTxt = g1.toFixed(1) + '%';
+      }
+
+      // 4. Carga total (cambio medio % entre las 2 últimas semanas)
+      let cargaTxt = '—', cargaPos = true;
+      if (semanas && semanas.length >= 2) {
+        const gA = agruparSemana(semanas[semanas.length - 2]);
+        const gB = agruparSemana(semanas[semanas.length - 1]);
+        const pcts = [];
+        Object.keys(gB).forEach(k => {
+          const nA = valorNumerico(gA[k]), nB = valorNumerico(gB[k]);
+          if (nA !== null && nB !== null && nA > 0) pcts.push(((nB - nA) / nA) * 100);
+        });
+        if (pcts.length) {
+          const media = pcts.reduce((a, b) => a + b, 0) / pcts.length;
+          cargaTxt = (media > 0 ? '+' : '') + media.toFixed(1) + '%';
+          cargaPos = media >= 0;
+        }
+      }
+
+      return { adherencia, masaTxt, masaPos, grasaTxt, grasaPos, cargaTxt, cargaPos };
+    }
+
+    function construirTarjetaCheckinReciente(lista) {
+      if (!lista || !lista.length) {
         return `
-          <button onclick="cargarProgresoParaCoach('${escHtml(a.id)}')"
-            class="text-left p-3 rounded-2xl border transition active:scale-[0.98] ${activo ? 'bg-emerald-500/10 border-emerald-500/60' : 'bg-slate-950 border-slate-800 hover:border-slate-600'}">
-            <div class="flex flex-col items-center text-center gap-2">
-              ${foto}
-              <span class="w-full">
-                <span class="block text-xs font-extrabold text-white leading-tight truncate">${escHtml(a.nombre)}</span>
-                <span class="block text-[10px] font-bold mt-1 uppercase tracking-wide ${activo ? 'text-emerald-300' : 'text-slate-500'} truncate">${escHtml(a.nivel || 'Sin nivel')}</span>
-              </span>
+          <div id="tarjetaCheckinDestacado" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5">
+            <div class="flex items-center justify-between gap-2">
+              <p class="text-sm font-extrabold text-white">Check-in semanal</p>
+              <span class="text-[11px] font-bold text-slate-500 bg-slate-950 border border-slate-800 px-2.5 py-0.5 rounded-full">Sin envíos</span>
             </div>
-          </button>`;
-      }).join('');
+            <p class="text-xs text-slate-500 mt-2">Este alumno aún no ha enviado su primer check-in semanal.</p>
+          </div>`;
+      }
+      const c = lista[0];
+      const badge = c.respuesta
+        ? '<span class="text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">Respondido</span>'
+        : '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/40 px-3 py-1 rounded-full">Pendiente</span>';
+      return `
+        <div id="tarjetaCheckinDestacado" class="bg-slate-900/90 border ${c.respuesta ? 'border-slate-800' : 'border-amber-500/40'} rounded-2xl p-4 sm:p-5 space-y-3">
+          <div class="flex items-center justify-between gap-2 flex-wrap">
+            <p class="text-sm font-extrabold text-white">Check-in · ${escHtml(c.semanaISO)} <span class="text-xs font-normal text-slate-500">(${escHtml(c.fecha)})</span></p>
+            ${badge}
+          </div>
+          <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
+            ${c.peso ? `<span>⚖️ <strong>${escHtml(c.peso)} kg</strong></span>` : ''}
+            <span>⚡ Energía ${CARAS[(parseInt(c.energia) || 3) - 1]}</span>
+            <span>😴 Sueño ${CARAS[(parseInt(c.sueno) || 3) - 1]}</span>
+            <span>${c.molestias ? `<span class="text-rose-300">⚠️ ${escHtml(c.molestias)}</span>` : '🩹 Sin molestias'}</span>
+          </div>
+          ${c.nota ? `<p class="text-xs text-slate-300 italic">“${escHtml(c.nota)}”</p>` : ''}
+          ${c.respuesta
+            ? `<div class="bg-slate-950 border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200">${escHtml(c.respuesta)}</div>`
+            : `<div class="flex gap-2">
+                 <input type="text" maxlength="500" placeholder="Responder al alumno..." id="respTop-${escHtml(c.semanaISO)}"
+                   class="flex-1 min-w-0 p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-xs text-white">
+                 <button onclick="responderCheckinCoach('${escHtml(c.semanaISO)}', 'respTop-')"
+                   class="shrink-0 px-4 bg-emerald-500 text-slate-950 font-extrabold rounded-xl text-xs">Enviar</button>
+               </div>`}
+        </div>`;
+    }
+
+    function cambiarSubTabExpediente(subId) {
+      document.querySelectorAll('.subtab-exp').forEach(el => el.classList.add('hidden'));
+      const target = document.getElementById(subId);
+      if (target) target.classList.remove('hidden');
+
+      document.querySelectorAll('.btn-subtab-exp').forEach(btn => {
+        btn.className = 'btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white';
+      });
+      const act = document.getElementById('btnSub-' + subId);
+      if (act) {
+        act.className = 'btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-extrabold transition bg-emerald-500/15 text-emerald-300 border border-emerald-500/50';
+      }
+      if (subId === 'expProgreso') {
+        setTimeout(() => inicializarGraficosSeparados(), 60);
+      }
     }
 
     function cargarProgresoParaCoach(idDirecto) {
       const idAlumno = idDirecto || document.getElementById('selectAlumnoAnalizar').value;
       if (!idAlumno) return;
       alumnoCoachActivo = idAlumno;
+      const selHidden = document.getElementById('selectAlumnoAnalizar');
+      if (selHidden) selHidden.value = idAlumno;
       renderTarjetasAlumnos();
-      const cont = document.getElementById('contenedorComparativaCoach');
-      cont.innerHTML = '<p class="text-slate-400 text-sm">Cargando expediente antropométrico y gráficos...</p>';
       
+      mostrarVistaAnalizarMovil(true);
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+
+      const cont = document.getElementById('contenedorComparativaCoach');
+      cont.innerHTML = '<div class="p-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-slate-400 text-sm">⏳ Cargando expediente del alumno...</div>';
+
       GS()
         .withSuccessHandler(res => {
           if (!res || res.success === false) {
@@ -721,18 +937,95 @@
           estadoGlobal.checkinsCoach = { idAlumno, lista: res.checkins || [] };
           inicializarProgresoCoach();
           estadoGlobal.diaSeleccionado = obtenerDiaActualSemana();
+
+          const alu = alumnoPorId(idAlumno) || { nombre: 'Alumno', nivel: '' };
+          const kpi = calcularKPIsAlumno(estadoGlobal.progresoActual, estadoGlobal.semanas);
+          const racha = rachaSemanas();
+          const avatarHtml = alu.foto
+            ? `<img src="${escHtml(urlFotoConCache(alu.foto))}" data-mini="1" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-500/60 shrink-0">`
+            : `<span class="w-12 h-12 rounded-full bg-emerald-500 text-slate-950 font-black text-base flex items-center justify-center shrink-0">${escHtml(inicialesDe(alu.nombre).toUpperCase())}</span>`;
+
+          const kpiCard = (etiqueta, valor, positivo) => `
+            <div class="bg-slate-950 border border-slate-800/90 rounded-xl p-3">
+              <span class="block text-[10px] text-slate-400 font-semibold">${etiqueta}</span>
+              <span class="block text-lg sm:text-xl font-black mt-0.5 ${valor === '—' ? 'text-slate-500' : (positivo ? 'text-emerald-400' : 'text-rose-400')}">${escHtml(valor)}</span>
+            </div>`;
+
           cont.innerHTML = `
-            <div class="space-y-8">
-              ${construirBarraWhatsApp(idAlumno)}
-              ${bloqueReportePDF(idAlumno, true)}
-              ${construirBloqueCheckinsCoach(res.checkins || [])}
-              ${construirResumenRutinaCoach(estadoGlobal.rutinaActual, estadoGlobal.historialRutinas)}
-              ${construirBloqueHistorialHTML(estadoGlobal.progresoActual)}
+            <div class="space-y-4">
+              <!-- CABECERA DEL ALUMNO + 4 KPIs -->
+              <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
+                <div class="flex items-center justify-between gap-3 flex-wrap">
+                  <div class="flex items-center gap-3 min-w-0">
+                    ${avatarHtml}
+                    <div class="min-w-0">
+                      <h3 class="text-base sm:text-lg font-extrabold text-white truncate">${escHtml(alu.nombre)}</h3>
+                      <p class="text-xs text-slate-400 truncate">${escHtml(alu.nivel || 'Sin nivel asignado')}</p>
+                    </div>
+                  </div>
+                  <span class="shrink-0 bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold px-3 py-1 rounded-full">
+                    🔥 ${racha} ${racha === 1 ? 'semana' : 'semanas'}
+                  </span>
+                </div>
+
+                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
+                  ${kpiCard('Adherencia', kpi.adherencia, true)}
+                  ${kpiCard('Masa magra', kpi.masaTxt, kpi.masaPos)}
+                  ${kpiCard('% Grasa', kpi.grasaTxt, kpi.grasaPos)}
+                  ${kpiCard('Carga total', kpi.cargaTxt, kpi.cargaPos)}
+                </div>
+              </div>
+
+              <!-- ÚLTIMO CHECK-IN -->
+              ${construirTarjetaCheckinReciente(res.checkins || [])}
+
+              <!-- 2 ACCIONES PRINCIPALES -->
+              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <button id="btnReporte-${escHtml(idAlumno)}" onclick="generarReportePDFCliente('${escHtml(idAlumno)}', true)"
+                  class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15">
+                  📄 Generar reporte PDF
+                </button>
+                <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','resumen')"
+                  class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15">
+                  📊 Resumen semanal
+                </button>
+              </div>
+              <div id="estadoReporteCoach-${escHtml(idAlumno)}">${barraDescargaReporteCoach(idAlumno)}</div>
+
+              <!-- PESTAÑAS INTERNAS DEL EXPEDIENTE -->
+              <div class="flex gap-2 overflow-x-auto no-scrollbar pt-2 border-t border-slate-800/80">
+                <button id="btnSub-expRutina" onclick="cambiarSubTabExpediente('expRutina')"
+                  class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-extrabold transition bg-emerald-500/15 text-emerald-300 border border-emerald-500/50">
+                  🏋️ Rutina e Historial
+                </button>
+                <button id="btnSub-expProgreso" onclick="cambiarSubTabExpediente('expProgreso')"
+                  class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
+                  📊 Medidas, Gráficos y Fotos
+                </button>
+                <button id="btnSub-expComunicacion" onclick="cambiarSubTabExpediente('expComunicacion')"
+                  class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
+                  💬 WhatsApp y Check-ins
+                </button>
+              </div>
+
+              <!-- CONTENIDO DE CADA PESTAÑA INTERNA -->
+              <div id="expRutina" class="subtab-exp">
+                ${construirResumenRutinaCoach(estadoGlobal.rutinaActual, estadoGlobal.historialRutinas)}
+              </div>
+
+              <div id="expProgreso" class="subtab-exp hidden">
+                ${construirBloqueHistorialHTML(estadoGlobal.progresoActual)}
+              </div>
+
+              <div id="expComunicacion" class="subtab-exp hidden space-y-4">
+                ${construirBarraWhatsApp(idAlumno)}
+                ${construirBloqueCheckinsCoach(res.checkins || [])}
+              </div>
             </div>
           `;
+
           seleccionarDiaResumen(estadoGlobal.diaSeleccionado);
           inicializarSelectoresFotos();
-          inicializarGraficosSeparados();
           renderComparadorSemanas();
         })
         .obtenerDetallesAlumnoParaCoach(idAlumno);
@@ -755,18 +1048,22 @@
       const pendientes = lista.filter(c => !c.respuesta).length;
       return `
         <div id="bloqueCheckinsCoach" class="bg-slate-900/60 p-4 sm:p-6 rounded-2xl border border-slate-800">
-          <h3 class="text-sm font-extrabold text-white mb-3">📋 Check-ins semanales ${pendientes ? `<span class="ml-2 text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">${pendientes} sin responder</span>` : ''}</h3>
+          <h3 class="text-sm font-extrabold text-white mb-3">📋 Historial de Check-ins ${pendientes ? `<span class="ml-2 text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">${pendientes} sin responder</span>` : ''}</h3>
           <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1">${tarjetas}</div>
         </div>`;
     }
-    function responderCheckinCoach(semanaISO) {
-      const inp = document.getElementById('resp-' + semanaISO); if (!inp || !inp.value.trim()) return;
+
+    function responderCheckinCoach(semanaISO, prefijoId) {
+      const inp = document.getElementById((prefijoId || 'resp-') + semanaISO);
+      if (!inp || !inp.value.trim()) return;
       const ctx = estadoGlobal.checkinsCoach; if (!ctx) return;
       GS().withSuccessHandler(res => {
         if (!res || !res.success) { mostrarToast('❌ ' + ((res && res.error) || 'No se pudo responder.')); return; }
         ctx.lista = res.checkins || [];
         const bloque = document.getElementById('bloqueCheckinsCoach');
         if (bloque) bloque.outerHTML = construirBloqueCheckinsCoach(ctx.lista);
+        const dest = document.getElementById('tarjetaCheckinDestacado');
+        if (dest) dest.outerHTML = construirTarjetaCheckinReciente(ctx.lista);
         mostrarToast('✅ ' + res.mensaje);
       }).responderCheckin(ctx.idAlumno, semanaISO, inp.value.trim());
     }

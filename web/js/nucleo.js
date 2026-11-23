@@ -172,63 +172,117 @@ function evaluarGrasa(grasa, sexo, edad) {
 }
 
 function abrirModalMetrica(tipo, valor, sexo, edad) {
-  // Sin un número real (> 0) no se clasifica: antes un campo vacío se leía como 0 y salía «Ideal / Atleta»
   const numero = parseFloat(String(valor === null || valor === undefined ? '' : valor).replace('%', '').replace(',', '.'));
   if (!isFinite(numero) || numero <= 0) {
     mostrarToast('Aún no hay un valor registrado para esta métrica.');
     return;
   }
+
   const mtTitulo = document.getElementById('mtTitulo');
   const mtValor = document.getElementById('mtValorActual');
   const mtSubtitulo = document.getElementById('mtSubtitulo');
   const mtContenedor = document.getElementById('mtContenedorTabla');
-  const mtIcono = document.getElementById('mtIcono');
-  
-  let datos;
+  const esHombre = String(sexo || '').trim().toUpperCase() === 'M';
+  const sexoTxt = esHombre ? 'hombre' : 'mujer';
+
+  let datos, segmentos, emoji = '💪';
   if (tipo === 'VTAPER') {
-    datos = clasificarVTaper(valor, sexo);
-    mtTitulo.innerText = 'RATIO V-TAPER';
-    mtIcono.innerText = '📐';
-    mtSubtitulo.innerHTML = `👦👧 Estás en el rango de ${sexo.toUpperCase() === 'M' ? 'HOMBRES' : 'MUJERES'}`;
+    datos = clasificarVTaper(numero, sexo);
+    mtTitulo.textContent = 'RATIO V-TAPER · HOMBRO / CINTURA';
+    mtSubtitulo.textContent = sexoTxt + (edad ? ` · ${edad} años` : '');
+    const lims = esHombre ? [1.0, 1.30, 1.45, 1.55, 1.618, 1.75] : [0.95, 1.15, 1.26, 1.36, 1.45, 1.60];
+    segmentos = [
+      { corto: 'Bajo', min: lims[0], max: lims[1], hex: '#64748b' },
+      { corto: 'Normal', min: lims[1], max: lims[2], hex: '#0ea5e9' },
+      { corto: 'Atlético', min: lims[2], max: lims[3], hex: '#10b981' },
+      { corto: 'Estético', min: lims[3], max: lims[4], hex: '#a855f7' },
+      { corto: 'Élite', min: lims[4], max: lims[5], hex: '#f59e0b' }
+    ];
+    emoji = numero >= lims[2] ? '💪' : '📐';
   } else if (tipo === 'IMC') {
-    datos = evaluarIMC(valor, sexo);
-    mtTitulo.innerText = 'ÍNDICE IMC';
-    mtIcono.innerText = '⚖️';
-    mtSubtitulo.innerHTML = `👦👧 Clasificación para ${sexo.toUpperCase() === 'M' ? 'HOMBRES' : 'MUJERES'}`;
+    datos = evaluarIMC(numero, sexo);
+    mtTitulo.textContent = 'ÍNDICE DE MASA CORPORAL · IMC';
+    mtSubtitulo.textContent = sexoTxt + (edad ? ` · ${edad} años` : '');
+    segmentos = [
+      { corto: 'Déficit', min: 14, max: 18.5, hex: '#f59e0b' },
+      { corto: 'Saludable', min: 18.5, max: 25.0, hex: '#10b981' },
+      { corto: 'Volumen', min: 25.0, max: 30.0, hex: '#0ea5e9' },
+      { corto: 'Alto', min: 30.0, max: 38.0, hex: '#f43f5e' }
+    ];
+    emoji = (numero >= 18.5 && numero < 25) ? '✅' : '⚖️';
   } else if (tipo === 'GRASA') {
-    datos = evaluarGrasa(valor.replace('%',''), sexo, edad);
-    mtTitulo.innerText = '% GRASA CORPORAL';
-    mtIcono.innerText = '🔥';
-    mtSubtitulo.innerHTML = `👦👧 Rango para ${sexo.toUpperCase() === 'M' ? 'HOMBRES' : 'MUJERES'} (Edad: ${edad} años)`;
+    datos = evaluarGrasa(numero, sexo, edad);
+    mtTitulo.textContent = '% GRASA CORPORAL · COMPOSICIÓN';
+    mtSubtitulo.textContent = `${sexoTxt} · ${edad || 25} años`;
+    const u0 = datos.tabla[0].limite, u1 = datos.tabla[1].limite, u2 = datos.tabla[2].limite;
+    segmentos = [
+      { corto: 'Atleta', min: esHombre ? 6 : 12, max: u0, hex: '#0ea5e9' },
+      { corto: 'Fitness', min: u0, max: u1, hex: '#10b981' },
+      { corto: 'Promedio', min: u1, max: u2, hex: '#f59e0b' },
+      { corto: 'Alto', min: u2, max: u2 + 12, hex: '#f43f5e' }
+    ];
+    emoji = numero <= u1 ? '🔥' : '📊';
   }
 
-  mtValor.innerHTML = `${datos.val} <span class="text-sm font-semibold text-${datos.tabla.find(t => t.nombre === datos.class).color}-400">(${datos.class})</span>`;
-  
-  mtContenedor.innerHTML = datos.tabla.map(t => {
-    const esActual = t.nombre === datos.class;
-    let bg = `bg-${t.color}-900/40`;
-    let border = `border-${t.color}-800`;
-    let text = `text-${t.color}-400`;
-    let shadow = '';
-    
-    if (esActual) {
-      bg = `bg-${t.color}-950`;
-      border = `border-${t.color}-400`;
-      shadow = ``;
-    }
+  mtValor.textContent = datos.val;
 
+  // Índice activo y posición exacta del indicador dentro de la barra segmentada
+  let idxActivo = datos.tabla.findIndex(t => t.nombre === datos.class);
+  if (idxActivo < 0) idxActivo = 0;
+  const segAct = segmentos[idxActivo] || segmentos[0];
+  const frac = Math.max(0.08, Math.min(0.92, (numero - segAct.min) / Math.max(0.01, segAct.max - segAct.min)));
+  const posPct = ((idxActivo + frac) / segmentos.length) * 100;
+  const hexActivo = segAct.hex;
+
+  const barrasHTML = segmentos.map(s =>
+    `<div class="h-2.5 flex-1 rounded-full" style="background-color:${s.hex};"></div>`
+  ).join('');
+
+  const etiquetasHTML = segmentos.map((s, i) =>
+    `<span class="flex-1 text-center text-[10px] font-bold truncate ${i === idxActivo ? 'text-white' : 'text-slate-500'}">${s.corto}</span>`
+  ).join('');
+
+  const detalleRangosHTML = datos.tabla.map((t, i) => {
+    const esAct = i === idxActivo;
+    const h = (segmentos[i] && segmentos[i].hex) || '#10b981';
     return `
-      <div class="relative p-4 rounded-xl border-2 transition-all ${bg} ${border} ${shadow}">
-        ${esActual ? `<div class="absolute -top-3 left-4 bg-${t.color}-500 text-slate-950 text-[10px] font-black uppercase tracking-wider px-3 py-1 rounded-full shadow-lg flex items-center gap-1"><span class="text-sm">📍</span> TU RANGO ACTUAL</div>` : ''}
-        
-        <div class="flex items-center gap-3 ${esActual ? 'mt-1' : ''}">
-          <span class="text-base font-extrabold text-white w-28 shrink-0">${t.rangoTxt}</span>
-          <span class="text-xs font-black uppercase px-2 py-0.5 rounded bg-${t.color}-500/20 ${text} border border-${t.color}-500/30">${t.nombre}</span>
+      <div class="p-3 rounded-xl border ${esAct ? 'bg-slate-900 border-slate-600' : 'bg-slate-950/70 border-slate-800/80'}">
+        <div class="flex items-center justify-between gap-2">
+          <span class="text-xs font-extrabold text-white">${t.rangoTxt}</span>
+          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md" style="background-color:${h}22;color:${h};border:1px solid ${h}55;">${t.nombre}</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-2">${t.desc}</p>
-      </div>
-    `;
+        <p class="text-[11px] text-slate-400 mt-1.5 leading-snug">${t.desc}</p>
+      </div>`;
   }).join('');
+
+  mtContenedor.innerHTML = `
+    <div class="rounded-2xl p-4 border" style="background-color:${hexActivo}14;border-color:${hexActivo}55;">
+      <p class="text-[10px] font-black uppercase tracking-[0.16em]" style="color:${hexActivo};">TU RANGO ACTUAL</p>
+      <p class="text-2xl font-black text-white mt-1 flex items-center gap-2">${datos.class} <span>${emoji}</span></p>
+      <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">${datos.desc}</p>
+    </div>
+
+    <div class="pt-1">
+      <div class="relative flex items-center gap-1.5">
+        ${barrasHTML}
+        <div class="absolute top-1/2 -translate-y-1/2 -translate-x-1/2 w-1.5 h-6 rounded-full bg-white shadow-[0_0_12px_rgba(255,255,255,0.9)] pointer-events-none transition-all duration-500"
+             style="left:${posPct.toFixed(1)}%;"></div>
+      </div>
+      <div class="flex items-center gap-1.5 mt-2">
+        ${etiquetasHTML}
+      </div>
+    </div>
+
+    <details class="bg-slate-950/60 border border-slate-800 rounded-2xl">
+      <summary class="cursor-pointer select-none px-4 py-3 text-xs font-bold text-slate-300 flex items-center justify-between">
+        <span>Ver descripción de cada rango</span>
+        <span class="text-slate-500 text-[10px] uppercase">Desplegar ▾</span>
+      </summary>
+      <div class="px-3 pb-3 space-y-2">
+        ${detalleRangosHTML}
+      </div>
+    </details>
+  `;
 
   document.getElementById('modalTablasMetricas').classList.remove('hidden');
 }
@@ -281,33 +335,79 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
   document.getElementById('modalComposicion').classList.remove('hidden');
 }
 
-
-    // ==================== PERSONAJE PIXEL-ART (composición corporal) ====================
-    const PIXEL_M = [
-      '..HHHHHH....','.HHHHHHHH...','.HSSSSSSH...','.HSESSESH...','..SSSSSS....','...SSSS.....',
-      '..TTTTTT....','.STTTTTTS...','SSTTTTTTSS..','SS.TTTTTT.SS','S..TTTTTT..S','...TTTTTT...',
-      '...PPPPPP...','...PPPPPP...','...PP..PP...','...PP..PP...','...PP..PP...','...PP..PP...','..BBB..BBB..','..BBB..BBB..'];
-    const PIXEL_F = [
-      '..HHHHHH....','.HHHHHHHH...','.HHSSSSHH...','.HHSESEHH...','.HHSSSSHH...','.HH.SS.HH...',
-      '.HTTTTTTH...','.STTTTTTS...','SSTTTTTTSS..','S..TTTT..S..','....TTTT....','...TTTTTT...',
-      '..PPPPPPPP..','..PPPPPPPP..','...PP..PP...','...PP..PP...','...PP..PP...','...PP..PP...','..BBB..BBB..','..BBB..BBB..'];
-    const PIXEL_COLOR = { H: '#1e293b', S: '#f1c27d', E: '#0f172a', T: '#34d399', P: '#334155', B: '#0f172a' };
+    // ==================== AVATAR VECTORIAL LIMPIO (composición corporal) ====================
     function avatarPixel(sexo, grasa) {
-      const mapa = sexo === 'F' ? PIXEL_F : PIXEL_M;
       const g = parseFloat(grasa);
-      // El cuerpo se ensancha con el % de grasa (rango visual 8 % → 40 %)
-      const ancho = isNaN(g) ? 1 : Math.max(0.85, Math.min(1.35, 0.85 + ((g - 8) / 32) * 0.5));
-      const px = 1;
-      let rects = '';
-      mapa.forEach((fila, y) => {
-        [...fila].forEach((c, x) => {
-          if (c === '.') return;
-          const esCuerpo = y >= 6;                         // de los hombros hacia abajo
-          const cx = esCuerpo ? 6 + (x - 6) * ancho : x;  // ensancha solo el cuerpo, centrado
-          rects += `<rect x="${cx.toFixed(2)}" y="${y}" width="${(esCuerpo ? ancho : 1) * px + 0.02}" height="${px + 0.02}" fill="${PIXEL_COLOR[c]}"/>`;
-        });
-      });
-      return `<svg viewBox="-2 -0.5 16 21" class="h-full w-auto" shape-rendering="crispEdges" style="image-rendering:pixelated">${rects}</svg>`;
+      // Adapta sutilmente el ancho del torso según el % de grasa sin deformar el rostro
+      const escala = isNaN(g) ? 1 : Math.max(0.9, Math.min(1.22, 0.9 + ((g - 10) / 30) * 0.32));
+      const trCuerpo = `translate(60 0) scale(${escala.toFixed(2)} 1) translate(-60 0)`;
+
+      if (sexo === 'F') {
+        return `<svg viewBox="0 0 120 185" class="h-full w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <!-- Coleta trasera -->
+          <path d="M74 22 C88 22 92 40 84 54 C78 48 76 38 72 34 Z" fill="#1e293b"/>
+          <circle cx="74" cy="24" r="3.5" fill="#10b981"/>
+          <!-- Cuerpo escalable -->
+          <g transform="${trCuerpo}">
+            <!-- Piernas / Leggings -->
+            <path d="M46 104 L42 162 L51 162 L57 118 L63 118 L69 162 L78 162 L74 104 Z" fill="#334155"/>
+            <path d="M46 104 L74 104 L76 112 L44 112 Z" fill="#1e293b"/>
+            <!-- Zapatillas -->
+            <path d="M41 162 L52 162 L53 169 C53 171 38 171 38 168 Z" fill="#e2e8f0"/>
+            <path d="M68 162 L79 162 L82 168 C82 171 67 171 67 169 Z" fill="#e2e8f0"/>
+            <rect x="38" y="168" width="15" height="2.5" rx="1" fill="#10b981"/>
+            <rect x="67" y="168" width="15" height="2.5" rx="1" fill="#10b981"/>
+            <!-- Brazos -->
+            <path d="M42 54 C35 60 32 82 35 104 L42 104 C41 86 43 70 47 62 Z" fill="#f3c6a5"/>
+            <path d="M78 54 C85 60 88 82 85 104 L78 104 C79 86 77 70 73 62 Z" fill="#f3c6a5"/>
+            <!-- Top / Camiseta deportiva -->
+            <path d="M44 50 C48 48 72 48 76 50 L82 65 L75 68 L72 60 L72 98 C66 100 54 100 48 98 L48 60 L45 68 L38 65 Z" fill="#34d399"/>
+            <path d="M48 94 L72 94 L72 99 L48 99 Z" fill="#10b981"/>
+            <!-- Cintura piel -->
+            <rect x="49" y="99" width="22" height="5" fill="#f3c6a5"/>
+          </g>
+          <!-- Cuello y Cabeza -->
+          <rect x="55" y="42" width="10" height="9" rx="3" fill="#eab894"/>
+          <ellipse cx="60" cy="29" rx="13" ry="15" fill="#f3c6a5"/>
+          <!-- Cabello frontal -->
+          <path d="M47 28 C47 16 53 12 60 12 C67 12 73 16 73 28 C70 21 65 19 60 19 C55 19 50 21 47 28 Z" fill="#1e293b"/>
+          <!-- Rasgos -->
+          <circle cx="55.5" cy="29" r="1.4" fill="#0f172a"/>
+          <circle cx="64.5" cy="29" r="1.4" fill="#0f172a"/>
+          <path d="M57 35 Q60 37.5 63 35" stroke="#c07a5b" stroke-width="1.4" stroke-linecap="round"/>
+        </svg>`;
+      }
+
+      return `<svg viewBox="0 0 120 185" class="h-full w-auto" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <!-- Cuerpo escalable -->
+        <g transform="${trCuerpo}">
+          <!-- Pantalón deportivo -->
+          <path d="M44 104 L41 162 L52 162 L58 118 L62 118 L68 162 L79 162 L76 104 Z" fill="#334155"/>
+          <rect x="44" y="102" width="32" height="6" rx="2" fill="#1e293b"/>
+          <!-- Zapatillas -->
+          <path d="M40 162 L53 162 L54 169 C54 171 37 171 37 168 Z" fill="#e2e8f0"/>
+          <path d="M67 162 L80 162 L83 168 C83 171 66 171 66 169 Z" fill="#e2e8f0"/>
+          <rect x="37" y="168" width="17" height="2.5" rx="1" fill="#10b981"/>
+          <rect x="66" y="168" width="17" height="2.5" rx="1" fill="#10b981"/>
+          <!-- Brazos -->
+          <path d="M38 56 C31 64 29 86 33 108 L41 108 C40 90 42 74 46 66 Z" fill="#f3c6a5"/>
+          <path d="M82 56 C89 64 91 86 87 108 L79 108 C80 90 78 74 74 66 Z" fill="#f3c6a5"/>
+          <!-- Camiseta atlética -->
+          <path d="M40 50 C46 47 74 47 80 50 L87 68 L78 72 L75 63 L76 103 L44 103 L45 63 L42 72 L33 68 Z" fill="#34d399"/>
+          <path d="M44 97 L76 97 L76 103 L44 103 Z" fill="#10b981"/>
+          <!-- Cuello camiseta -->
+          <path d="M52 49 Q60 55 68 49" stroke="#065f46" stroke-width="2" stroke-linecap="round"/>
+        </g>
+        <!-- Cuello y Cabeza -->
+        <rect x="54" y="42" width="12" height="9" rx="3" fill="#eab894"/>
+        <ellipse cx="60" cy="28" rx="13.5" ry="15" fill="#f3c6a5"/>
+        <!-- Cabello corto -->
+        <path d="M46.5 26 C46 15 52 11 60 11 C68 11 74 15 73.5 26 C71 20 67 17.5 60 17.5 C53 17.5 49 20 46.5 26 Z" fill="#1e293b"/>
+        <!-- Rasgos -->
+        <circle cx="55" cy="28.5" r="1.5" fill="#0f172a"/>
+        <circle cx="65" cy="28.5" r="1.5" fill="#0f172a"/>
+        <path d="M56.5 34.5 Q60 37 63.5 34.5" stroke="#c07a5b" stroke-width="1.5" stroke-linecap="round"/>
+      </svg>`;
     }
 
     // ==================== UTILIDADES NUEVAS (v3) ====================
@@ -403,7 +503,7 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
     // ---- Llamadas al servidor con manejo de errores (los botones ya no se quedan bloqueados) ----
     const TEXTO_BOTONES = {
       btnLogin: 'Ingresar al Sistema',
-      btnCrearAlumno: 'Guardar Alumno',
+      btnCrearAlumno: 'Crear Alumno',
       btnGuardarEvaluacion: 'Guardar Evaluación y Subir Fotos',
       btnGuardarRutina: 'Guardar Rutina',
       btnAsignarPlantilla: '🔗 Designar Rutina al Alumno',

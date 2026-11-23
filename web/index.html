@@ -68,178 +68,260 @@
   </div>
 </div>
 
-<!-- PanelCoach.html · Panel del coach (pestañas: nuevo alumno, medidas, crear rutina, analizar alumno). Se incluye desde Index.html -->
+<!-- PanelCoach.html · Panel del coach (pestañas: alumnos, evaluación y fotos, rutinas, analizar alumno). Se incluye desde Index.html -->
     <!-- ==================== PANEL COACH ==================== -->
-    <div id="coachView" class="hidden w-full max-w-7xl mx-auto p-3 sm:p-6">
-      <header class="flex flex-wrap justify-between items-center pb-4 border-b border-slate-800 mb-5 gap-3">
-        <div class="flex items-center gap-3">
-          <div onclick="abrirModalPerfil()" class="relative cursor-pointer shrink-0">
-            <img id="avatarCoachHeader" src="" class="w-12 h-12 rounded-full object-cover border-2 border-emerald-400 shadow">
-            <span class="absolute -bottom-1 -right-1 bg-slate-900 text-emerald-400 border border-slate-700 rounded-full px-1 text-[9px]">✏️</span>
+    <div id="coachView" class="hidden w-full max-w-7xl mx-auto p-3 sm:p-5">
+
+      <!-- CABECERA Y NAVEGACIÓN SUPERIOR -->
+      <header class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800/90 mb-6">
+        <!-- Marca -->
+        <div class="flex items-center gap-2.5 min-w-0">
+          <div class="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
+            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
           </div>
-          <div>
-            <h1 class="text-lg sm:text-2xl font-bold text-emerald-400">Panel de Administración del Coach</h1>
-            <p id="coachWelcome" class="text-xs sm:text-sm text-slate-400"></p>
+          <div class="min-w-0">
+            <div class="flex items-baseline gap-2 flex-wrap">
+              <h1 class="text-sm sm:text-base font-black text-white tracking-tight">PRO COACHING</h1>
+              <span class="text-xs text-slate-500 font-semibold">Panel del Coach</span>
+            </div>
+            <p id="coachWelcome" class="text-[11px] text-slate-400 truncate"></p>
           </div>
         </div>
-        <div class="flex items-center gap-2">
-          <button onclick="abrirModalPerfil()" class="bg-slate-900 hover:bg-slate-800 text-emerald-400 border border-slate-700 px-3.5 py-2 rounded-xl text-xs font-bold transition">
-            ⚙️ Mi Perfil
-          </button>
-          <button onclick="cerrarSesion()" class="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-xl text-xs sm:text-sm font-bold transition">
-            Cerrar Sesión
-          </button>
+
+        <!-- 4 Pestañas + Avatar + Salir -->
+        <div class="flex items-center gap-2 flex-wrap w-full lg:w-auto justify-between lg:justify-end">
+          <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
+            <button id="btnTab-tabNuevoAlumno" onclick="cambiarTabCoach('tabNuevoAlumno')"
+              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-extrabold transition bg-emerald-500 text-slate-950">
+              1 · Alumnos
+            </button>
+            <button id="btnTab-tabMedidasFotos" onclick="cambiarTabCoach('tabMedidasFotos')"
+              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
+              2 · Evaluación y Fotos
+            </button>
+            <button id="btnTab-tabCrearRutina" onclick="cambiarTabCoach('tabCrearRutina')"
+              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
+              3 · Rutinas
+            </button>
+            <button id="btnTab-tabComparativaCoach" onclick="cambiarTabCoach('tabComparativaCoach')"
+              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
+              4 · Analizar Alumno
+            </button>
+          </nav>
+
+          <div class="flex items-center gap-2 pl-2 border-l border-slate-800 shrink-0">
+            <button onclick="abrirModalPerfil()" title="Mi Perfil" class="relative shrink-0 rounded-full focus:outline-none">
+              <img id="avatarCoachHeader" src="" class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500/70 hover:border-emerald-400 transition">
+            </button>
+            <button onclick="cerrarSesion()" title="Cerrar Sesión"
+              class="bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-300 border border-rose-500/30 px-3 py-2 rounded-xl text-xs font-bold transition">
+              Salir
+            </button>
+          </div>
         </div>
       </header>
 
-      <div class="flex gap-2 mb-6 border-b border-slate-800 pb-3 overflow-x-auto no-scrollbar">
-        <button onclick="cambiarTabCoach('tabNuevoAlumno')" class="whitespace-nowrap bg-slate-900 hover:bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold">1. Alta Alumno + Drive</button>
-        <button onclick="cambiarTabCoach('tabMedidasFotos')" class="whitespace-nowrap bg-slate-900 hover:bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold">2. Evaluación y Fotos</button>
-        <button onclick="cambiarTabCoach('tabCrearRutina')" class="whitespace-nowrap bg-slate-900 hover:bg-slate-800 border border-slate-700 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-semibold">3. Crear Rutina (Con Descanso)</button>
-        <button onclick="cambiarTabCoach('tabComparativaCoach')" class="whitespace-nowrap bg-emerald-500 text-slate-950 px-4 py-2.5 rounded-xl text-xs sm:text-sm font-bold">4. Analizar Alumno</button>
+      <!-- TAB 1: ALUMNOS (FIJA A LA IZQUIERDA >= 640px · DRAWER DESLIZABLE EN CELULAR) -->
+      <div id="tabNuevoAlumno" class="tab-coach grid grid-cols-1 sm:grid-cols-[240px_1fr] md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-5 items-start">
+
+        <!-- Botón móvil llamativo para abrir lista de alumnos -->
+        <button type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', true)"
+          class="sm:hidden w-full text-left bg-gradient-to-r from-emerald-500/15 via-slate-900 to-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-lg shadow-emerald-500/10 active:scale-[0.98] transition">
+          <span class="w-11 h-11 rounded-xl bg-emerald-500 text-slate-950 text-xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">👥</span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-extrabold text-white leading-tight">Mis alumnos</span>
+            <span class="block text-[11px] text-slate-400 mt-0.5 truncate">Ver lista y acceder a expedientes</span>
+          </span>
+          <span class="shrink-0 flex items-center gap-1.5">
+            <span id="contadorMisAlumnosMovil" class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-[11px] font-extrabold px-2.5 py-1 rounded-full"></span>
+            <span class="text-emerald-400 text-lg font-black leading-none">›</span>
+          </span>
+        </button>
+
+        <!-- Overlay móvil -->
+        <div id="overlay-drawerAlumnosTab1" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', false)"
+          class="hidden fixed inset-0 z-40 bg-slate-950/80 backdrop-blur-xs sm:hidden"></div>
+
+        <!-- Columna izquierda / Drawer móvil: Mis alumnos -->
+        <aside id="drawerAlumnosTab1"
+          class="fixed sm:static inset-y-0 left-0 z-50 sm:z-auto w-[82vw] max-w-[320px] sm:w-auto bg-slate-950 sm:bg-transparent border-r sm:border-0 border-slate-800 p-4 sm:p-0 transform -translate-x-full sm:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col">
+          <div class="flex items-center justify-between px-1 mb-3 shrink-0">
+            <h2 class="text-sm font-extrabold text-white">Mis alumnos</h2>
+            <div class="flex items-center gap-2">
+              <span id="contadorMisAlumnos" class="text-[11px] font-bold text-slate-500"></span>
+              <button type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', false)"
+                class="sm:hidden w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold">✕</button>
+            </div>
+          </div>
+          <div id="listaMisAlumnosTab1" class="space-y-2.5 overflow-y-auto flex-1 sm:max-h-[72vh] pr-1"></div>
+        </aside>
+
+        <!-- Columna derecha: Nuevo alumno -->
+        <div class="bg-slate-900/90 p-5 sm:p-6 rounded-2xl border border-slate-800 shadow-lg min-w-0">
+          <div class="flex items-center gap-2 mb-5">
+            <span class="text-emerald-400 text-xl font-black leading-none">+</span>
+            <h3 class="text-base sm:text-lg font-extrabold text-white">Nuevo alumno</h3>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div>
+              <label class="block text-xs text-slate-400 mb-1.5">Nombre completo</label>
+              <input type="text" id="regNombre" placeholder="Ej. María Torres"
+                class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1.5">Usuario</label>
+              <input type="text" id="regUser" placeholder="Ej. maria.torres"
+                class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1.5">Contraseña</label>
+              <input type="password" id="regPass" placeholder="••••••••"
+                class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
+            </div>
+            <div>
+              <label class="block text-xs text-slate-400 mb-1.5">WhatsApp <span class="text-slate-600">(opcional)</span></label>
+              <input type="tel" inputmode="tel" id="regWhatsApp" placeholder="987654321"
+                class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
+            </div>
+            <div class="md:col-span-2">
+              <label class="block text-xs text-slate-400 mb-1.5">Nivel inicial</label>
+              <select id="regNivel" class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white">
+                <option value="NIVEL I: PRINCIPIANTE">NIVEL I: PRINCIPIANTE</option>
+                <option value="NIVEL II: INTERMEDIO">NIVEL II: INTERMEDIO</option>
+                <option value="NIVEL III: AVANZADO">NIVEL III: AVANZADO</option>
+                <option value="NO APLICA">NO APLICA</option>
+              </select>
+            </div>
+          </div>
+
+          <button id="btnCrearAlumno" onclick="crearAlumno()"
+            class="w-full mt-6 bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 rounded-xl transition shadow-lg shadow-emerald-500/15">
+            Crear alumno
+          </button>
+
+          <p class="mt-4 flex items-center gap-2 text-xs text-slate-400">
+            <span>📁</span>
+            <span>Se creará su carpeta privada en Google Drive automáticamente</span>
+          </p>
+        </div>
       </div>
 
-      <!-- TAB 1: ALTA ALUMNO -->
-      <div id="tabNuevoAlumno" class="tab-coach bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800 max-w-2xl">
-        <h3 class="text-base sm:text-lg font-bold mb-1 text-emerald-400">Registrar Alumno</h3>
-        <p class="text-xs text-slate-400 mb-5">Se creará su carpeta en Google Drive automáticamente.</p>
-        <div class="grid grid-cols-1 sm:grid-cols-2 gap-4">
-          <div><label class="block text-xs text-slate-400 mb-1">Nombre Completo</label><input type="text" id="regNombre" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="block text-xs text-slate-400 mb-1">Usuario</label><input type="text" id="regUser" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="block text-xs text-slate-400 mb-1">Contraseña</label><input type="password" id="regPass" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="block text-xs text-slate-400 mb-1">WhatsApp <span class="text-slate-600">(opcional)</span></label><input type="tel" inputmode="tel" id="regWhatsApp" placeholder="987654321" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div>
-            <label class="block text-xs text-slate-400 mb-1">Nivel Inicial</label>
-            <select id="regNivel" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl">
+      <!-- TAB 2: EVALUACIÓN ANTROPOMÉTRICA (SIN NÚMEROS EN LAS SECCIONES) -->
+      <div id="tabMedidasFotos" class="tab-coach hidden bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
+        <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-800 gap-4">
+          <h3 class="text-base sm:text-lg font-bold text-emerald-400">Nueva Evaluación</h3>
+          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+            <span class="text-xs text-slate-400">Nivel:</span>
+            <select id="updateNivelSelect" class="flex-grow sm:flex-grow-0 p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
               <option value="NIVEL I: PRINCIPIANTE">NIVEL I: PRINCIPIANTE</option>
               <option value="NIVEL II: INTERMEDIO">NIVEL II: INTERMEDIO</option>
               <option value="NIVEL III: AVANZADO">NIVEL III: AVANZADO</option>
-              <option value="NO APLICA">NO APLICA</option>
             </select>
+            <button onclick="cambiarNivel()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-extrabold">Actualizar</button>
           </div>
         </div>
-        <button id="btnCrearAlumno" onclick="crearAlumno()" class="w-full sm:w-auto mt-6 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-6 py-3 rounded-xl">Guardar Alumno</button>
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Datos Generales</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
+          <div class="sm:col-span-2"><label class="text-xs text-slate-400">Alumno</label><select id="selectAlumnoMedidas" class="select-alumnos w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></select></div>
+          <div><label class="text-xs text-slate-400">Fecha</label><input type="date" id="evFecha" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Edad</label><input type="number" id="evEdad" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div>
+            <label class="text-xs text-slate-400">Sexo</label>
+            <select id="evSexo" onchange="actualizarLabelCintura(); calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
+              <option value="M">Masculino</option>
+              <option value="F">Femenino</option>
+            </select>
+          </div>
+          <div><label class="text-xs text-slate-400">Peso (KG)</label><input type="number" step="0.1" id="evPeso" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Talla (CM)</label><input type="number" step="0.1" id="evTalla" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Envergadura (CM)</label><input type="number" step="0.1" id="evEnvergadura" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+        </div>
+
+        <div class="flex items-center gap-4 mb-5 bg-slate-950 p-4 border border-slate-800 rounded-xl">
+          <label class="text-sm font-bold text-emerald-400">¿Se cuenta con medidor de grasa corporal (Plicómetro)?</label>
+          <select id="evTienePlicometro" onchange="togglePlicometro(); calcularComposicionAutomatica()" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl font-bold text-white">
+            <option value="NO">NO</option>
+            <option value="SI">SÍ</option>
+          </select>
+        </div>
+
+        <div id="seccionPliegues" class="hidden">
+          <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Pliegues (mm)</h4>
+          <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
+            <div><label class="text-xs text-slate-400">Subescapular</label><input type="number" step="0.1" id="evSubescapular" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label class="text-xs text-slate-400">Tricipital</label><input type="number" step="0.1" id="evTricipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label class="text-xs text-slate-400">Bicipital</label><input type="number" step="0.1" id="evBicipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label class="text-xs text-slate-400">Supracrestal</label><input type="number" step="0.1" id="evSupracrestal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label class="text-xs text-slate-400">Suprailíaca</label><input type="number" step="0.1" id="evSuprailiaca" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label class="text-xs text-slate-400">Abdominal</label><input type="number" step="0.1" id="evAbdominal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          </div>
+        </div>
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Perímetros y Diámetros (CM)</h4>
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+          <div><label class="text-xs text-slate-400">Cuello</label><input type="number" step="0.1" id="evCuello" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Hombros</label><input type="number" step="0.1" id="evHombros" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Pecho</label><input type="number" step="0.1" id="evPecho" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400" id="labelCintura">Cintura (Medir en Ombligo)</label><input type="number" step="0.1" id="evCintura" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl border-amber-500/50"></div>
+          <div><label class="text-xs text-slate-400">Cadera</label><input type="number" step="0.1" id="evCadera" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+
+          <div><label class="text-xs text-slate-400">Brazo Relajado</label><input type="number" step="0.1" id="evBrazoRel" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Brazo Flexionado</label><input type="number" step="0.1" id="evBrazoFlex" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Glúteos</label><input type="number" step="0.1" id="evGluteos" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Muslo</label><input type="number" step="0.1" id="evMuslo" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Pantorrilla</label><input type="number" step="0.1" id="evPantorrilla" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+
+          <div><label class="text-xs text-slate-400">Húmero</label><input type="number" step="0.1" id="evHumero" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Muñeca</label><input type="number" step="0.1" id="evMuneca" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Fémur</label><input type="number" step="0.1" id="evFemur" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+        </div>
+
+        <div class="bg-emerald-950/40 p-4 border border-emerald-500/50 rounded-xl mb-6 shadow-lg relative">
+          <h4 class="text-sm font-extrabold uppercase tracking-wider text-emerald-400 mb-3">Resultados Automáticos (Composición)</h4>
+          <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <div><label class="text-xs text-slate-300">IMC</label><input type="text" id="evImc" class="w-full p-3 bg-slate-900 border border-emerald-500/50 rounded-xl text-white font-bold" readonly></div>
+            <div><label class="text-xs text-slate-300">% Grasa Corporal</label><input type="text" id="evGrasa" class="w-full p-3 bg-slate-900 border border-amber-500/50 rounded-xl text-white font-bold" readonly></div>
+            <div><label class="text-xs text-slate-300">Masa Magra (KG)</label><input type="text" id="evMasa" class="w-full p-3 bg-slate-900 border border-sky-500/50 rounded-xl text-white font-bold" readonly></div>
+          </div>
+
+          <div id="alertaMedidasAtipicas" class="hidden mt-4 p-3 bg-rose-950/60 border border-rose-500/50 rounded-xl flex items-start gap-3 transition-all shadow-lg">
+            <span class="text-xl leading-none">⚠️</span>
+            <p class="text-[11px] sm:text-xs text-rose-300 font-semibold leading-relaxed">
+              <strong>Error de cálculo:</strong> Las medidas ingresadas arrojan proporciones atípicas o matemáticamente imposibles para la fórmula. Por favor, verifica y vuelve a tomar las medidas (especialmente cintura y cuello).
+            </p>
+          </div>
+        </div>
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Historial Clínico</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
+          <div><label class="text-xs text-slate-400">¿Lesión?</label><input type="text" id="evLesion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">¿Enfermedad?</label><input type="text" id="evEnfermedad" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">¿Medicamento?</label><input type="text" id="evMedicamento" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">¿Cirugía previa?</label><input type="text" id="evCirugia" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">¿Limitación?</label><input type="text" id="evLimitacion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label class="text-xs text-slate-400">Observación</label><input type="text" id="evObservacion" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+        </div>
+
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Fotografías (Drive)</h4>
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div><label class="block text-xs font-bold text-slate-300 mb-2">Frente</label><input type="file" id="fotoFrente" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label class="block text-xs font-bold text-slate-300 mb-2">Perfil</label><input type="file" id="fotoPerfil" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label class="block text-xs font-bold text-slate-300 mb-2">Espalda</label><input type="file" id="fotoEspalda" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+        </div>
+        <button id="btnGuardarEvaluacion" onclick="procesarYGuardarEvaluacion()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-3.5 rounded-xl">Guardar Evaluación y Subir Fotos</button>
       </div>
-
-      <!-- TAB 2: EVALUACIÓN ANTROPOMÉTRICA -->
-<div id="tabMedidasFotos" class="tab-coach hidden bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
-  <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-800 gap-4">
-    <h3 class="text-base sm:text-lg font-bold text-emerald-400">Nueva Evaluación</h3>
-    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-      <span class="text-xs text-slate-400">Nivel:</span>
-      <select id="updateNivelSelect" class="flex-grow sm:flex-grow-0 p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-        <option value="NIVEL I: PRINCIPIANTE">NIVEL I: PRINCIPIANTE</option>
-        <option value="NIVEL II: INTERMEDIO">NIVEL II: INTERMEDIO</option>
-        <option value="NIVEL III: AVANZADO">NIVEL III: AVANZADO</option>
-      </select>
-      <button onclick="cambiarNivel()" class="bg-blue-600 hover:bg-blue-700 px-4 py-2.5 rounded-xl text-xs font-bold">Actualizar</button>
-    </div>
-  </div>
-
-  <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">1. Datos Generales</h4>
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-    <div class="sm:col-span-2"><label class="text-xs text-slate-400">Alumno</label><select id="selectAlumnoMedidas" class="select-alumnos w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></select></div>
-    <div><label class="text-xs text-slate-400">Fecha</label><input type="date" id="evFecha" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Edad</label><input type="number" id="evEdad" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div>
-      <label class="text-xs text-slate-400">Sexo</label>
-      <select id="evSexo" onchange="actualizarLabelCintura(); calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
-        <option value="M">Masculino</option>
-        <option value="F">Femenino</option>
-      </select>
-    </div>
-    <div><label class="text-xs text-slate-400">Peso (KG)</label><input type="number" step="0.1" id="evPeso" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Talla (CM)</label><input type="number" step="0.1" id="evTalla" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Envergadura (CM)</label><input type="number" step="0.1" id="evEnvergadura" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-  </div>
-
-  <div class="flex items-center gap-4 mb-4 bg-slate-950 p-4 border border-slate-800 rounded-xl">
-    <label class="text-sm font-bold text-sky-400">¿Se cuenta con medidor de grasa corporal (Plicómetro)?</label>
-    <select id="evTienePlicometro" onchange="togglePlicometro(); calcularComposicionAutomatica()" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl font-bold text-white">
-      <option value="NO">NO</option>
-      <option value="SI">SÍ</option>
-    </select>
-  </div>
-
-  <div id="seccionPliegues" class="hidden">
-    <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">2. Pliegues (mm)</h4>
-    <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-      <div><label class="text-xs text-slate-400">Subescapular</label><input type="number" step="0.1" id="evSubescapular" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-      <div><label class="text-xs text-slate-400">Tricipital</label><input type="number" step="0.1" id="evTricipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-      <div><label class="text-xs text-slate-400">Bicipital</label><input type="number" step="0.1" id="evBicipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-      <div><label class="text-xs text-slate-400">Supracrestal</label><input type="number" step="0.1" id="evSupracrestal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-      <div><label class="text-xs text-slate-400">Suprailíaca</label><input type="number" step="0.1" id="evSuprailiaca" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-      <div><label class="text-xs text-slate-400">Abdominal</label><input type="number" step="0.1" id="evAbdominal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    </div>
-  </div>
-
-  <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">3. Perímetros y Diámetros (CM)</h4>
-  <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
-    <div><label class="text-xs text-slate-400">Cuello</label><input type="number" step="0.1" id="evCuello" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Hombros</label><input type="number" step="0.1" id="evHombros" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Pecho</label><input type="number" step="0.1" id="evPecho" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400" id="labelCintura">Cintura (Medir en Ombligo)</label><input type="number" step="0.1" id="evCintura" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl border-amber-500/50"></div>
-    <div><label class="text-xs text-slate-400">Cadera</label><input type="number" step="0.1" id="evCadera" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    
-    <div><label class="text-xs text-slate-400">Brazo Relajado</label><input type="number" step="0.1" id="evBrazoRel" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Brazo Flexionado</label><input type="number" step="0.1" id="evBrazoFlex" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Glúteos</label><input type="number" step="0.1" id="evGluteos" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Muslo</label><input type="number" step="0.1" id="evMuslo" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Pantorrilla</label><input type="number" step="0.1" id="evPantorrilla" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    
-    <div><label class="text-xs text-slate-400">Húmero</label><input type="number" step="0.1" id="evHumero" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Muñeca</label><input type="number" step="0.1" id="evMuneca" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Fémur</label><input type="number" step="0.1" id="evFemur" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-  </div>
-
-  <div class="bg-emerald-950/40 p-4 border border-emerald-500/50 rounded-xl mb-6 shadow-lg relative">
-    <h4 class="text-sm font-extrabold uppercase tracking-wider text-emerald-400 mb-3">Resultados Automáticos (Composición)</h4>
-    <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-      <div><label class="text-xs text-slate-300">IMC</label><input type="text" id="evImc" class="w-full p-3 bg-slate-900 border border-emerald-500/50 rounded-xl text-white font-bold" readonly></div>
-      <div><label class="text-xs text-slate-300">% Grasa Corporal</label><input type="text" id="evGrasa" class="w-full p-3 bg-slate-900 border border-amber-500/50 rounded-xl text-white font-bold" readonly></div>
-      <div><label class="text-xs text-slate-300">Masa Magra (KG)</label><input type="text" id="evMasa" class="w-full p-3 bg-slate-900 border border-sky-500/50 rounded-xl text-white font-bold" readonly></div>
-    </div>
-    
-    <!-- Alerta de validación de medidas atípicas -->
-    <div id="alertaMedidasAtipicas" class="hidden mt-4 p-3 bg-rose-950/60 border border-rose-500/50 rounded-xl flex items-start gap-3 transition-all shadow-lg">
-      <span class="text-xl leading-none">⚠️</span>
-      <p class="text-[11px] sm:text-xs text-rose-300 font-semibold leading-relaxed">
-        <strong>Error de cálculo:</strong> Las medidas ingresadas arrojan proporciones atípicas o matemáticamente imposibles para la fórmula. Por favor, verifica y vuelve a tomar las medidas (especialmente cintura y cuello).
-      </p>
-    </div>
-  </div>
-
-  <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">4. Historial Clínico</h4>
-  <!-- RESTO DE LOS CAMPOS (Enfermedades, Fotos, Botón Guardar, etc.) IGUAL A TU VERSIÓN ORIGINAL -->
-  <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-    <div><label class="text-xs text-slate-400">¿Lesión?</label><input type="text" id="evLesion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">¿Enfermedad?</label><input type="text" id="evEnfermedad" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">¿Medicamento?</label><input type="text" id="evMedicamento" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">¿Cirugía previa?</label><input type="text" id="evCirugia" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">¿Limitación?</label><input type="text" id="evLimitacion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-    <div><label class="text-xs text-slate-400">Observación</label><input type="text" id="evObservacion" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-  </div>
-  
-  <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">5. Fotografías (Drive)</h4>
-  <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
-    <div><label class="block text-xs font-bold text-slate-300 mb-2">Frente</label><input type="file" id="fotoFrente" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-    <div><label class="block text-xs font-bold text-slate-300 mb-2">Perfil</label><input type="file" id="fotoPerfil" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-    <div><label class="block text-xs font-bold text-slate-300 mb-2">Espalda</label><input type="file" id="fotoEspalda" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-  </div>
-  <button id="btnGuardarEvaluacion" onclick="procesarYGuardarEvaluacion()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-3.5 rounded-xl">Guardar Evaluación y Subir Fotos</button>
-</div>
 
       <!-- TAB 3: CONSTRUCTOR Y ASIGNADOR DE RUTINAS -->
       <div id="tabCrearRutina" class="tab-coach hidden space-y-6">
-        
-        <!-- OPCIÓN B: DESIGNAR PLANTILLA EXISTENTE A UN ALUMNO -->
         <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-emerald-500/40 shadow-lg">
           <div class="flex items-center gap-2 mb-1">
             <span class="bg-emerald-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded uppercase">Rápido</span>
             <h3 class="text-base sm:text-lg font-bold text-emerald-400">Opción A: Designar Rutina de Catálogo a un Alumno</h3>
           </div>
           <p class="text-xs text-slate-400 mb-4">Selecciona una plantilla previamente creada y asígnala en un clic a cualquier alumno.</p>
-          
+
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div>
               <label class="block text-xs text-slate-400 mb-1">1. Seleccionar Plantilla de Rutina</label>
@@ -257,7 +339,6 @@
           </div>
         </div>
 
-        <!-- Aviso: estás editando una rutina que ya existe -->
         <div id="avisoEdicionRutina" class="hidden bg-amber-500/10 border border-amber-500/40 rounded-2xl p-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="min-w-0">
@@ -268,7 +349,6 @@
           </div>
         </div>
 
-        <!-- OPCIÓN A: CREAR RUTINA DESDE CERO (PARA ALUMNO O COMO PLANTILLA) -->
         <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
           <h3 class="text-base sm:text-lg font-bold mb-1 text-sky-400">Opción B: Constructor de Rutina (Directa a Alumno o Guardar como Plantilla)</h3>
           <p class="text-xs text-slate-400 mb-4">Elige si deseas guardar esta rutina en tu catálogo general o asignarla directamente a un alumno específico.</p>
@@ -305,32 +385,39 @@
         </div>
       </div>
 
-      <!-- TAB 4: ANALIZAR ALUMNO -->
-      <div id="tabComparativaCoach" class="tab-coach hidden bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
-        <h3 class="text-base sm:text-lg font-bold text-emerald-400 mb-1">Expediente y Progreso del Alumno</h3>
-        <p class="text-xs text-slate-400 mb-5">Selecciona un alumno para revisar sus gráficos, fotos de progreso y rutina de entrenamiento actual.</p>
-        
-        <div class="flex flex-wrap items-end gap-3 mb-6 pb-6 border-b border-slate-800">
-          <div class="w-full">
-            <label class="block text-xs font-bold text-slate-400 mb-2">Selecciona un alumno</label>
-            <div id="tarjetasAlumnosCoach" class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3"></div>
-            <select id="selectAlumnoAnalizar" class="select-alumnos hidden"></select>
+     <!-- TAB 4: ANALIZAR ALUMNO (FIJA A LA IZQUIERDA >= 640px · LISTA DIRECTA -> EXPEDIENTE EN CELULAR) -->
+      <div id="tabComparativaCoach" class="tab-coach hidden grid grid-cols-1 sm:grid-cols-[240px_1fr] md:grid-cols-[280px_1fr] lg:grid-cols-[300px_1fr] gap-5 items-start">
+
+        <!-- Columna izquierda: Lista completa de alumnos -->
+        <aside id="panelListaAnalizar" class="flex flex-col space-y-3">
+          <div class="flex items-center justify-between px-1">
+            <h3 class="text-sm font-extrabold text-white">Analizar alumno</h3>
+            <span id="contadorAnalizarMovil" class="text-[11px] font-bold text-slate-500"></span>
           </div>
-          <button onclick="cargarProgresoParaCoach()" class="hidden w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold px-6 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg shadow-emerald-500/20">
-            📊 Cargar Expediente
+          <div id="tarjetasAlumnosCoach" class="space-y-2.5 sm:max-h-[75vh] sm:overflow-y-auto pr-1"></div>
+          <select id="selectAlumnoAnalizar" class="select-alumnos hidden"></select>
+        </aside>
+
+        <!-- Columna derecha: Expediente del alumno -->
+        <div id="panelExpedienteAnalizar" class="hidden sm:block min-w-0 space-y-3">
+          <!-- Botón móvil para volver a la lista de alumnos -->
+          <button type="button" onclick="volverAListaAlumnosMovil()"
+            class="sm:hidden w-full bg-slate-900 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs px-4 py-3 rounded-xl flex items-center justify-between active:scale-[0.98] transition">
+            <span>← Cambiar alumno</span>
+            <span class="text-[11px] text-slate-400 font-semibold">Ver lista completa</span>
           </button>
-        </div>
 
-        <!-- Aquí se renderizarán la rutina y el historial completo -->
-        <div id="contenedorComparativaCoach" class="min-h-[200px]">
-          <div class="flex flex-col items-center justify-center p-10 bg-slate-950/50 rounded-xl border border-slate-800 border-dashed">
-            <span class="text-3xl mb-3">🔎</span>
-            <p class="text-slate-500 text-sm italic text-center font-semibold">Toca la tarjeta de un alumno para ver su expediente.</p>
+          <div id="contenedorComparativaCoach" class="min-h-[260px] min-w-0">
+            <div class="flex flex-col items-center justify-center p-12 bg-slate-900/60 rounded-2xl border border-slate-800 border-dashed">
+              <span class="text-3xl mb-3">🔎</span>
+              <p class="text-slate-400 text-sm font-semibold text-center">Selecciona un alumno de la lista para ver su resumen, check-ins, rutina y progreso.</p>
+            </div>
           </div>
         </div>
-      </div> <!-- AQUI CIERRA EL TAB 4 CORRECTAMENTE -->
 
-    </div> <!-- 🔴 AQUI CIERRA EL PANEL DEL COACH POR COMPLETO 🔴 -->
+      </div>
+
+    </div>
 <!-- PanelAlumno.html · Vista del alumno (barra lateral, Hoy, Entrenar, Progreso, Perfil). Se incluye desde Index.html -->
     <!-- ==================== VISTA ALUMNO CON BARRA LATERAL Y NAVEGACIÓN MÓVIL ==================== -->
     <div id="alumnoView" class="hidden flex-grow flex flex-col md:flex-row w-full max-w-7xl mx-auto">
@@ -630,23 +717,26 @@
   </div>
 
         <!-- MODAL TABLAS DE MÉTRICAS (IMC, V-Taper, Grasa) -->
-  <div id="modalTablasMetricas" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
-    <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
-      
-      <!-- Cabecera del Modal -->
-      <div class="bg-slate-950/80 p-5 border-b border-slate-800 relative">
-        <button onclick="document.getElementById('modalTablasMetricas').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-lg px-2">✕</button>
-        <div class="flex items-center gap-2 mb-1">
-          <span id="mtIcono" class="text-xl">🔥</span>
-          <h3 class="text-sm font-bold text-slate-300 uppercase tracking-widest">TU <span id="mtTitulo">RATIO</span> ACTUAL:</h3>
-          <span id="mtValorActual" class="text-lg font-black text-white ml-1"></span>
+  <div id="modalTablasMetricas" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4" onclick="if (event.target === this) this.classList.add('hidden')">
+    <div class="bg-[#0b1220] border border-slate-800 rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
+      <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mt-3"></div>
+
+      <!-- Cabecera -->
+      <div class="px-5 pt-4 pb-2 flex items-start justify-between gap-3">
+        <div class="min-w-0">
+          <p id="mtTitulo" class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.16em]"></p>
+          <div class="flex items-baseline gap-2.5 mt-1.5 flex-wrap">
+            <span id="mtValorActual" class="text-4xl font-black text-white tracking-tight leading-none"></span>
+            <span id="mtSubtitulo" class="text-xs font-semibold text-slate-400"></span>
+          </div>
         </div>
-        <p id="mtSubtitulo" class="text-[11px] text-slate-400 mt-1"></p>
+        <button onclick="document.getElementById('modalTablasMetricas').classList.add('hidden')"
+          class="shrink-0 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white font-bold transition">✕</button>
       </div>
 
-      <!-- Contenedor de la Tabla -->
-      <div id="mtContenedorTabla" class="p-5 overflow-y-auto space-y-3">
-        <!-- Las filas se inyectan mediante JS -->
+      <!-- Cuerpo: Caja de rango + Barra segmentada + Desplegable discreto -->
+      <div id="mtContenedorTabla" class="px-5 pb-6 pt-3 overflow-y-auto space-y-4">
+        <!-- Se inyecta mediante JS -->
       </div>
     </div>
   </div>
