@@ -4,7 +4,7 @@ window.PROCOACHING_CONFIG = {
   // URL de tu implementación de Apps Script. La encuentras en:
   // Apps Script → Implementar → Gestionar implementaciones → «URL de la aplicación web» (termina en /exec).
   // Si mañana cambias Google Sheets por otra base de datos, aquí pondrás la URL del nuevo servidor.
-  API_URL: 'PEGA_AQUI_TU_URL_QUE_TERMINA_EN_/exec',
+  API_URL: 'https://script.google.com/macros/s/AKfycbxSq5qI88l-Bipys_I4lmx_yMY-MZm57MaXHxFLu5kiPWLMXE52lYSpOoQwIk9vcY5VBw/exec',
 
   // Tiempo máximo de espera por llamada (en milisegundos). Los reportes PDF con fotos pueden tardar.
   TIEMPO_MAXIMO_MS: 120000
