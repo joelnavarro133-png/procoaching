@@ -17,6 +17,34 @@
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-[100dvh] flex flex-col justify-between font-sans selection:bg-emerald-500 selection:text-slate-950">
 
+<!-- v18 · SPLASH: solo al abrir la app desde cero, mientras se prepara (sin espera extra; máximo 2 s).
+     Mismo logo y fondo que la pantalla de inicio de la app Android, para que el paso sea continuo. -->
+<style>
+  #splashApp { position: fixed; inset: 0; z-index: 9999; background: #0b0f1a; display: flex; flex-direction: column;
+    align-items: center; justify-content: center; gap: 28px; transition: opacity .25s ease; }
+  #splashApp.fuera { opacity: 0; pointer-events: none; }
+  #splashApp img { width: 168px; height: auto; }
+  #splashApp .barra { width: 120px; height: 3px; border-radius: 9px; background: #1e293b; overflow: hidden; }
+  #splashApp .barra span { display: block; width: 40%; height: 100%; border-radius: 9px; background: #10b981; animation: splashBarra 1.1s ease-in-out infinite; }
+  @keyframes splashBarra { from { transform: translateX(-100%); } to { transform: translateX(250%); } }
+  @media (prefers-reduced-motion: reduce) { #splashApp .barra span { animation: none; width: 100%; } #splashApp { transition: none; } }
+</style>
+<div id="splashApp" role="status" aria-label="Cargando PRO COACHING">
+  <img src="data:image/webp;base64,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" alt="PRO COACHING" width="168" height="140">
+  <div class="barra" aria-hidden="true"><span></span></div>
+</div>
+<script>
+  (function () {
+    var listo = false;
+    window.ocultarSplash = function () {
+      if (listo) return; listo = true;
+      var el = document.getElementById('splashApp'); if (!el) return;
+      requestAnimationFrame(function () { el.classList.add('fuera'); setTimeout(function () { el.remove(); }, 300); });
+    };
+    setTimeout(window.ocultarSplash, 2000);   // nunca más de 2 s
+  })();
+</script>
+
   <main class="flex-grow flex flex-col">
 
     <!-- ==================== LOGIN ==================== -->
@@ -50,70 +78,76 @@
 
 <!-- PanelCoach.html · Panel del coach (pestañas: alumnos, evaluación y fotos, rutinas, analizar alumno). Se incluye desde Index.html -->
     <!-- ==================== PANEL COACH ==================== -->
-    <div id="coachView" class="hidden w-full max-w-7xl mx-auto p-3 sm:p-5">
+    <div id="coachView" class="hidden w-full max-w-7xl mx-auto">
 
-      <!-- CABECERA Y NAVEGACIÓN SUPERIOR -->
-      <header class="flex flex-wrap items-center justify-between gap-3 pb-4 border-b border-slate-800/90 mb-6">
-        <!-- Marca -->
-        <div class="flex items-center gap-2.5 min-w-0">
-          <div class="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0 shadow-lg shadow-emerald-500/20">
-            <svg class="w-5 h-5" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
-          </div>
-          <div class="min-w-0">
-            <div class="flex items-baseline gap-2 flex-wrap">
-              <h1 class="text-sm sm:text-base font-black text-white tracking-tight">PRO COACHING</h1>
-              <span class="text-xs text-slate-400 font-semibold">Panel del Coach</span>
-            </div>
-            <p id="coachWelcome" class="text-xs text-slate-400 truncate"></p>
-          </div>
+      <!-- v17 · MENÚ LATERAL (computadora) -->
+      <aside id="sidebarCoach" class="hidden md:flex flex-col w-60 shrink-0 bg-slate-900/80 border border-slate-800 rounded-2xl p-4 self-start sticky top-5">
+        <div class="flex items-center gap-2.5 px-1 pb-4 mb-3 border-b border-slate-800">
+          <div class="w-10 h-10 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/> <path d="m2.5 21.5 1.4-1.4"/> <path d="m20.1 3.9 1.4-1.4"/> <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/> <path d="m9.6 14.4 4.8-4.8"/></svg></div>
+          <div class="min-w-0"><h1 class="text-sm font-black text-white tracking-tight">PRO COACHING</h1><p class="text-xs text-slate-400">Panel del coach</p></div>
         </div>
+        <nav aria-label="Menú del coach" class="space-y-1">
+          <button id="navc-side-HOY" data-navc="HOY" onclick="cambiarTabCoach('tabHoyCoach')" class="navc-side w-full flex items-center gap-3 px-3.5 min-h-[46px] rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800/70 transition">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="flex-1 text-left">Hoy</span>
+          </button>
+          <button id="navc-side-ALUMNOS" data-navc="ALUMNOS" onclick="cambiarTabCoach('tabComparativaCoach')" class="navc-side w-full flex items-center gap-3 px-3.5 min-h-[46px] rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800/70 transition">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/> <path d="M16 3.128a4 4 0 0 1 0 7.744"/> <path d="M22 21v-2a4 4 0 0 0-3-3.87"/> <circle cx="9" cy="7" r="4"/></svg><span class="flex-1 text-left">Alumnos</span>
+          </button>
+          <button id="navc-side-EVALUACIONES" data-navc="EVALUACIONES" onclick="cambiarTabCoach('tabMedidasFotos')" class="navc-side w-full flex items-center gap-3 px-3.5 min-h-[46px] rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800/70 transition">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/> <path d="M12 11h4"/> <path d="M12 16h4"/> <path d="M8 11h.01"/> <path d="M8 16h.01"/></svg><span class="flex-1 text-left">Evaluaciones</span>
+          </button>
+          <button id="navc-side-RUTINAS" data-navc="RUTINAS" onclick="cambiarTabCoach('tabCrearRutina')" class="navc-side w-full flex items-center gap-3 px-3.5 min-h-[46px] rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800/70 transition">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/> <path d="m2.5 21.5 1.4-1.4"/> <path d="m20.1 3.9 1.4-1.4"/> <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/> <path d="m9.6 14.4 4.8-4.8"/></svg><span class="flex-1 text-left">Rutinas</span>
+          </button>
+          <button id="navc-side-RECORDS" data-navc="RECORDS" onclick="cambiarTabCoach('tabRecordsCoach')" class="navc-side w-full flex items-center gap-3 px-3.5 min-h-[46px] rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800/70 transition">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/> <path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/> <path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/> <path d="M4 22h16"/> <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/> <path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg><span class="flex-1 text-left">Récords</span>
+          </button>
+          <button id="navc-side-MENSAJES" data-navc="MENSAJES" onclick="cambiarTabCoach('tabMensajesCoach')" class="navc-side w-full flex items-center gap-3 px-3.5 min-h-[46px] rounded-xl text-sm font-bold text-slate-300 hover:bg-slate-800/70 transition">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg><span class="flex-1 text-left">Mensajes</span><span id="badgeMensajesSide" class="hidden bg-amber-400 text-slate-950 text-[11px] font-black rounded-full px-2 py-0.5"></span>
+          </button>
+        </nav>
+        <div class="mt-6 pt-4 border-t border-slate-800 space-y-2">
+          <button onclick="abrirModalPerfil()" class="w-full flex items-center gap-3 px-2 min-h-[48px] rounded-xl hover:bg-slate-800/70 text-left">
+            <img id="avatarCoachHeader" src="" alt="" class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500/70">
+            <span class="min-w-0"><span id="coachWelcome" class="block text-sm font-bold text-white truncate"></span><span class="block text-xs text-slate-400">Mi perfil y contraseña</span></span>
+          </button>
+          <button onclick="cerrarSesion()" class="w-full flex items-center gap-3 px-3.5 min-h-[44px] rounded-xl text-sm font-bold text-rose-300 hover:bg-rose-500/10"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/> <path d="M21 12H9"/> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg> Cerrar sesión</button>
+        </div>
+      </aside>
 
-        <!-- 4 Pestañas + Avatar + Salir -->
-        <div class="flex items-center gap-2 flex-wrap w-full lg:w-auto justify-between lg:justify-end">
-          <nav class="flex items-center gap-1.5 overflow-x-auto no-scrollbar py-0.5">
-            <button id="btnTab-tabNuevoAlumno" onclick="cambiarTabCoach('tabNuevoAlumno')"
-              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-extrabold transition bg-emerald-500 text-slate-950">
-              1 · Alumnos
-            </button>
-            <button id="btnTab-tabMedidasFotos" onclick="cambiarTabCoach('tabMedidasFotos')"
-              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
-              2 · Evaluación y Fotos
-            </button>
-            <button id="btnTab-tabCrearRutina" onclick="cambiarTabCoach('tabCrearRutina')"
-              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
-              3 · Rutinas
-            </button>
-            <button id="btnTab-tabComparativaCoach" onclick="cambiarTabCoach('tabComparativaCoach')"
-              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
-              4 · Analizar Alumno
-            </button>
-            <button id="btnTab-tabRecordsCoach" onclick="cambiarTabCoach('tabRecordsCoach')"
-              class="btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800">
-              5 · Récords
-            </button>
-          </nav>
+      <div id="coachMain" class="flex-1 min-w-0 p-3 sm:p-5 md:p-0 pb-28 md:pb-0">
 
-          <div class="flex items-center gap-2 pl-2 border-l border-slate-800 shrink-0">
-            <button onclick="abrirModalPerfil()" title="Mi Perfil" class="relative shrink-0 rounded-full focus:outline-none">
-              <img id="avatarCoachHeader" src="" class="w-9 h-9 rounded-full object-cover border-2 border-emerald-500/70 hover:border-emerald-400 transition">
-            </button>
-            <button onclick="cerrarSesion()" title="Cerrar Sesión"
-              class="bg-rose-500/10 hover:bg-rose-500 hover:text-white text-rose-300 border border-rose-500/30 px-3 py-2 rounded-xl text-xs font-bold transition">
-              Salir
-            </button>
-          </div>
+      <!-- v17 · CABECERA (celular) -->
+      <header class="md:hidden flex items-center justify-between gap-3 pb-3 mb-4 border-b border-slate-800/90 sticky top-0 safe-sticky-top z-30 bg-slate-950/95 backdrop-blur-md -mx-3 px-3 pt-1">
+        <div class="flex items-center gap-2.5 min-w-0">
+          <span class="w-9 h-9 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/> <path d="m2.5 21.5 1.4-1.4"/> <path d="m20.1 3.9 1.4-1.4"/> <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/> <path d="m9.6 14.4 4.8-4.8"/></svg></span>
+          <h1 id="tituloCoachMovil" class="text-base font-extrabold text-white truncate">Hoy</h1>
+        </div>
+        <div class="flex items-center gap-2">
+          <button onclick="cambiarTabCoach('tabMensajesCoach')" aria-label="Mensajes" class="relative w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 flex items-center justify-center">
+            <svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg><span id="badgeMensajesMovil" class="hidden absolute -top-1 -right-1 min-w-[20px] h-5 px-1 rounded-full bg-amber-400 text-slate-950 text-[11px] font-black flex items-center justify-center"></span>
+          </button>
+          <button onclick="abrirModalPerfil()" aria-label="Mi perfil" class="rounded-full"><img id="avatarCoachMovil" src="" alt="" class="w-10 h-10 rounded-full object-cover border-2 border-emerald-500/70"></button>
         </div>
       </header>
 
-      <!-- ACTIVIDAD DE HOY (v11): quién entrenó hoy y quién está en línea -->
-      <div id="resumenActividadCoach" class="mb-5"></div>
+      <!-- v17 · PANTALLA «HOY» -->
+      <div id="tabHoyCoach" class="tab-coach space-y-4">
+        <div id="contenedorHoyCoach" class="space-y-4"></div>
+      </div>
+
+      <!-- v17 · MENSAJES (check-ins de todos los alumnos) -->
+      <div id="tabMensajesCoach" class="tab-coach hidden space-y-4">
+        <div id="contenedorMensajesCoach" class="space-y-4"></div>
+      </div>
+
 
       <!-- TAB 1: ALUMNOS (FIJA A LA IZQUIERDA >= 640px · DRAWER DESLIZABLE EN CELULAR) -->
-      <div id="tabNuevoAlumno" class="tab-coach grid grid-cols-1 sm:grid-cols-[240px_1fr] md:grid-cols-[280px_1fr] lg:grid-cols-[320px_1fr] gap-5 items-start">
+      <div id="tabNuevoAlumno" class="tab-coach hidden max-w-2xl">
 
         <!-- Botón móvil llamativo para abrir lista de alumnos -->
         <button type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', true)"
-          class="sm:hidden w-full text-left bg-gradient-to-r from-emerald-500/15 via-slate-900 to-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-lg shadow-emerald-500/10 active:scale-[0.98] transition">
+          class="hidden w-full text-left bg-gradient-to-r from-emerald-500/15 via-slate-900 to-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-lg shadow-emerald-500/10 active:scale-[0.98] transition">
           <span class="w-11 h-11 rounded-xl bg-emerald-500 text-slate-950 text-xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20"><svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/> <path d="M16 3.128a4 4 0 0 1 0 7.744"/> <path d="M22 21v-2a4 4 0 0 0-3-3.87"/> <circle cx="9" cy="7" r="4"/></svg></span>
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white leading-tight">Mis alumnos</span>
@@ -131,7 +165,7 @@
 
         <!-- Columna izquierda / Drawer móvil: Mis alumnos -->
         <aside id="drawerAlumnosTab1"
-          class="fixed sm:static inset-y-0 left-0 z-50 sm:z-auto w-[82vw] max-w-[320px] sm:w-auto bg-slate-950 sm:bg-transparent border-r sm:border-0 border-slate-800 p-4 sm:p-0 transform -translate-x-full sm:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col">
+          class="hidden fixed sm:static inset-y-0 left-0 z-50 sm:z-auto w-[82vw] max-w-[320px] sm:w-auto bg-slate-950 sm:bg-transparent border-r sm:border-0 border-slate-800 p-4 sm:p-0 transform -translate-x-full sm:translate-x-0 transition-transform duration-200 ease-in-out flex flex-col">
           <div class="flex items-center justify-between px-1 mb-3 shrink-0">
             <h2 class="text-sm font-extrabold text-white">Mis alumnos</h2>
             <div class="flex items-center gap-2">
@@ -197,19 +231,20 @@
       <!-- TAB 2: EVALUACIÓN ANTROPOMÉTRICA (SIN NÚMEROS EN LAS SECCIONES) -->
       <div id="tabMedidasFotos" class="tab-coach hidden bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800">
         <div class="flex flex-wrap justify-between items-center mb-6 pb-4 border-b border-slate-800 gap-4">
-          <h3 class="text-base sm:text-lg font-bold text-emerald-400">Nueva Evaluación</h3>
-          <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
-            <span class="text-xs text-slate-400">Nivel:</span>
-            <select id="updateNivelSelect" class="flex-grow sm:flex-grow-0 p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs">
-              <option value="NIVEL I: PRINCIPIANTE">NIVEL I: PRINCIPIANTE</option>
-              <option value="NIVEL II: INTERMEDIO">NIVEL II: INTERMEDIO</option>
-              <option value="NIVEL III: AVANZADO">NIVEL III: AVANZADO</option>
-            </select>
-            <button onclick="cambiarNivel()" class="bg-emerald-500 hover:bg-emerald-400 text-slate-950 px-4 py-2.5 rounded-xl text-xs font-extrabold">Actualizar</button>
-          </div>
+          <div><h3 class="text-lg font-black text-white">Nueva evaluación</h3><p id="evalSubtitulo" class="text-xs text-slate-400"></p></div>
         </div>
 
-        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Datos Generales</h4>
+        
+        <ol id="evalStepper" aria-label="Pasos de la evaluación" class="flex items-start justify-between gap-1 mb-6 pb-5 border-b border-slate-800"><li class="flex-1"><button type="button" id="evalPasoBtn-1" onclick="irPasoEvaluacion(1)" class="w-full flex flex-col items-center gap-1.5 min-h-[44px]">
+            <span class="eval-num w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border">1</span><span class="eval-txt text-[11px] font-bold">Datos</span></button></li><li class="flex-1"><button type="button" id="evalPasoBtn-2" onclick="irPasoEvaluacion(2)" class="w-full flex flex-col items-center gap-1.5 min-h-[44px]">
+            <span class="eval-num w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border">2</span><span class="eval-txt text-[11px] font-bold">Perímetros</span></button></li><li class="flex-1"><button type="button" id="evalPasoBtn-3" onclick="irPasoEvaluacion(3)" class="w-full flex flex-col items-center gap-1.5 min-h-[44px]">
+            <span class="eval-num w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border">3</span><span class="eval-txt text-[11px] font-bold">Pliegues</span></button></li><li class="flex-1"><button type="button" id="evalPasoBtn-4" onclick="irPasoEvaluacion(4)" class="w-full flex flex-col items-center gap-1.5 min-h-[44px]">
+            <span class="eval-num w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border">4</span><span class="eval-txt text-[11px] font-bold">Fotos</span></button></li><li class="flex-1"><button type="button" id="evalPasoBtn-5" onclick="irPasoEvaluacion(5)" class="w-full flex flex-col items-center gap-1.5 min-h-[44px]">
+            <span class="eval-num w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border">5</span><span class="eval-txt text-[11px] font-bold">Revisar</span></button></li></ol>
+
+        <section id="evalPaso-1" class="eval-paso" aria-labelledby="evalTitulo-1">
+          <div class="mb-4"><h4 id="evalTitulo-1" class="text-base font-black text-white outline-none">Datos generales</h4><p class="text-xs text-slate-400">Paso 1 de 5 · alumno, fecha y medidas básicas</p></div>
+          
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
           <div class="sm:col-span-2"><label for="selectAlumnoMedidas" class="text-xs text-slate-400">Alumno</label><select id="selectAlumnoMedidas" class="select-alumnos w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></select></div>
           <div><label for="evFecha" class="text-xs text-slate-400">Fecha</label><input type="date" id="evFecha" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
@@ -226,7 +261,34 @@
           <div><label for="evEnvergadura" class="text-xs text-slate-400">Envergadura (CM)</label><input type="number" step="0.1" id="evEnvergadura" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
         </div>
 
-        <div class="flex items-center gap-4 mb-5 bg-slate-950 p-4 border border-slate-800 rounded-xl">
+        
+        </section>
+        <section id="evalPaso-2" class="eval-paso hidden" aria-labelledby="evalTitulo-2">
+          <div class="mb-4"><h4 id="evalTitulo-2" class="text-base font-black text-white outline-none">Perímetros y diámetros</h4><p class="text-xs text-slate-400">Paso 2 de 5 · en centímetros</p></div>
+          
+        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
+          <div><label for="evCuello" class="text-xs text-slate-400">Cuello</label><input type="number" step="0.1" id="evCuello" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evHombros" class="text-xs text-slate-400">Hombros</label><input type="number" step="0.1" id="evHombros" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evPecho" class="text-xs text-slate-400">Pecho</label><input type="number" step="0.1" id="evPecho" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evCintura" class="text-xs text-slate-400" id="labelCintura">Cintura (Medir en Ombligo)</label><input type="number" step="0.1" id="evCintura" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl border-amber-500/50"></div>
+          <div><label for="evCadera" class="text-xs text-slate-400">Cadera</label><input type="number" step="0.1" id="evCadera" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+
+          <div><label for="evBrazoRel" class="text-xs text-slate-400">Brazo Relajado</label><input type="number" step="0.1" id="evBrazoRel" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evBrazoFlex" class="text-xs text-slate-400">Brazo Flexionado</label><input type="number" step="0.1" id="evBrazoFlex" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evGluteos" class="text-xs text-slate-400">Glúteos</label><input type="number" step="0.1" id="evGluteos" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evMuslo" class="text-xs text-slate-400">Muslo</label><input type="number" step="0.1" id="evMuslo" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evPantorrilla" class="text-xs text-slate-400">Pantorrilla</label><input type="number" step="0.1" id="evPantorrilla" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+
+          <div><label for="evHumero" class="text-xs text-slate-400">Húmero</label><input type="number" step="0.1" id="evHumero" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evMuneca" class="text-xs text-slate-400">Muñeca</label><input type="number" step="0.1" id="evMuneca" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evFemur" class="text-xs text-slate-400">Fémur</label><input type="number" step="0.1" id="evFemur" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+        </div>
+
+        
+        </section>
+        <section id="evalPaso-3" class="eval-paso hidden" aria-labelledby="evalTitulo-3">
+          <div class="mb-4"><h4 id="evalTitulo-3" class="text-base font-black text-white outline-none">Pliegues cutáneos</h4><p class="text-xs text-slate-400">Paso 3 de 5 · solo si usas plicómetro</p></div>
+          <div class="flex items-center gap-4 mb-5 bg-slate-950 p-4 border border-slate-800 rounded-xl">
           <label for="evTienePlicometro" class="text-sm font-bold text-emerald-400">¿Se cuenta con medidor de grasa corporal (Plicómetro)?</label>
           <select id="evTienePlicometro" onchange="togglePlicometro(); calcularComposicionAutomatica()" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl font-bold text-white">
             <option value="NO">NO</option>
@@ -246,26 +308,21 @@
           </div>
         </div>
 
-        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Perímetros y Diámetros (CM)</h4>
-        <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
-          <div><label for="evCuello" class="text-xs text-slate-400">Cuello</label><input type="number" step="0.1" id="evCuello" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evHombros" class="text-xs text-slate-400">Hombros</label><input type="number" step="0.1" id="evHombros" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evPecho" class="text-xs text-slate-400">Pecho</label><input type="number" step="0.1" id="evPecho" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evCintura" class="text-xs text-slate-400" id="labelCintura">Cintura (Medir en Ombligo)</label><input type="number" step="0.1" id="evCintura" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl border-amber-500/50"></div>
-          <div><label for="evCadera" class="text-xs text-slate-400">Cadera</label><input type="number" step="0.1" id="evCadera" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-
-          <div><label for="evBrazoRel" class="text-xs text-slate-400">Brazo Relajado</label><input type="number" step="0.1" id="evBrazoRel" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evBrazoFlex" class="text-xs text-slate-400">Brazo Flexionado</label><input type="number" step="0.1" id="evBrazoFlex" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evGluteos" class="text-xs text-slate-400">Glúteos</label><input type="number" step="0.1" id="evGluteos" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evMuslo" class="text-xs text-slate-400">Muslo</label><input type="number" step="0.1" id="evMuslo" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evPantorrilla" class="text-xs text-slate-400">Pantorrilla</label><input type="number" step="0.1" id="evPantorrilla" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-
-          <div><label for="evHumero" class="text-xs text-slate-400">Húmero</label><input type="number" step="0.1" id="evHumero" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evMuneca" class="text-xs text-slate-400">Muñeca</label><input type="number" step="0.1" id="evMuneca" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label for="evFemur" class="text-xs text-slate-400">Fémur</label><input type="number" step="0.1" id="evFemur" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+        
+        </section>
+        <section id="evalPaso-4" class="eval-paso hidden" aria-labelledby="evalTitulo-4">
+          <div class="mb-4"><h4 id="evalTitulo-4" class="text-base font-black text-white outline-none">Fotografías</h4><p class="text-xs text-slate-400">Paso 4 de 5 · frente, perfil y espalda (opcional)</p></div>
+          
+        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
+          <div><label for="fotoFrente" class="block text-xs font-bold text-slate-300 mb-2">Frente</label><input type="file" id="fotoFrente" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label for="fotoPerfil" class="block text-xs font-bold text-slate-300 mb-2">Perfil</label><input type="file" id="fotoPerfil" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label for="fotoEspalda" class="block text-xs font-bold text-slate-300 mb-2">Espalda</label><input type="file" id="fotoEspalda" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
         </div>
-
-        <div class="bg-emerald-950/40 p-4 border border-emerald-500/50 rounded-xl mb-6 shadow-lg relative">
+        
+        </section>
+        <section id="evalPaso-5" class="eval-paso hidden" aria-labelledby="evalTitulo-5">
+          <div class="mb-4"><h4 id="evalTitulo-5" class="text-base font-black text-white outline-none">Revisar y guardar</h4><p class="text-xs text-slate-400">Paso 5 de 5 · resultados automáticos e historial clínico</p></div>
+          <div class="bg-emerald-950/40 p-4 border border-emerald-500/50 rounded-xl mb-6 shadow-lg relative">
           <h4 class="text-sm font-extrabold uppercase tracking-wider text-emerald-400 mb-3">Resultados Automáticos (Composición)</h4>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
             <div><label for="evImc" class="text-xs text-slate-300">IMC</label><input type="text" id="evImc" class="w-full p-3 bg-slate-900 border border-emerald-500/50 rounded-xl text-white font-bold" readonly></div>
@@ -281,7 +338,7 @@
           </div>
         </div>
 
-        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Historial Clínico</h4>
+        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Historial clínico</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
           <div><label for="evLesion" class="text-xs text-slate-400">¿Lesión?</label><input type="text" id="evLesion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
           <div><label for="evEnfermedad" class="text-xs text-slate-400">¿Enfermedad?</label><input type="text" id="evEnfermedad" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
@@ -291,14 +348,14 @@
           <div><label for="evObservacion" class="text-xs text-slate-400">Observación</label><input type="text" id="evObservacion" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
         </div>
 
-        <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Fotografías (Drive)</h4>
-        <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
-          <div><label for="fotoFrente" class="block text-xs font-bold text-slate-300 mb-2">Frente</label><input type="file" id="fotoFrente" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-          <div><label for="fotoPerfil" class="block text-xs font-bold text-slate-300 mb-2">Perfil</label><input type="file" id="fotoPerfil" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-          <div><label for="fotoEspalda" class="block text-xs font-bold text-slate-300 mb-2">Espalda</label><input type="file" id="fotoEspalda" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+        <button id="btnGuardarEvaluacion" onclick="procesarYGuardarEvaluacion()" class="w-full sm:w-auto min-h-[48px] bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold px-8 rounded-xl">Guardar Evaluación y Subir Fotos</button>
+      
+        </section>
+        <div class="flex gap-2 mt-2 pt-4 border-t border-slate-800">
+          <button type="button" id="evalBtnAtras" onclick="irPasoEvaluacion(evalPaso - 1)" class="flex-1 sm:flex-none min-h-[48px] px-5 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold">Atrás</button>
+          <button type="button" id="evalBtnSiguiente" onclick="siguientePasoEvaluacion()" class="flex-[2] sm:flex-none min-h-[48px] px-6 rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold">Siguiente</button>
         </div>
-        <button id="btnGuardarEvaluacion" onclick="procesarYGuardarEvaluacion()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-3.5 rounded-xl">Guardar Evaluación y Subir Fotos</button>
-      </div>
+</div>
 
       <!-- TAB 3: CONSTRUCTOR Y ASIGNADOR DE RUTINAS -->
       <div id="tabCrearRutina" class="tab-coach hidden space-y-6">
@@ -382,11 +439,15 @@
 
         <!-- Columna izquierda: Lista completa de alumnos -->
         <aside id="panelListaAnalizar" class="flex flex-col space-y-3">
-          <div class="flex items-center justify-between px-1">
-            <h3 class="text-sm font-extrabold text-white">Analizar alumno</h3>
-            <span id="contadorAnalizarMovil" class="text-xs font-bold text-slate-400"></span>
+          <div class="flex items-center justify-between gap-2 px-1">
+            <div><h2 class="text-base font-extrabold text-white">Alumnos</h2><span id="contadorAnalizarMovil" class="text-xs font-bold text-slate-400"></span></div>
+            <button type="button" onclick="cambiarTabCoach('tabNuevoAlumno')" class="min-h-[40px] px-3 rounded-xl bg-emerald-500 text-slate-950 text-xs font-extrabold inline-flex items-center gap-1.5"><span aria-hidden="true">+</span> Nuevo</button>
           </div>
-          <div id="tarjetasAlumnosCoach" class="space-y-2.5 sm:max-h-[75vh] sm:overflow-y-auto pr-1"></div>
+          <label for="buscarAlumnoCoach" class="sr-only">Buscar alumno</label>
+          <input id="buscarAlumnoCoach" type="search" placeholder="Buscar por nombre o usuario" oninput="filtroAlumnosCoach.q = this.value; renderTarjetasAlumnos()"
+            class="w-full min-h-[44px] px-3.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-white focus:border-emerald-500">
+          <div id="filtrosAlumnosCoach" class="flex gap-2 overflow-x-auto no-scrollbar pb-0.5"></div>
+          <div id="tarjetasAlumnosCoach" class="space-y-2.5 sm:max-h-[70vh] sm:overflow-y-auto pr-1"></div>
           <select id="selectAlumnoAnalizar" class="select-alumnos hidden"></select>
         </aside>
 
@@ -394,7 +455,7 @@
         <div id="panelExpedienteAnalizar" class="hidden sm:block min-w-0 space-y-3">
           <!-- Botón móvil para volver a la lista de alumnos -->
           <button type="button" onclick="volverAListaAlumnosMovil()"
-            class="sm:hidden w-full bg-slate-900 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs px-4 py-3 rounded-xl flex items-center justify-between active:scale-[0.98] transition">
+            class="hidden w-full bg-slate-900 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs px-4 py-3 rounded-xl flex items-center justify-between active:scale-[0.98] transition">
             <span class="inline-flex items-center gap-1"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/> <path d="M19 12H5"/></svg> Cambiar alumno</span>
             <span class="text-xs text-slate-400 font-semibold">Ver lista completa</span>
           </button>
@@ -409,6 +470,53 @@
 
       </div>
 
+      </div><!-- /coachMain -->
+
+      <!-- v17 · BARRA INFERIOR (celular) -->
+      <nav aria-label="Menú del coach" class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 border-t border-slate-900 grid grid-cols-5 px-1 backdrop-blur-md safe-bottom">
+        <button id="navc-bot-HOY" data-navc="HOY" onclick="cambiarTabCoach('tabHoyCoach')" class="navc-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 min-h-[56px] text-slate-400">
+          <svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg><span class="text-[11px] font-bold">Hoy</span>
+        </button>
+        <button id="navc-bot-ALUMNOS" data-navc="ALUMNOS" onclick="cambiarTabCoach('tabComparativaCoach')" class="navc-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 min-h-[56px] text-slate-400">
+          <svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/> <path d="M16 3.128a4 4 0 0 1 0 7.744"/> <path d="M22 21v-2a4 4 0 0 0-3-3.87"/> <circle cx="9" cy="7" r="4"/></svg><span class="text-[11px] font-bold">Alumnos</span>
+        </button>
+        <button id="navc-bot-RUTINAS" data-navc="RUTINAS" onclick="cambiarTabCoach('tabCrearRutina')" class="navc-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 min-h-[56px] text-slate-400">
+          <svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/> <path d="m2.5 21.5 1.4-1.4"/> <path d="m20.1 3.9 1.4-1.4"/> <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/> <path d="m9.6 14.4 4.8-4.8"/></svg><span class="text-[11px] font-bold">Rutinas</span>
+        </button>
+        <button id="navc-bot-RECORDS" data-navc="RECORDS" onclick="cambiarTabCoach('tabRecordsCoach')" class="navc-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 min-h-[56px] text-slate-400">
+          <svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/> <path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/> <path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/> <path d="M4 22h16"/> <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/> <path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg><span class="text-[11px] font-bold">Récords</span>
+        </button>
+        <button id="navc-bot-MAS" data-navc="MAS" onclick="abrirMasCoach()" class="navc-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 min-h-[56px] text-slate-400">
+          <svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="1"/> <circle cx="19" cy="12" r="1"/> <circle cx="5" cy="12" r="1"/></svg><span class="text-[11px] font-bold">Más</span>
+          <span id="badgeMasCoach" class="hidden absolute top-1.5 right-[30%] w-2.5 h-2.5 rounded-full bg-amber-400"></span>
+        </button>
+      </nav>
+
+      <!-- v17 · HOJA «MÁS» (celular) -->
+      <div id="hojaMasCoach" role="dialog" aria-modal="true" aria-label="Más opciones" class="hidden fixed inset-0 z-[70] bg-slate-950/80 backdrop-blur-sm flex items-end md:hidden" onclick="if (event.target === this) cerrarMasCoach()">
+        <div class="w-full bg-slate-900 border-t border-slate-700 rounded-t-3xl p-4 pb-8 space-y-1.5">
+          <div class="w-10 h-1.5 rounded-full bg-slate-700 mx-auto mb-3"></div>
+          <button onclick="cerrarMasCoach(); cambiarTabCoach('tabMensajesCoach')" class="w-full flex items-center gap-3 px-3 min-h-[52px] rounded-xl text-sm font-bold text-white hover:bg-slate-800"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719"/></svg><span class="flex-1 text-left">Mensajes</span><span id="badgeMensajesMas" class="hidden bg-amber-400 text-slate-950 text-[11px] font-black rounded-full px-2 py-0.5"></span></button>
+          <button onclick="cerrarMasCoach(); cambiarTabCoach('tabMedidasFotos')" class="w-full flex items-center gap-3 px-3 min-h-[52px] rounded-xl text-sm font-bold text-white hover:bg-slate-800"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/> <path d="M12 11h4"/> <path d="M12 16h4"/> <path d="M8 11h.01"/> <path d="M8 16h.01"/></svg><span class="flex-1 text-left">Evaluaciones</span></button>
+          <button onclick="cerrarMasCoach(); cambiarTabCoach('tabNuevoAlumno')" class="w-full flex items-center gap-3 px-3 min-h-[52px] rounded-xl text-sm font-bold text-white hover:bg-slate-800"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/> <circle cx="12" cy="7" r="4"/></svg><span class="flex-1 text-left">Nuevo alumno</span></button>
+          <button onclick="cerrarMasCoach(); abrirModalPerfil()" class="w-full flex items-center gap-3 px-3 min-h-[52px] rounded-xl text-sm font-bold text-white hover:bg-slate-800"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/> <circle cx="12" cy="12" r="3"/></svg><span class="flex-1 text-left">Mi perfil y contraseña</span></button>
+          <button onclick="cerrarMasCoach(); cerrarSesion()" class="w-full flex items-center gap-3 px-3 min-h-[52px] rounded-xl text-sm font-bold text-rose-300 hover:bg-rose-500/10"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 17 5-5-5-5"/> <path d="M21 12H9"/> <path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"/></svg><span class="flex-1 text-left">Cerrar sesión</span></button>
+        </div>
+      </div>
+
+      <!-- v18 · Hoja para cambiar el nivel del alumno (desde su ficha) -->
+      <div id="hojaNivelCoach" role="dialog" aria-modal="true" aria-labelledby="tituloHojaNivel" class="hidden fixed inset-0 z-[75] bg-slate-950/80 backdrop-blur-sm flex items-end md:items-center justify-center" onclick="if (event.target === this) cerrarCambioNivel()">
+        <div class="w-full md:max-w-md bg-slate-900 border-t md:border border-slate-700 rounded-t-3xl md:rounded-3xl p-5 pb-8 md:pb-5">
+          <div class="w-10 h-1.5 rounded-full bg-slate-700 mx-auto mb-4 md:hidden"></div>
+          <h3 id="tituloHojaNivel" class="text-lg font-black text-white">Cambiar nivel</h3>
+          <p id="subHojaNivel" class="text-sm text-slate-400 mt-1 mb-4"></p>
+          <div id="opcionesNivel" role="radiogroup" aria-labelledby="tituloHojaNivel" class="space-y-2.5"></div>
+          <div class="grid grid-cols-3 gap-2.5 mt-5">
+            <button type="button" onclick="cerrarCambioNivel()" class="min-h-[50px] rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold">Cancelar</button>
+            <button type="button" id="btnGuardarNivel" onclick="guardarCambioNivel()" class="col-span-2 min-h-[50px] rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold disabled:opacity-40">Guardar nivel</button>
+          </div>
+        </div>
+      </div>
     </div>
 <!-- PanelAlumno.html · Vista del alumno (barra lateral, Hoy, Entrenar, Progreso, Perfil). Se incluye desde Index.html -->
     <!-- ==================== VISTA ALUMNO CON BARRA LATERAL Y NAVEGACIÓN MÓVIL ==================== -->
@@ -580,6 +688,11 @@
 
           <div id="contenedorRutinaAlumno"></div>
         </section>
+
+        <!-- v18 · MODO GUIADO: un ejercicio a la vez, descanso automático (pantalla completa) -->
+        <div id="modalGuiado" role="dialog" aria-modal="true" aria-label="Modo guiado de entrenamiento" class="hidden fixed inset-0 z-[58] bg-slate-950 overflow-y-auto overscroll-contain">
+          <div id="contGuiado" class="w-full max-w-lg mx-auto min-h-full flex flex-col px-4 pt-3 safe-sticky-top" style="padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 20px)"></div>
+        </div>
 
         <!-- ==================== OPCIÓN 3: HISTORIAL ==================== -->
         <!-- ==================== OPCIÓN 5: RÉCORDS (v11) ==================== -->

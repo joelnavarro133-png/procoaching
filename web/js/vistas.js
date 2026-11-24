@@ -9,6 +9,7 @@
       const vistaActual = vistaVisible ? vistaVisible.id.replace('vista-alumno-', '') : 'INICIO';
       document.getElementById('alumnoView').classList.remove('hidden');
       if (!refresco || !senalIntervalo) iniciarSenalActividad();
+      if (!refresco) precargarMediosRutina(rutina);
       
       const nombreLimpio = (user.nombre || '').toUpperCase();
       const primerNombre = (user.nombre || '').trim().split(/\s+/)[0] || '';
@@ -722,6 +723,43 @@
       return 'NORMAL';
     }
 
+    /** Agrupa los ejercicios del día: bi-series de 2, tri-series de 3 y fichas especiales (drop set, ascendente, pirámide). */
+    function agruparBloquesDia(ejerciciosDia) {
+      const bloques = [];
+      let i = 0;
+      while (i < ejerciciosDia.length) {
+        const actual = ejerciciosDia[i];
+        const tipoClasificado = clasificarTipoSerie(actual.tipoEjercicio);
+
+        if (tipoClasificado === 'BISERIE') {
+          const itemsGrupo = [{ data: actual, idx: i }];
+          if (i + 1 < ejerciciosDia.length && clasificarTipoSerie(ejerciciosDia[i + 1].tipoEjercicio) === 'BISERIE') {
+            itemsGrupo.push({ data: ejerciciosDia[i + 1], idx: i + 1 });
+            i += 2;
+          } else {
+            i += 1;
+          }
+          bloques.push({ tipo: 'GRUPO', subtipo: 'BISERIE', items: itemsGrupo });
+        } else if (tipoClasificado === 'TRISERIE') {
+          const itemsGrupo = [{ data: actual, idx: i }];
+          let k = 1;
+          while (k < 3 && (i + k) < ejerciciosDia.length && clasificarTipoSerie(ejerciciosDia[i + k].tipoEjercicio) === 'TRISERIE') {
+            itemsGrupo.push({ data: ejerciciosDia[i + k], idx: i + k });
+            k++;
+          }
+          i += k;
+          bloques.push({ tipo: 'GRUPO', subtipo: 'TRISERIE', items: itemsGrupo });
+        } else if (tipoClasificado === 'DROPSET' || tipoClasificado === 'ASCENDING' || tipoClasificado === 'PIRAMIDE') {
+          bloques.push({ tipo: tipoClasificado, item: { data: actual, idx: i } });
+          i++;
+        } else {
+          bloques.push({ tipo: 'NORMAL', item: { data: actual, idx: i } });
+          i++;
+        }
+      }
+      return bloques;
+    }
+
     function seleccionarDiaRutina(dia) {
       estadoGlobal.diaSeleccionado = dia;
       const diaNorm = normalizarDia(dia);
@@ -767,41 +805,10 @@
       });
 
       // 2. Agrupar automáticamente Bi-Series (de 2 en 2) y Tri-Series (de 3 en 3)
-      const bloques = [];
-      let i = 0;
-      while (i < ejerciciosDia.length) {
-        const actual = ejerciciosDia[i];
-        const tipoClasificado = clasificarTipoSerie(actual.tipoEjercicio);
-
-        if (tipoClasificado === 'BISERIE') {
-          const itemsGrupo = [{ data: actual, idx: i }];
-          if (i + 1 < ejerciciosDia.length && clasificarTipoSerie(ejerciciosDia[i + 1].tipoEjercicio) === 'BISERIE') {
-            itemsGrupo.push({ data: ejerciciosDia[i + 1], idx: i + 1 });
-            i += 2;
-          } else {
-            i += 1;
-          }
-          bloques.push({ tipo: 'GRUPO', subtipo: 'BISERIE', items: itemsGrupo });
-        } else if (tipoClasificado === 'TRISERIE') {
-          const itemsGrupo = [{ data: actual, idx: i }];
-          let k = 1;
-          while (k < 3 && (i + k) < ejerciciosDia.length && clasificarTipoSerie(ejerciciosDia[i + k].tipoEjercicio) === 'TRISERIE') {
-            itemsGrupo.push({ data: ejerciciosDia[i + k], idx: i + k });
-            k++;
-          }
-          i += k;
-          bloques.push({ tipo: 'GRUPO', subtipo: 'TRISERIE', items: itemsGrupo });
-        } else if (tipoClasificado === 'DROPSET' || tipoClasificado === 'ASCENDING' || tipoClasificado === 'PIRAMIDE') {
-          bloques.push({ tipo: tipoClasificado, item: { data: actual, idx: i } });
-          i++;
-        } else {
-          bloques.push({ tipo: 'NORMAL', item: { data: actual, idx: i } });
-          i++;
-        }
-      }
+      const bloques = agruparBloquesDia(ejerciciosDia);
 
       // 3. Renderizar cada bloque según su diseño visual
-      const bloquesHTML = bloques.map(bloque => {
+      const tarjetasHTML = bloques.map(bloque => {
         
         // ==================== CASO A: CONTENEDOR DE BI-SERIE O TRI-SERIE ====================
         if (bloque.tipo === 'GRUPO') {
@@ -1007,14 +1014,129 @@
             ${tablaSeries(r, idx, kp, diaNorm)}
           </div>
         `;
-      }).join('');
+      });
 
       const porcentaje = Math.round((completados / ejerciciosDia.length) * 100);
       contador.innerText = `${dia}: ${completados}/${ejerciciosDia.length} (${porcentaje}%)`;
 
-      contenedor.innerHTML = bloquesHTML;
+      contenedor.innerHTML = lineaDeTiempoRutina(bloques, tarjetasHTML, ejerciciosDia, kp, diaNorm, dia);
       activarGifsEnPantalla();
       precargarDetallesDia();
+    }
+
+    // ==================== v18 · RUTINA EN LÍNEA DE TIEMPO ====================
+    // Lo hecho queda arriba (resumido y tachado), el ejercicio actual abierto y lo que falta abajo (resumido).
+    // Al tocar un resumen se abre la tarjeta completa de siempre (mismas casillas y registros).
+    const rutinaAbierta = {};   // 'DIA|n' → true/false si el alumno abrió o cerró ese bloque a mano
+    function alternarBloqueRutina(diaNorm, bi, abierto) {
+      rutinaAbierta[diaNorm + '|' + bi] = !abierto;
+      seleccionarDiaRutina(estadoGlobal.diaSeleccionado);
+    }
+    /** Avance de un ejercicio: series hechas / total (drop set y pirámide cuentan sus fases). */
+    function avanceItemRutina(it, kp, tipo) {
+      const r = it.data, idx = it.idx;
+      if (tipo === 'DROPSET' || tipo === 'ASCENDING' || tipo === 'PIRAMIDE') {
+        const fases = fasesEspeciales(r, tipo).length;
+        let h = 0; for (let d = 1; d <= fases; d++) if (leerProg(kp(idx, 'ok_d' + d)) === 'true') h++;
+        const ok = leerProg(kp(idx, 'ok')) === 'true';
+        return { hechas: ok ? fases : h, total: fases, ok: ok || h >= fases };
+      }
+      const total = cuantasSeries(r);
+      let h = 0; for (let n = 1; n <= total; n++) if (leerProg(kp(idx, 's' + n + '_ok')) === 'true') h++;
+      const ok = leerProg(kp(idx, 'ok')) === 'true';
+      return { hechas: ok ? total : h, total: total, ok: ok || h >= total };
+    }
+    function fasesEspeciales(r, tipo) {
+      const partes = String(r.repeticiones || '').split(/[-/,]+/).map(x => x.trim()).filter(Boolean);
+      return partes.length >= 2 ? partes : (tipo === 'PIRAMIDE' ? ['12', '10', '8', '10', '12'] : ['8', '10', '12']);
+    }
+    /** Último kg anotado en un ejercicio (esta semana) o el de la semana pasada. */
+    function kgReferencia(it, kp, diaNorm) {
+      const idx = it.idx, total = cuantasSeries(it.data);
+      for (let n = total; n >= 1; n--) { const v = leerProg(kp(idx, 's' + n + '_peso')); if (v) return { kg: v, pasada: false }; }
+      const c = leerProg(kp(idx, 'carga')) || leerProg(kp(idx, 'carga_d1'));
+      if (c) return { kg: c, pasada: false };
+      const ant = valorSemanaPasada(diaNorm, txtClave(kp(idx, 's1_peso'))) || valorSemanaPasada(diaNorm, txtClave(kp(idx, 'carga')));
+      return ant ? { kg: ant, pasada: true } : null;
+    }
+    const kgTxt = v => /kg/i.test(String(v)) ? String(v) : String(v) + ' kg';
+
+    function lineaDeTiempoRutina(bloques, tarjetas, ejerciciosDia, kp, diaNorm, dia) {
+      let seriesHechas = 0, seriesTotal = 0, segundos = 0, ejHechos = 0;
+      const info = bloques.map(b => {
+        const items = b.tipo === 'GRUPO' ? b.items : [b.item];
+        const tipoItem = b.tipo === 'GRUPO' ? 'NORMAL' : b.tipo;
+        const av = items.map(it => avanceItemRutina(it, kp, tipoItem));
+        av.forEach((a, i) => {
+          seriesHechas += a.hechas; seriesTotal += a.total; if (a.ok) ejHechos++;
+          if (!a.ok) segundos += (a.total - a.hechas) * (40 + (b.tipo === 'GRUPO' ? 0 : (parseInt(items[i].data.descanso) || 60)));
+        });
+        if (b.tipo === 'GRUPO') segundos += Math.max(0, ...av.map(a => a.total - a.hechas)) * (parseInt(items[items.length - 1].data.descanso) || 90);
+        return { items, av, hecho: av.every(a => a.ok), enCurso: av.some(a => a.hechas > 0) };
+      });
+      const actual = info.findIndex(x => !x.hecho);
+      const pct = seriesTotal ? Math.round(seriesHechas / seriesTotal * 100) : 0;
+      const minutos = Math.max(1, Math.round(segundos / 60));
+      const c = 2 * Math.PI * 27;
+      const soloLectura = !!(estadoGlobal.progLocal && estadoGlobal.progLocal.soloLectura) || esCoach();
+      const resumen = `
+        <div class="flex items-center gap-4 mb-4">
+          <div class="relative w-16 h-16 shrink-0" role="img" aria-label="${pct}% de las series hechas">
+            <svg width="64" height="64" viewBox="0 0 64 64" aria-hidden="true"><circle cx="32" cy="32" r="27" stroke="#1e293b" stroke-width="7" fill="none"/>
+              <circle cx="32" cy="32" r="27" stroke="#10b981" stroke-width="7" fill="none" stroke-linecap="round" stroke-dasharray="${c.toFixed(1)}" stroke-dashoffset="${(c * (1 - pct / 100)).toFixed(1)}" transform="rotate(-90 32 32)"/></svg>
+            <span class="absolute inset-0 flex items-center justify-center text-sm font-black text-white">${pct}%</span>
+          </div>
+          <div class="min-w-0">
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">${escHtml(dia)}</p>
+            <p class="text-lg font-black text-white leading-tight">${ejHechos} de ${ejerciciosDia.length} ejercicios</p>
+            <p class="text-xs text-slate-400">${seriesHechas} de ${seriesTotal} series${actual >= 0 ? ' · quedan ~' + minutos + ' min' : ' · ¡día completo!'}</p>
+          </div>
+        </div>
+        ${!soloLectura && actual >= 0 ? `<button type="button" onclick="abrirModoGuiado()" class="w-full mb-5 min-h-[52px] rounded-2xl bg-emerald-500 text-slate-950 font-extrabold text-base flex items-center justify-center gap-2 active:scale-[0.98] transition">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M7 4.5v15l13-7.5z"/></svg>${seriesHechas ? 'Continuar en modo guiado' : 'Empezar en modo guiado'}</button>` : ''}`;
+
+      const filas = bloques.map((b, bi) => {
+        const x = info[bi];
+        const clave = diaNorm + '|' + bi;
+        const abierto = clave in rutinaAbierta ? rutinaAbierta[clave] : bi === actual;
+        const estado = x.hecho ? 'ok' : bi === actual ? 'ahora' : 'pend';
+        const nodo = estado === 'ok'
+          ? `<span class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center">${ico('check', 'w-4 h-4')}</span>`
+          : estado === 'ahora'
+            ? '<span class="w-8 h-8 rounded-full bg-slate-950 border-[3px] border-amber-400 flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span></span>'
+            : '<span class="block w-8 h-8 rounded-full bg-slate-950 border-2 border-slate-700"></span>';
+        const linea = bi < bloques.length - 1 ? '<span class="absolute left-[15px] top-9 -bottom-3 w-0.5 bg-slate-800" aria-hidden="true"></span>' : '';
+        let cuerpo;
+        if (abierto) {
+          // Abierto: la tarjeta usa todo el ancho (en el celular no se aprieta); el punto queda en la fila de arriba
+          const cab = estado !== 'ahora'
+            ? `<button type="button" onclick="alternarBloqueRutina('${diaNorm}', ${bi}, true)" aria-expanded="true" class="text-xs font-bold text-slate-400 hover:text-white inline-flex items-center gap-1 min-h-[36px]">${ico('chevrons-down', 'w-4 h-4')} Resumir</button>`
+            : `<span class="text-[11px] font-black text-amber-300 tracking-wider">AHORA</span>`;
+          return `<li class="relative"><div class="flex items-center gap-3 mb-2">${nodo}${cab}</div>${tarjetas[bi]}</li>`;
+        } else {
+          const nombres = x.items.map(it => it.data.ejercicio).join(' + ');
+          const etiqueta = b.tipo === 'GRUPO' ? (b.subtipo === 'TRISERIE' ? 'Tri-serie · ' : 'Súper serie · ') : b.tipo === 'DROPSET' ? 'Drop set · ' : b.tipo === 'PIRAMIDE' ? 'Pirámide · ' : b.tipo === 'ASCENDING' ? 'Ascendente · ' : '';
+          const r0 = x.items[0].data;
+          const ref = kgReferencia(x.items[0], kp, diaNorm);
+          const hechas = x.av.reduce((t, a) => t + a.hechas, 0), total = x.av.reduce((t, a) => t + a.total, 0);
+          const sub = estado === 'ok'
+            ? `${escHtml(String(r0.serie || ''))} × ${escHtml(String(r0.repeticiones || ''))}${ref && !ref.pasada ? ' · ' + escHtml(kgTxt(ref.kg)) : ''} · hecho`
+            : x.enCurso ? `En curso · ${hechas} de ${total} series`
+              : `${escHtml(String(r0.serie || ''))} × ${escHtml(String(r0.repeticiones || ''))}${ref ? (ref.pasada ? ' · semana pasada ' : ' · ') + escHtml(kgTxt(ref.kg)) : ''}`;
+          const mini = r0.media ? `<img src="${urlMini(r0.media)}" alt="" loading="lazy" decoding="async" class="w-11 h-11 rounded-xl bg-white object-contain shrink-0">` : `<span class="w-11 h-11 rounded-xl bg-slate-800 flex items-center justify-center text-slate-400 shrink-0">${ico('dumbbell', 'w-5 h-5')}</span>`;
+          cuerpo = `<button type="button" onclick="alternarBloqueRutina('${diaNorm}', ${bi}, false)" aria-expanded="false"
+            class="w-full flex items-center gap-3 p-2.5 min-h-[64px] rounded-2xl text-left border transition ${estado === 'ok' ? 'bg-emerald-500/5 border-emerald-500/25' : 'bg-slate-900 border-slate-800 hover:border-slate-700'}">
+            ${mini}
+            <span class="flex-1 min-w-0">
+              <span class="block text-sm font-extrabold leading-snug line-clamp-2 ${estado === 'ok' ? 'text-slate-300 line-through decoration-slate-600' : 'text-white'}">${escHtml(etiqueta)}${escHtml(nombres)}</span>
+              <span class="block text-xs ${estado === 'ok' ? 'text-emerald-300' : x.enCurso ? 'text-amber-300' : 'text-slate-400'}">${sub}</span>
+            </span>
+            ${ico('chevron-right', 'w-5 h-5 text-slate-500 shrink-0')}
+          </button>`;
+        }
+        return `<li class="relative pl-11">${linea}<span class="absolute left-0 top-3">${nodo}</span>${cuerpo}</li>`;
+      }).join('');
+      return resumen + `<ol class="space-y-3" aria-label="Ejercicios de ${escHtml(dia)}">${filas}</ol>`;
     }
 
     function alternarCheckEjercicio(storageKey, idx) {
@@ -1314,30 +1436,86 @@
         return;
       }
       const mini = esAvatar || img.dataset.mini === '1';
-      const cache = mini ? cacheMiniaturas : cacheFotosDrive;
-      if (cacheFotosDrive[id] || cache[id]) {
-        img.src = cacheFotosDrive[id] || cache[id];
+      if (mini) {
+        // v18: fotos de PERFIL → memoria, luego teléfono, luego servidor (en lote)
+        pedirMiniaturaPerfil(id).then(uri => {
+          if (uri) img.src = uri;
+          else if (esAvatar && estadoGlobal.user) img.src = obtenerAvatarFallback(estadoGlobal.user.nombre);
+        });
         return;
       }
-      const runner = GS()
-        .withFailureHandler(() => {
-          if (esAvatar && estadoGlobal.user) img.src = obtenerAvatarFallback(estadoGlobal.user.nombre);
-        })
-        .withSuccessHandler(res => {
-          if (res && res.success && res.dataUri) {
-            cache[id] = res.dataUri;
-            img.src = res.dataUri;
-          } else if (esAvatar && estadoGlobal.user) {
-            img.src = obtenerAvatarFallback(estadoGlobal.user.nombre);
-          }
+      // Fotos de evaluación: solo en memoria mientras la app está abierta (datos sensibles, no se guardan en el teléfono)
+      if (cacheFotosDrive[id]) { img.src = cacheFotosDrive[id]; return; }
+      GS()
+        .withFailureHandler(() => {})
+        .withSuccessHandler(res => { if (res && res.success && res.dataUri) { cacheFotosDrive[id] = res.dataUri; img.src = res.dataUri; } })
+        .obtenerFotoBase64(id);
+    }
+
+    // ==================== v18 · FOTOS DE PERFIL GUARDADAS EN EL TELÉFONO ====================
+    // Una foto nueva siempre es otro archivo en Drive (otro ID): por eso no hace falta «revisar cambios»;
+    // el ID nuevo no está guardado y se descarga solo esa. Las viejas se van borrando (máx. 300).
+    const MAX_FOTOS_GUARDADAS = 300;
+    const pendMini = {};
+    let colaMini = [], relojMini = null;
+    function pedirMiniaturaPerfil(id) {
+      if (!id) return Promise.resolve(null);
+      if (cacheMiniaturas[id]) return Promise.resolve(cacheMiniaturas[id]);
+      if (pendMini[id]) return pendMini[id];
+      const p = (async () => {
+        const g = await CajaLocal.leer(CAJA_FOTOS, 'foto/' + id);
+        if (g) { cacheMiniaturas[id] = g; return g; }
+        return new Promise(res => {
+          colaMini.push([id, res]);
+          if (!relojMini) relojMini = setTimeout(vaciarColaMini, 60);   // junta los pedidos de toda la lista
         });
-      if (mini) runner.obtenerMiniaturaBase64(id); else runner.obtenerFotoBase64(id);
-    } 
+      })();
+      pendMini[id] = p;
+      p.then(() => { delete pendMini[id]; });
+      return p;
+    }
+    function vaciarColaMini() {
+      relojMini = null;
+      const lote = colaMini.splice(0, 30);
+      if (colaMini.length) relojMini = setTimeout(vaciarColaMini, 0);
+      if (!lote.length) return;
+      const ids = lote.map(x => x[0]);
+      let guardadas = 0;
+      const entregar = (id, uri) => {
+        if (uri && estadoGlobal.user) { cacheMiniaturas[id] = uri; CajaLocal.guardar(CAJA_FOTOS, 'foto/' + id, uri); guardadas++; }
+        lote.filter(x => x[0] === id).forEach(x => x[1](uri || null));
+      };
+      const alFinal = () => { if (guardadas) CajaLocal.podar(CAJA_FOTOS, MAX_FOTOS_GUARDADAS); };
+      const unoPorUno = () => {
+        let quedan = ids.length;
+        ids.forEach(id => GS()
+          .withFailureHandler(() => { entregar(id, null); if (!--quedan) alFinal(); })
+          .withSuccessHandler(r => { entregar(id, r && r.success ? r.dataUri : null); if (!--quedan) alFinal(); })
+          .obtenerMiniaturaBase64(id));
+      };
+      if (ids.length === 1) return unoPorUno();
+      GS()
+        .withFailureHandler(unoPorUno)
+        .withSuccessHandler(r => {
+          if (!r || !r.success || !r.fotos) return unoPorUno();   // Apps Script anterior a la v18
+          ids.forEach(id => entregar(id, r.fotos[id] || null));
+          alFinal();
+        })
+        .obtenerMiniaturasLote(ids);
+    }
+    /** Al abrir la app: las fotos guardadas pasan a memoria para pintarse sin esperar. */
+    function precargarFotosGuardadas() {
+      return CajaLocal.todas(CAJA_FOTOS).then(t => {
+        Object.keys(t).forEach(k => { const id = k.replace(/^foto\//, ''); if (id && t[k]) cacheMiniaturas[id] = t[k]; });
+      });
+    }
+    if (LS.get(CLAVE_TOKEN)) precargarFotosGuardadas();
+
 
     function actualizarAvataresUI() {
       if (!estadoGlobal.user) return;
       const url = urlFotoConCache(estadoGlobal.user.urlFotoPerfil) || obtenerAvatarFallback(estadoGlobal.user.nombre);
-      const ids = ['avatarAlumnoBanner', 'avatarAlumnoSidebar', 'avatarCoachHeader', 'avatarAlumnoTop', 'avatarAlumnoPerfil'];
+      const ids = ['avatarAlumnoBanner', 'avatarAlumnoSidebar', 'avatarCoachHeader', 'avatarCoachMovil', 'avatarAlumnoTop', 'avatarAlumnoPerfil'];
       ids.forEach(id => {
         const el = document.getElementById(id);
         if (!el) return;
@@ -1444,7 +1622,7 @@
           }
           
           const coachWel = document.getElementById('coachWelcome');
-          if (coachWel) coachWel.innerText = `Coach activo: ${estadoGlobal.user.nombre}`;
+          if (coachWel) coachWel.innerText = estadoGlobal.user.nombre;
 
           actualizarAvataresUI();
           avisar(res.mensaje, 'exito');
@@ -1486,9 +1664,14 @@
       }
       LS.del(CLAVE_TOKEN);
       LS.del(CLAVE_CACHE_SESION);          // los datos guardados en el teléfono se borran al salir
+      CajaLocal.borrarDatosUsuario();       // v18: fotos de perfil y vistas guardadas
+      Object.keys(cacheMiniaturas).forEach(k => delete cacheMiniaturas[k]);
+      Object.keys(cacheFotosDrive).forEach(k => delete cacheFotosDrive[k]);
+      if (typeof panelCoach !== 'undefined') panelCoach = null;
       detenerCronometro();
       detenerSenalActividad();
       if (typeof detenerActividadCoach === 'function') detenerActividadCoach();
+      if (typeof detenerVivoCoach === 'function') detenerVivoCoach();
       recordsData = null; recordsEdicion = null; clubesEdicion = null;
       LS.del(CLAVE_MARCAS_HOY);
       Object.values(estadoGlobal.charts || {}).forEach(c => { if (c) c.destroy(); });
@@ -1501,11 +1684,11 @@
       bloquearSelectoresEdicion(false);
       ['coachView', 'alumnoView', 'modalPerfil', 'modal1RM', 'modalTablasMetricas', 'modalComposicion',
        'modalGraficoDelta', 'modalAyudaGym', 'modalFotoCompleta', 'modalCatalogo', 'modalEjercicio',
-       'hojaCronometro', 'hojaCheckin', 'hojaDuplicar', 'avisoEdicionRutina'].forEach(id => {
+       'hojaCronometro', 'hojaCheckin', 'hojaDuplicar', 'avisoEdicionRutina', 'hojaMasCoach', 'hojaNivelCoach'].forEach(id => {
         const el = document.getElementById(id); if (el) el.classList.add('hidden');
       });
       ['contenedorComparativaCoach', 'contenedorRutinaAlumno', 'contenedorHistorialAlumno',
-       'resumenInicioCards', 'listaConstructorRutina'].forEach(id => {
+       'resumenInicioCards', 'listaConstructorRutina', 'contenedorHoyCoach', 'contenedorMensajesCoach', 'tarjetasAlumnosCoach'].forEach(id => {
         const el = document.getElementById(id); if (el) el.innerHTML = '';
       });
       const btnGuardar = document.getElementById('btnGuardarRutina');
@@ -1758,13 +1941,34 @@ function calcularComposicionAutomatica() {
       if (marcada) d.claves[clave] = 1; else delete d.claves[clave];
       LS.set(CLAVE_MARCAS_HOY, JSON.stringify(d));
       clearTimeout(senalPendiente);
-      senalPendiente = setTimeout(enviarSenalActividad, 8000);   // agrupa varios toques seguidos
+      senalPendiente = setTimeout(enviarSenalActividad, 5000);   // agrupa varios toques seguidos (v18: 5 s para el «en vivo» del coach)
     }
     function resumenHoy() {
       const claves = Object.keys(marcasHoy().claves);
       const series = claves.filter(k => /::s\d+_ok$/.test(k)).length;
       const ejercicios = new Set(claves.map(k => k.split('::')[0])).size;
       return { series: series || (ejercicios ? ejercicios : 0), ejercicios };
+    }
+    /** v18 · Lo que el coach ve «en vivo»: series marcadas HOY por ejercicio, con sus kg. */
+    function avanceEnVivo() {
+      const claves = Object.keys(marcasHoy().claves);
+      if (!claves.length) return null;
+      const porEj = {}, dias = {};
+      claves.forEach(k => {
+        const m = /^([^|]+)\|(.+?)::(?:s(\d+)_ok|ok)$/.exec(k);
+        if (!m) return;
+        const clave = m[1] + '|' + m[2];
+        dias[m[1]] = (dias[m[1]] || 0) + 1;
+        const e = porEj[clave] = porEj[clave] || { d: m[1], b: m[2], s: [], kg: [], ok: false };
+        if (m[3]) { e.s.push(+m[3]); e.kg.push(leerProg(clave + '::s' + m[3] + '_peso') || ''); }
+        else e.ok = true;
+      });
+      const dia = Object.keys(dias).sort((a, b) => dias[b] - dias[a])[0] || '';
+      const e = Object.values(porEj).filter(x => x.d === dia).slice(0, 40).map(x => {
+        const orden = x.s.map((n, i) => [n, x.kg[i]]).sort((a, b) => a[0] - b[0]);
+        return { b: x.b, s: orden.map(o => o[0]), kg: orden.map(o => o[1]), ok: x.ok };
+      });
+      return { d: dia, e: e };
     }
     function origenApp() {
       try { return (window.Capacitor && Capacitor.isNativePlatform && Capacitor.isNativePlatform()) ? 'app' : 'web'; } catch (e) { return 'web'; }
@@ -1775,7 +1979,7 @@ function calcularComposicionAutomatica() {
       const r = resumenHoy();
       try {
         GS().withSuccessHandler(() => {}).withFailureHandler(() => {})
-          .registrarActividad({ origen: origenApp(), seriesHoy: r.series, ejerciciosHoy: r.ejercicios, fecha: fechaLocalISO() });
+          .registrarActividad({ origen: origenApp(), seriesHoy: r.series, ejerciciosHoy: r.ejercicios, fecha: fechaLocalISO(), vivo: avanceEnVivo() });
       } catch (e) {}
     }
     function iniciarSenalActividad() {
@@ -1805,12 +2009,26 @@ function calcularComposicionAutomatica() {
       const cont = document.getElementById(idCont);
       if (!cont) return;
       if (!recordsData) cont.innerHTML = esqueleto('tarjetas', 3, 'Cargando récords');
+      // v18: mientras llega la respuesta, se muestra el último muro guardado en el teléfono
+      const claveRec = 'records/' + ((estadoGlobal.user && estadoGlobal.user.id) || '');
+      let llegoServidor = false;
+      if (!recordsData) CajaLocal.leerJSON(CAJA_VISTAS, claveRec).then(g => {
+        if (!g || !g.success || llegoServidor || recordsData || recordsContenedor !== idCont) return;
+        recordsData = g;
+        if (g.esCoach) {
+          recordsEdicion = (g.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre }));
+          clubesEdicion = (g.clubes || []).map(c => ({ idEjercicio: c.idEjercicio, nombre: c.ejercicio, kg: c.kg }));
+        }
+        renderRecords();
+      });
       GS().withSuccessHandler(res => {
+        llegoServidor = true;
         if (!res || !res.success) {
           cont.innerHTML = '<div class="ko"><p class="t-err text-sm">' + escHtml((res && res.error) || 'No se pudieron cargar los récords.') + '</p></div>';
           return;
         }
         recordsData = res;
+        if (estadoGlobal.user) CajaLocal.guardarJSON(CAJA_VISTAS, claveRec, res);
         if (recordsEjSel >= (res.ranking || []).length) recordsEjSel = -1;
         if (res.esCoach) {
           recordsEdicion = (res.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre }));
@@ -1848,7 +2066,6 @@ function calcularComposicionAutomatica() {
     const ejFiltroRec = () => recordsEjSel >= 0 && recordsData && recordsData.ranking[recordsEjSel] ? recordsData.ranking[recordsEjSel].nombre : '';
 
     // Avatar: iniciales debajo y la foto de perfil (privada en Drive) encima cuando llega
-    const fotosRecPend = {};
     function avatarRec(p, tam = 40) {
       const ini = String(p.nombre || '?').split(/\s+/).filter(x => x).slice(0, 2).map(w => w[0]).join('').toUpperCase() || '?';
       const foto = p.foto ? `<img alt="" referrerpolicy="no-referrer" data-foto-rec="${escHtml(p.foto)}" class="hidden">` : '';
@@ -1856,16 +2073,7 @@ function calcularComposicionAutomatica() {
     }
     function cargarFotosRec(cont) {
       cont.querySelectorAll('img[data-foto-rec]').forEach(img => {
-        const id = img.dataset.fotoRec;
-        const poner = uri => { img.src = uri; img.classList.remove('hidden'); };
-        if (cacheMiniaturas[id]) return poner(cacheMiniaturas[id]);
-        if (fotosRecPend[id]) return fotosRecPend[id].push(poner);
-        fotosRecPend[id] = [poner];
-        GS().withFailureHandler(() => { delete fotosRecPend[id]; })
-          .withSuccessHandler(res => {
-            const cbs = fotosRecPend[id] || []; delete fotosRecPend[id];
-            if (res && res.success && res.dataUri) { cacheMiniaturas[id] = res.dataUri; cbs.forEach(f => f(res.dataUri)); }
-          }).obtenerMiniaturaBase64(id);
+        pedirMiniaturaPerfil(img.dataset.fotoRec).then(uri => { if (uri) { img.src = uri; img.classList.remove('hidden'); } });
       });
     }
 
@@ -2334,4 +2542,266 @@ function calcularComposicionAutomatica() {
         }).join('')}</div>` : '';
       return `<div class="ko-card">${tituloMuro('track_changes', 'Mis récords')}
         <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${tiles}</div>${enviados}</div>`;
+    }
+
+    // ==================== v18 · GIFs DE LA RUTINA DESCARGADOS POR ADELANTADO ====================
+    // Al abrir la app (con calma, 3 s después) se descargan los GIFs de HOY y las imágenes del resto de la semana.
+    // Quedan en la memoria del navegador/app, así en el gimnasio con poca señal no se quedan cargando.
+    // No se hace si el teléfono tiene activado el «ahorro de datos».
+    function precargarMediosRutina(rutina) {
+      try {
+        if (navigator.connection && navigator.connection.saveData) return;
+        const lista = rutina || estadoGlobal.rutinaActual || [];
+        if (!lista.length) return;
+        const hoy = normalizarDia(obtenerDiaActualSemana());
+        const gifs = [], minis = [];
+        lista.forEach(r => {
+          if (!r || !r.media) return;
+          minis.push(urlMini(r.media));
+          if (normalizarDia(r.dia) === hoy) gifs.push(urlGif(r.media));
+        });
+        const urls = Array.from(new Set(gifs.concat(minis)));
+        let i = 0;
+        const siguiente = () => {
+          if (i >= urls.length || !estadoGlobal.user) return;
+          const im = new Image();
+          im.onload = im.onerror = () => setTimeout(siguiente, 40);
+          im.src = urls[i++];
+        };
+        setTimeout(() => { siguiente(); siguiente(); }, 3000);   // de a 2 para no saturar la conexión
+      } catch (e) {}
+    }
+
+    // ==================== v18 · MODO GUIADO (un ejercicio a la vez) ====================
+    // Usa las MISMAS casillas que la rutina (s1_peso, s1_ok, carga_d1…): lo que marques aquí se ve en la rutina y viceversa.
+    // Descanso automático con el cronómetro de siempre (suena y vibra; en la app avisa aunque la pantalla esté apagada).
+    let guiado = null;
+    function construirPasosGuiado(diaNorm) {
+      const ejs = (estadoGlobal.rutinaActual || []).filter(r => normalizarDia(r.dia) === diaNorm);
+      const bases = basesEjerciciosDia(ejs);
+      const kp = (idx, campo) => diaNorm + '|' + bases[idx] + '::' + campo;
+      const bloques = agruparBloquesDia(ejs);
+      const pasos = [];
+      const desc = r => parseInt(r.descanso) || 0;
+      bloques.forEach((b, bi) => {
+        if (b.tipo === 'GRUPO') {
+          const its = b.items, rondas = Math.max(...its.map(it => cuantasSeries(it.data)));
+          const descGrupo = parseInt(its[its.length - 1].data.descanso) || 90;
+          for (let n = 1; n <= rondas; n++) its.forEach((it, pos) => {
+            if (n > cuantasSeries(it.data)) return;
+            const ultimo = its.slice(pos + 1).every(o => n > cuantasSeries(o.data));
+            pasos.push({ bi, it, tipo: 'serie', n, total: cuantasSeries(it.data), reps: it.data.repeticiones,
+              kPeso: kp(it.idx, 's' + n + '_peso'), kOk: kp(it.idx, 's' + n + '_ok'), kMain: kp(it.idx, 'ok'),
+              descanso: ultimo ? descGrupo : 0, grupo: { sub: b.subtipo, pos: pos + 1, de: its.length } });
+          });
+        } else if (b.tipo === 'DROPSET' || b.tipo === 'ASCENDING' || b.tipo === 'PIRAMIDE') {
+          const it = b.item, fases = fasesEspeciales(it.data, b.tipo);
+          fases.forEach((rep, d) => pasos.push({ bi, it, tipo: 'fase', especial: b.tipo, n: d + 1, total: fases.length, reps: rep,
+            kPeso: kp(it.idx, 'carga_d' + (d + 1)), kOk: kp(it.idx, 'ok_d' + (d + 1)), kMain: kp(it.idx, 'ok'),
+            descanso: d === fases.length - 1 ? (desc(it.data) || 90) : 0 }));
+        } else {
+          const it = b.item, t = cuantasSeries(it.data);
+          for (let n = 1; n <= t; n++) pasos.push({ bi, it, tipo: 'serie', n, total: t, reps: it.data.repeticiones,
+            kPeso: kp(it.idx, 's' + n + '_peso'), kOk: kp(it.idx, 's' + n + '_ok'), kMain: kp(it.idx, 'ok'), descanso: desc(it.data) });
+        }
+      });
+      return { pasos, bloques, kp, diaNorm };
+    }
+    const pasoHecho = p => leerProg(p.kOk) === 'true' || leerProg(p.kMain) === 'true';
+    function siguientePendiente(desde) {
+      const ps = guiado.pasos;
+      for (let k = 1; k <= ps.length; k++) { const j = (desde + k) % ps.length; if (!pasoHecho(ps[j])) return j; }
+      return -1;
+    }
+
+    async function abrirModoGuiado() {
+      const p = asegurarSemanaLocal();
+      if (!p || p.soloLectura) return;
+      const dia = estadoGlobal.diaSeleccionado || obtenerDiaActualSemana();
+      const datos = construirPasosGuiado(normalizarDia(dia));
+      if (!datos.pasos.length) return avisar('No hay ejercicios para este día.', 'atencion');
+      guiado = Object.assign(datos, { dia, i: 0, vista: 'serie', inicio: Date.now(), reloj: null, wake: null, siguiente: -1 });
+      const primero = datos.pasos.findIndex(x => !pasoHecho(x));
+      if (primero < 0) guiado.vista = 'fin'; else guiado.i = primero;
+      document.getElementById('modalGuiado').classList.remove('hidden');
+      document.documentElement.style.overflow = 'hidden';
+      prepararAudio();
+      guiado.reloj = setInterval(tickGuiado, 250);
+      try { if (navigator.wakeLock) guiado.wake = await navigator.wakeLock.request('screen'); } catch (e) {}   // pantalla encendida
+      renderGuiado();
+    }
+    function cerrarModoGuiado() {
+      if (!guiado) return;
+      clearInterval(guiado.reloj);
+      try { if (guiado.wake) guiado.wake.release(); } catch (e) {}
+      guiado = null;
+      document.getElementById('modalGuiado').classList.add('hidden');
+      document.documentElement.style.overflow = '';
+      seleccionarDiaRutina(estadoGlobal.diaSeleccionado);
+    }
+    document.addEventListener('visibilitychange', async () => {   // el bloqueo de pantalla se suelta al salir: se pide de nuevo
+      if (!document.hidden && guiado && navigator.wakeLock) { try { guiado.wake = await navigator.wakeLock.request('screen'); } catch (e) {} }
+    });
+    document.addEventListener('keydown', e => {
+      const tecnica = document.getElementById('modalEjercicio');
+      if (e.key === 'Escape' && guiado && (!tecnica || tecnica.classList.contains('hidden'))) cerrarModoGuiado();
+    });
+
+    const mmss = s => Math.floor(s / 60) + ':' + String(Math.floor(s % 60)).padStart(2, '0');
+    function tickGuiado() {
+      if (!guiado) return;
+      const t = document.getElementById('guiadoTiempo');
+      if (t) t.textContent = mmss((Date.now() - guiado.inicio) / 1000);
+      if (guiado.vista !== 'descanso') return;
+      if (!cronometroFin) { irPasoGuiado(guiado.siguiente); return; }   // terminó (o se saltó) el descanso
+      const resta = Math.max(0, (cronometroFin - Date.now()) / 1000);
+      const txt = document.getElementById('guiadoResta'), arco = document.getElementById('guiadoArco');
+      if (txt) txt.textContent = mmss(Math.ceil(resta));
+      if (arco) arco.setAttribute('stroke-dashoffset', (666 * (1 - resta / Math.max(1, guiado.descansoTotal))).toFixed(1));
+    }
+    function irPasoGuiado(j) {
+      if (!guiado) return;
+      if (j < 0 || j >= guiado.pasos.length) { guiado.vista = 'fin'; detenerCronometro(); }
+      else { guiado.i = j; guiado.vista = 'serie'; }
+      renderGuiado();
+    }
+    function ajustarKgGuiado(delta) {
+      const inp = document.getElementById('guiadoKg'); if (!inp) return;
+      const v = parseFloat(String(inp.value).replace(',', '.')) || 0;
+      inp.value = String(Math.max(0, Math.round((v + delta) * 10) / 10));
+    }
+    function completarPasoGuiado() {
+      if (!guiado || guiado.vista !== 'serie') return;
+      const p = guiado.pasos[guiado.i];
+      const inp = document.getElementById('guiadoKg');
+      const kg = inp ? String(inp.value || '').trim() : '';
+      if (kg) guardarCargaEjercicio(p.kPeso, kg);
+      escribirProg(p.kOk, 'true');
+      // ✓ del ejercicio cuando todas sus series/fases están hechas (igual que en la rutina)
+      const hermanos = guiado.pasos.filter(x => x.it === p.it);
+      if (hermanos.every(x => leerProg(x.kOk) === 'true')) escribirProg(p.kMain, 'true');
+      try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) {}
+      const sig = siguientePendiente(guiado.i);
+      if (sig < 0) { guiado.vista = 'fin'; renderGuiado(); return; }
+      if (p.descanso > 0) {
+        guiado.siguiente = sig; guiado.descansoTotal = p.descanso; guiado.vista = 'descanso';
+        iniciarCronometro(p.descanso);
+        renderGuiado();
+      } else irPasoGuiado(sig);
+    }
+    function ajustarDescansoGuiado(delta) {
+      if (!cronometroFin) return;
+      const resta = Math.ceil((cronometroFin - Date.now()) / 1000) + delta;
+      if (resta <= 0) { detenerCronometro(); return; }
+      guiado.descansoTotal = Math.max(guiado.descansoTotal + Math.max(0, delta), resta);
+      iniciarCronometro(resta);
+    }
+
+    function detallePaso(p) {
+      const r = p.it.data;
+      const tempo = `${r.excentrica || 0}-${r.pausaExcentrica || 0}-${r.concentrica || 0}-${r.pausaConcentrica || 0}`;
+      const etiqueta = p.grupo ? (p.grupo.sub === 'TRISERIE' ? 'Tri-serie' : 'Súper serie') + ` · ${p.grupo.pos} de ${p.grupo.de}`
+        : p.especial ? ({ DROPSET: 'Drop set', ASCENDING: 'Ascendente', PIRAMIDE: 'Pirámide' })[p.especial] + ` · fase ${p.n} de ${p.total}` : '';
+      return { r, tempo, etiqueta };
+    }
+    function vistaPrevia(j, texto) {
+      if (j < 0) return '';
+      const q = guiado.pasos[j], r = q.it.data;
+      return `<div class="flex items-center gap-3 bg-slate-900 border border-slate-800 rounded-2xl p-2.5">
+        ${r.media ? `<img src="${urlMini(r.media)}" alt="" class="w-11 h-11 rounded-xl bg-white object-contain shrink-0">` : ''}
+        <div class="min-w-0 flex-1"><p class="text-[11px] font-black text-slate-400 tracking-wider">${texto}</p>
+        <p class="text-sm font-extrabold text-white truncate">${escHtml(r.ejercicio)} · ${q.tipo === 'fase' ? 'fase' : 'serie'} ${q.n} de ${q.total}</p></div></div>`;
+    }
+
+    function renderGuiado() {
+      const cont = document.getElementById('contGuiado'); if (!cont || !guiado) return;
+      const g = guiado, total = g.bloques.length;
+      const bloqueHecho = bi => g.pasos.filter(x => x.bi === bi).every(pasoHecho);
+      const biActual = g.vista === 'fin' ? total : g.pasos[g.vista === 'descanso' ? g.siguiente : g.i].bi;
+      const segmentos = g.bloques.map((b, bi) => `<span class="flex-1 h-1.5 rounded-full ${bloqueHecho(bi) ? 'bg-emerald-500' : bi === biActual ? 'bg-amber-400' : 'bg-slate-800'}"></span>`).join('');
+      const cabecera = `
+        <div class="flex gap-1" aria-hidden="true">${segmentos}</div>
+        <div class="flex items-center justify-between mt-3 mb-3">
+          <button type="button" onclick="cerrarModoGuiado()" aria-label="Salir del modo guiado" class="w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 flex items-center justify-center">${ico('x', 'w-5 h-5')}</button>
+          <div class="text-center"><p class="text-xs font-bold text-slate-400 tabular-nums">${g.vista === 'fin' ? 'TERMINADO' : `EJERCICIO ${Math.min(biActual + 1, total)} DE ${total}`} · <span id="guiadoTiempo">${mmss((Date.now() - g.inicio) / 1000)}</span></p>
+            <p class="text-sm font-extrabold text-white">${escHtml(g.dia)}</p></div>
+          <button type="button" onclick="cerrarModoGuiado()" aria-label="Ver la rutina completa" class="w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 flex items-center justify-center">${ico('list-checks', 'w-5 h-5')}</button>
+        </div>`;
+
+      if (g.vista === 'fin') {
+        const hechas = g.pasos.filter(pasoHecho).length;
+        const pend = estadoGlobal.progLocal && estadoGlobal.progLocal.dirty && !estadoGlobal.progLocal.soloLectura;
+        cont.innerHTML = cabecera + `
+          <div class="flex-1 flex flex-col items-center justify-center text-center gap-4 py-8">
+            <span class="w-24 h-24 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center">${ico('check', 'w-12 h-12')}</span>
+            <h2 class="text-2xl font-black text-white">¡Entrenamiento completado!</h2>
+            <p class="text-sm text-slate-400">${hechas} de ${g.pasos.length} series · ${mmss((Date.now() - g.inicio) / 1000)} de entrenamiento</p>
+            ${pend ? `<button type="button" onclick="cerrarModoGuiado(); subirProgresoSemanal()" class="w-full min-h-[52px] rounded-2xl bg-emerald-500 text-slate-950 font-extrabold">Subir mi semana a mi coach</button>` : ''}
+            <button type="button" onclick="cerrarModoGuiado()" class="w-full min-h-[52px] rounded-2xl ${pend ? 'bg-slate-900 border border-slate-700 text-white' : 'bg-emerald-500 text-slate-950'} font-extrabold">Volver a mi rutina</button>
+          </div>`;
+        return;
+      }
+
+      if (g.vista === 'descanso') {
+        const resta = cronometroFin ? Math.max(0, Math.ceil((cronometroFin - Date.now()) / 1000)) : 0;
+        cont.innerHTML = cabecera + `
+          <div class="flex-1 flex flex-col items-center gap-5 py-4">
+            <p class="text-xs font-black text-slate-400 tracking-[0.2em]">DESCANSO</p>
+            <div class="relative w-60 h-60">
+              <svg width="240" height="240" viewBox="0 0 240 240" aria-hidden="true"><circle cx="120" cy="120" r="106" stroke="#1e293b" stroke-width="14" fill="none"/>
+                <circle id="guiadoArco" cx="120" cy="120" r="106" stroke="#10b981" stroke-width="14" fill="none" stroke-linecap="round" stroke-dasharray="666" stroke-dashoffset="${(666 * (1 - resta / Math.max(1, g.descansoTotal))).toFixed(1)}" transform="rotate(-90 120 120)"/></svg>
+              <div class="absolute inset-0 flex flex-col items-center justify-center"><span id="guiadoResta" class="text-6xl font-black text-white tabular-nums" role="timer" aria-live="off">${mmss(resta)}</span><span class="text-sm text-slate-400">de ${mmss(g.descansoTotal)}</span></div>
+            </div>
+            <div class="grid grid-cols-3 gap-2.5 w-full">
+              <button type="button" onclick="ajustarDescansoGuiado(-15)" class="min-h-[52px] rounded-xl bg-slate-900 border border-slate-700 text-white font-extrabold">−15 s</button>
+              <button type="button" onclick="ajustarDescansoGuiado(15)" class="min-h-[52px] rounded-xl bg-slate-900 border border-slate-700 text-white font-extrabold">+15 s</button>
+              <button type="button" onclick="detenerCronometro()" class="min-h-[52px] rounded-xl border border-emerald-500/50 text-emerald-300 font-extrabold">Saltar</button>
+            </div>
+            <div class="w-full">${vistaPrevia(g.siguiente, 'A CONTINUACIÓN')}</div>
+            <p class="text-xs text-slate-400 text-center">Suena y vibra al terminar${origenApp() === 'app' ? ', aunque la pantalla esté apagada' : ''}.</p>
+          </div>`;
+        return;
+      }
+
+      const p = g.pasos[g.i], { r, tempo, etiqueta } = detallePaso(p);
+      const mismos = g.pasos.map((x, j) => [x, j]).filter(([x]) => x.it === p.it);
+      const chips = mismos.map(([x, j]) => {
+        const hecho = pasoHecho(x), actual = j === g.i, kg = leerProg(x.kPeso);
+        const est = hecho ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' : actual ? 'bg-amber-400 text-slate-950 border-amber-400' : 'bg-slate-900 text-slate-400 border-slate-800';
+        return `<button type="button" onclick="irPasoGuiado(${j})" aria-label="${x.tipo === 'fase' ? 'Fase' : 'Serie'} ${x.n}${hecho ? ', hecha' : ''}" ${actual ? 'aria-current="step"' : ''}
+          class="flex-1 min-w-[52px] min-h-[48px] rounded-xl border text-xs font-extrabold leading-tight ${est}">${x.tipo === 'fase' ? 'F' : 'S'}${x.n}<br><span class="font-semibold">${hecho ? (kg ? escHtml(kg) + ' kg ✓' : '✓') : actual ? 'ahora' : '—'}</span></button>`;
+      }).join('');
+      const kgActual = leerProg(p.kPeso) || '';
+      const anterior = mismos.map(([x]) => x).filter(x => x.n < p.n).map(x => leerProg(x.kPeso)).filter(Boolean).pop() || '';
+      const pasada = valorSemanaPasada(g.diaNorm, txtClave(p.kPeso)) || '';
+      const sugerido = kgActual || anterior || pasada;
+      const sig = siguientePendiente(g.i);
+      const textoBoton = p.descanso > 0 && sig >= 0 ? `Serie hecha · descansar ${p.descanso} s` : sig < 0 ? 'Serie hecha · terminar' : 'Serie hecha · siguiente';
+      cont.innerHTML = cabecera + `
+        <div class="flex-1 flex flex-col gap-3.5">
+          ${r.media ? `<button type="button" onclick="abrirModalEjercicio('${escHtml(r.idEjercicio || '')}', '${escHtml(String(r.ejercicio || '').replace(/'/g, ''))}', '${escHtml(r.media)}')" class="relative w-full h-56 rounded-3xl bg-white overflow-hidden" aria-label="Ver la técnica de ${escHtml(r.ejercicio)}">
+            <img src="${urlGif(r.media)}" alt="Demostración: ${escHtml(r.ejercicio)}" class="w-full h-full object-contain">
+            <span class="absolute right-3 bottom-3 bg-slate-950/85 text-white text-xs font-extrabold px-2.5 py-1.5 rounded-lg inline-flex items-center gap-1.5">${ico('circle-help', 'w-4 h-4')} Técnica</span></button>` : ''}
+          <div>
+            ${etiqueta ? `<span class="inline-block mb-1 text-[11px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30">${escHtml(etiqueta)}</span>` : ''}
+            <h2 class="text-2xl font-black text-white leading-tight">${escHtml(r.ejercicio)}</h2>
+            <p class="text-sm text-slate-400 mt-0.5">${p.tipo === 'fase' ? 'Fase' : 'Serie'} ${p.n} de ${p.total} · <b class="text-white">${escHtml(String(p.reps || '-'))} reps</b> · tempo <span class="font-mono text-amber-300">${tempo}</span>${p.descanso ? ' · descanso ' + p.descanso + ' s' : ''}</p>
+          </div>
+          <div class="flex gap-2 overflow-x-auto no-scrollbar">${chips}</div>
+          <div class="bg-slate-900 border border-slate-700 rounded-2xl p-3">
+            <label for="guiadoKg" class="block text-[11px] font-black text-slate-400 tracking-wider mb-1.5">PESO (KG)</label>
+            <div class="flex items-center gap-3">
+              <button type="button" onclick="ajustarKgGuiado(-2.5)" aria-label="Bajar 2,5 kg" class="w-14 h-14 shrink-0 rounded-xl bg-slate-800 text-white flex items-center justify-center">${ico('minus', 'w-6 h-6')}</button>
+              <input id="guiadoKg" type="number" inputmode="decimal" step="0.5" min="0" value="${escHtml(sugerido)}" placeholder="—" class="flex-1 min-w-0 h-14 bg-slate-950 border border-slate-700 rounded-xl text-center text-3xl font-black text-white">
+              <button type="button" onclick="ajustarKgGuiado(2.5)" aria-label="Subir 2,5 kg" class="w-14 h-14 shrink-0 rounded-xl bg-slate-800 text-white flex items-center justify-center">${ico('plus', 'w-6 h-6')}</button>
+            </div>
+            <p class="text-xs text-slate-400 text-center mt-2">${pasada ? 'Semana pasada: <b class="text-slate-200">' + escHtml(kgTxt(pasada)) + '</b>' : 'Anota el peso que usaste'}</p>
+          </div>
+          <button type="button" onclick="completarPasoGuiado()" class="w-full min-h-[58px] rounded-2xl bg-emerald-500 text-slate-950 text-base font-extrabold flex items-center justify-center gap-2 active:scale-[0.98] transition">${ico('check', 'w-5 h-5')} ${textoBoton}</button>
+          ${sig >= 0 && guiado.pasos[sig].it !== p.it ? vistaPrevia(sig, 'SIGUIENTE') : ''}
+          <div class="flex justify-between">
+            <button type="button" onclick="irPasoGuiado(${Math.max(0, g.i - 1)})" ${g.i === 0 ? 'disabled' : ''} class="min-h-[44px] px-2 text-sm font-bold text-slate-400 disabled:opacity-30">← Anterior</button>
+            <button type="button" onclick="irPasoGuiado(${Math.min(g.pasos.length - 1, g.i + 1)})" ${g.i >= g.pasos.length - 1 ? 'disabled' : ''} class="min-h-[44px] px-2 text-sm font-bold text-slate-400 disabled:opacity-30">Saltar →</button>
+          </div>
+        </div>`;
     }

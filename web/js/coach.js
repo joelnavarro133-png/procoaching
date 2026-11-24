@@ -7,27 +7,11 @@
       actualizarSelectorPlantillas();
       renumerarConstructor();
       document.getElementById('evFecha').value = fechaLocalISO();
-      cambiarTabCoach('tabNuevoAlumno');
+      cambiarTabCoach('tabHoyCoach');
       iniciarActividadCoach();
     }
 
-    function cambiarTabCoach(tabId) {
-      document.querySelectorAll('.tab-coach').forEach(el => el.classList.add('hidden'));
-      const target = document.getElementById(tabId);
-      if (target) target.classList.remove('hidden');
-
-      document.querySelectorAll('.btn-tab-coach').forEach(btn => {
-        btn.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800';
-      });
-      if (tabId === 'tabRecordsCoach') cargarRecords('contenedorRecordsCoach');
-      document.querySelectorAll('.btn-tab-coach').forEach(b => b.removeAttribute('aria-current'));
-      const btnActivo = document.getElementById('btnTab-' + tabId);
-      if (btnActivo) btnActivo.setAttribute('aria-current', 'page');
-      if (btnActivo) {
-        btnActivo.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-extrabold transition bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20';
-      }
-    }
-
+    // v17: la navegación del coach (menú lateral, barra inferior y hoja «Más») está en el bloque «NAVEGACIÓN DEL COACH» al final.
     function actualizarSelectoresAlumnos() {
       const html = estadoGlobal.alumnos.map(a => `<option value="${escHtml(a.id)}">${escHtml(a.nombre)} (${escHtml(a.nivel)})</option>`).join('');
       document.querySelectorAll('.select-alumnos').forEach(s => s.innerHTML = html);
@@ -132,17 +116,11 @@
             document.getElementById('fotoFrente').value = '';
             document.getElementById('fotoPerfil').value = '';
             document.getElementById('fotoEspalda').value = '';
+            irPasoEvaluacion(1, true);
+            cargarPanelCoach();
           }
         })
         .guardarEvaluacionCompleta(payload);
-    }
-
-    function cambiarNivel() {
-      const idAlumno = document.getElementById('selectAlumnoMedidas').value;
-      const nuevoNivel = document.getElementById('updateNivelSelect').value;
-      GS()
-        .withSuccessHandler(res => avisar(res.mensaje || res.error, res.success ? 'exito' : 'error'))
-        .actualizarNivelAlumno(idAlumno, nuevoNivel);
     }
 
     function crearTarjetaConstructor() {
@@ -732,21 +710,35 @@
     }
 
     /** Formato único de tarjeta de alumno para Pestaña 1 y Pestaña 4. */
-    function htmlTarjetaAlumnoCoach(a, { activo = false, onclick = '' }) {
-      const avatar = a.foto
-        ? `<img src="${escHtml(urlFotoConCache(a.foto))}" data-mini="1" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" alt="" loading="lazy" class="w-10 h-10 rounded-full object-cover border-2 ${activo ? 'border-emerald-400' : 'border-slate-700'} shrink-0">`
-        : `<span class="w-10 h-10 rounded-full font-black text-xs flex items-center justify-center shrink-0 ${activo ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-200'}">${escHtml(inicialesDe(a.nombre).toUpperCase())}</span>`;
+    // v17: etiquetas de estado de cada alumno (vienen del panel del coach)
+    const ETIQUETA_PENDIENTE = {
+      CHECKIN: ['Check-in', 'bg-amber-500/15 text-amber-300'], RECORD: ['Récord', 'bg-amber-500/15 text-amber-300'],
+      SIN_ENTRENAR: ['Sin entrenar', 'bg-rose-500/15 text-rose-300'], EVALUACION: ['Evaluación', 'bg-rose-500/15 text-rose-300']
+    };
+    function etiquetasAlumnoCoach(id) {
+      if (!panelCoach || !panelCoach.estado || !panelCoach.estado[id]) return '';
+      const p = [...new Set(panelCoach.estado[id].pendientes)];
+      if (!p.length) return '<span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full bg-emerald-500/15 text-emerald-300">Al día</span>';
+      return p.slice(0, 2).map(t => `<span class="text-[11px] font-extrabold px-2 py-0.5 rounded-full whitespace-nowrap ${ETIQUETA_PENDIENTE[t][1]}">${ETIQUETA_PENDIENTE[t][0]}</span>`).join('') +
+        (p.length > 2 ? `<span class="text-[11px] font-bold text-slate-400">+${p.length - 2}</span>` : '');
+    }
 
+    function htmlTarjetaAlumnoCoach(a, { activo = false, onclick = '' }) {
+      const act = actividadCoach[a.id] || {};
+      const avatar = a.foto
+        ? `<img src="${escHtml(urlFotoConCache(a.foto))}" data-mini="1" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" alt="" loading="lazy" class="w-11 h-11 rounded-full object-cover border-2 ${activo ? 'border-emerald-400' : 'border-slate-700'} shrink-0">`
+        : `<span class="w-11 h-11 rounded-full font-black text-sm flex items-center justify-center shrink-0 ${activo ? 'bg-emerald-500 text-slate-950' : 'bg-slate-800 text-slate-200'}">${escHtml(inicialesDe(a.nombre).toUpperCase())}</span>`;
+      const linea = textoActividad(a.id);
       return `
         <button type="button" onclick="${onclick}"
-          class="w-full text-left p-3 rounded-2xl border transition flex items-center gap-3 active:scale-[0.99] ${activo ? 'bg-emerald-500/10 border-emerald-500/60 shadow-md shadow-emerald-500/10' : 'bg-slate-900/90 hover:bg-slate-900 border-slate-800 hover:border-slate-700'}">
-          ${avatar}
+          class="w-full text-left p-3 rounded-2xl border transition flex items-center gap-3 active:scale-[0.99] ${activo ? 'bg-emerald-500/10 border-emerald-500/60' : 'bg-slate-900/90 hover:bg-slate-900 border-slate-800 hover:border-slate-700'}">
+          <span class="relative shrink-0">${avatar}${act.enLinea ? '<span class="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 rounded-full bg-emerald-400 border-2 border-slate-900" aria-label="En línea"></span>' : ''}</span>
           <span class="min-w-0 flex-1">
-            <span class="block text-sm font-extrabold text-white truncate">${escHtml(a.nombre)}</span>
-            <span class="block text-xs font-semibold truncate mt-0.5 ${activo ? 'text-emerald-300' : 'text-slate-400'}">${escHtml(a.nivel || 'Sin nivel')}</span>
-            ${textoActividad(a.id) ? `<span class="block text-[11px] font-semibold truncate mt-0.5 ${(actividadCoach[a.id] || {}).enLinea ? 'text-emerald-400' : 'text-slate-400'}">${escHtml(textoActividad(a.id))}${(actividadCoach[a.id] || {}).entrenoHoy ? ' · ' + ico('circle-check', 'w-4 h-4') + ' entrenó hoy' : ''}</span>` : ''}
+            <span class="block text-sm font-extrabold text-white truncate">${escHtml(nombreCortoCoach(a.nombre))}</span>
+            <span class="block text-xs text-slate-400 truncate mt-0.5">${escHtml(String(a.nivel || 'Sin nivel').replace(/:.*$/, ''))}${linea ? ' · ' + escHtml(linea.replace(/^● /, '')) : ''}</span>
           </span>
-          <span class="${activo ? 'text-emerald-400' : 'text-slate-400'} font-bold text-sm shrink-0">›</span>
+          <span class="flex flex-col items-end gap-1 shrink-0">${etiquetasAlumnoCoach(a.id)}</span>
+          <span class="${activo ? 'text-emerald-400' : 'text-slate-400'} shrink-0">${ico('chevron-right', 'w-4 h-4')}</span>
         </button>`;
     }
 
@@ -786,18 +778,29 @@
       window.scrollTo({ top: 0, behavior: modoScroll() });
     }
 
+    const filtroAlumnosCoach = { q: '', f: 'TODOS' };
     function renderTarjetasAlumnos() {
       const cont = document.getElementById('tarjetasAlumnosCoach');
       if (!cont) return;
       const lista = estadoGlobal.alumnos || [];
+      const cnt = document.getElementById('contadorAnalizarMovil');
+      const atencion = a => panelCoach && panelCoach.estado && panelCoach.estado[a.id] && panelCoach.estado[a.id].pendientes.length > 0;
+      const nivelDe = a => (String(a.nivel || '').match(/NIVEL (I{1,3})\b/) || [])[1] || '';
+      const filtros = [['TODOS', 'Todos', lista.length], ['ATENCION', 'Atención', lista.filter(atencion).length], ['I', 'Nivel I'], ['II', 'Nivel II'], ['III', 'Nivel III']]
+        .filter(([k]) => ['TODOS', 'ATENCION'].includes(k) || lista.some(a => nivelDe(a) === k));
+      const fc = document.getElementById('filtrosAlumnosCoach');
+      if (fc) fc.innerHTML = filtros.map(([k, t, n]) => `<button type="button" aria-pressed="${filtroAlumnosCoach.f === k}" onclick="filtroAlumnosCoach.f='${k}'; renderTarjetasAlumnos()"
+        class="shrink-0 min-h-[36px] px-3.5 rounded-full text-xs font-extrabold border ${filtroAlumnosCoach.f === k ? 'bg-emerald-500 text-slate-950 border-emerald-500' : 'bg-slate-900 text-slate-300 border-slate-800'}">${t}${n !== undefined ? ' ' + n : ''}</button>`).join('');
+      if (cnt) cnt.textContent = lista.length + (lista.length === 1 ? ' alumno' : ' alumnos') + (panelCoach ? ` · ${panelCoach.resumen.entrenaronHoy} entrenaron hoy` : '');
       if (!lista.length) {
-        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">Aún no tienes alumnos registrados.</div>';
+        cont.innerHTML = `<div class="p-5 rounded-2xl bg-slate-900/60 border border-slate-800 text-center"><p class="text-sm font-bold text-white">Aún no tienes alumnos</p><p class="text-xs text-slate-400 mt-1">Crea el primero con el botón «Nuevo».</p></div>`;
         return;
       }
-      cont.innerHTML = lista.map(a => htmlTarjetaAlumnoCoach(a, {
-        activo: a.id === alumnoCoachActivo,
-        onclick: `cargarProgresoParaCoach('${escHtml(a.id)}')`
-      })).join('');
+      const q = normBusq(filtroAlumnosCoach.q || '');
+      const vis = lista.filter(a => (!q || normBusq((a.nombre || '') + ' ' + (a.usuario || '')).includes(q)) &&
+        (filtroAlumnosCoach.f === 'TODOS' || (filtroAlumnosCoach.f === 'ATENCION' ? atencion(a) : nivelDe(a) === filtroAlumnosCoach.f)));
+      cont.innerHTML = vis.length ? vis.map(a => htmlTarjetaAlumnoCoach(a, { activo: a.id === alumnoCoachActivo, onclick: `cargarProgresoParaCoach('${escHtml(a.id)}')` })).join('')
+        : '<p class="p-4 text-sm text-slate-400 text-center">Ningún alumno coincide con la búsqueda o el filtro.</p>';
     }
 
     // ---- KPIs del expediente del Coach ----
@@ -906,20 +909,18 @@
       document.querySelectorAll('.subtab-exp').forEach(el => el.classList.add('hidden'));
       const target = document.getElementById(subId);
       if (target) target.classList.remove('hidden');
-
       document.querySelectorAll('.btn-subtab-exp').forEach(btn => {
-        btn.className = 'btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white';
+        const on = btn.id === 'btnSub-' + subId;
+        btn.className = 'btn-subtab-exp shrink-0 whitespace-nowrap min-h-[44px] px-3 text-sm font-extrabold border-b-2 transition ' + (on ? 'border-emerald-400 text-emerald-300' : 'border-transparent text-slate-400 hover:text-white');
+        btn.setAttribute('aria-selected', on ? 'true' : 'false');
       });
-      const act = document.getElementById('btnSub-' + subId);
-      if (act) {
-        act.className = 'btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-extrabold transition bg-emerald-500/15 text-emerald-300 border border-emerald-500/50';
-      }
       if (subId === 'expProgreso') {
         setTimeout(() => inicializarGraficosSeparados(), 60);
       }
     }
 
     function cargarProgresoParaCoach(idDirecto) {
+      detenerVivoCoach();
       const idAlumno = idDirecto || document.getElementById('selectAlumnoAnalizar').value;
       if (!idAlumno) return;
       alumnoCoachActivo = idAlumno;
@@ -960,65 +961,55 @@
               <span class="block text-lg sm:text-xl font-black mt-0.5 ${valor === '—' ? 'text-slate-400' : (positivo ? 'text-emerald-400' : 'text-rose-400')}">${escHtml(valor)}</span>
             </div>`;
 
+          const act = actividadCoach[idAlumno] || {};
+          const accion = (icono, texto, onclick, id = '') => `
+            <button type="button" ${id ? `id="${id}"` : ''} onclick="${onclick}" class="flex flex-col items-center justify-center gap-1.5 min-h-[72px] px-1 rounded-2xl bg-slate-900 border border-slate-800 hover:border-emerald-500/40 text-slate-100 text-xs font-bold text-center active:scale-[0.98] transition">
+              <span class="text-emerald-400">${ico(icono, 'w-5 h-5')}</span>${texto}</button>`;
+          const pestana = (id, texto, activa) => `<button type="button" role="tab" id="btnSub-${id}" aria-selected="${activa}" onclick="cambiarSubTabExpediente('${id}')"
+              class="btn-subtab-exp shrink-0 whitespace-nowrap min-h-[44px] px-3 text-sm font-extrabold border-b-2 transition ${activa ? 'border-emerald-400 text-emerald-300' : 'border-transparent text-slate-400 hover:text-white'}">${texto}</button>`;
+
           cont.innerHTML = `
             <div class="space-y-4">
-              <!-- CABECERA DEL ALUMNO + 4 KPIs -->
-              <div class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5 space-y-4">
-                <div class="flex items-center justify-between gap-3 flex-wrap">
-                  <div class="flex items-center gap-3 min-w-0">
-                    ${avatarHtml}
-                    <div class="min-w-0">
-                      <h3 class="text-base sm:text-lg font-extrabold text-white truncate">${escHtml(alu.nombre)}</h3>
-                      <p class="text-xs text-slate-400 truncate">${escHtml(alu.nivel || 'Sin nivel asignado')}</p>
-                    </div>
+              <!-- v17 · CABECERA DE LA FICHA -->
+              <div class="flex items-center gap-3">
+                <button type="button" onclick="volverAListaAlumnosMovil()" aria-label="Volver a la lista de alumnos" class="sm:hidden w-11 h-11 shrink-0 rounded-xl bg-slate-900 border border-slate-800 text-slate-200 flex items-center justify-center">${ico('arrow-left', 'w-5 h-5')}</button>
+                ${avatarHtml}
+                <div class="min-w-0 flex-1">
+                  <h3 class="text-lg font-black text-white truncate">${escHtml(nombreCortoCoach(alu.nombre))}</h3>
+                  <div class="flex items-center gap-2 flex-wrap mt-1">
+                    <button type="button" id="chipNivel-${escHtml(idAlumno)}" onclick="abrirCambioNivel('${escHtml(idAlumno)}')" aria-label="Cambiar nivel" class="inline-flex items-center gap-1.5 min-h-[32px] px-2.5 rounded-full bg-emerald-500/10 border border-emerald-500/40 text-emerald-300 text-xs font-extrabold whitespace-nowrap hover:bg-emerald-500/20">${ico('graduation-cap', 'w-3.5 h-3.5')}<span>${htmlNivelCorto(alu.nivel)}</span>${ico('pencil', 'w-3 h-3')}</button>
+                    <span class="text-xs text-slate-400 truncate">${textoActividad(idAlumno) ? escHtml(textoActividad(idAlumno).replace(/^● /, '')) : ''}${act.entrenoHoy ? ' · entrenó hoy' : ''}</span>
                   </div>
-                  <span class="shrink-0 bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold px-3 py-1 rounded-full">
-                    ${ico('flame', 'w-4 h-4')} ${racha} ${racha === 1 ? 'semana' : 'semanas'}
-                  </span>
                 </div>
+                <span class="shrink-0 bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold px-2.5 py-1 rounded-full inline-flex items-center gap-1">${ico('flame', 'w-3.5 h-3.5')} ${racha} ${racha === 1 ? 'sem.' : 'sem.'}</span>
+              </div>
 
+              <!-- v17 · ACCIONES RÁPIDAS -->
+              <div class="grid grid-cols-4 gap-2">
+                ${accion('message-circle', 'WhatsApp', `cambiarSubTabExpediente('expComunicacion')`)}
+                ${accion('clipboard-pen', 'Evaluar', `abrirEvaluacionPara('${escHtml(idAlumno)}')`)}
+                ${accion('clipboard-list', 'Rutina', `cambiarSubTabExpediente('expRutina')`)}
+                ${accion('file-text', 'Reporte PDF', `generarReportePDFCliente('${escHtml(idAlumno)}', true)`, 'btnReporte-' + escHtml(idAlumno))}
+              </div>
+              <div id="estadoReporteCoach-${escHtml(idAlumno)}">${barraDescargaReporteCoach(idAlumno)}</div>
+
+              <!-- v17 · PESTAÑAS DE LA FICHA -->
+              <div role="tablist" aria-label="Secciones del alumno" class="flex gap-1 overflow-x-auto no-scrollbar border-b border-slate-800">
+                ${pestana('expResumen', 'Resumen', true)}${pestana('expRutina', 'Rutina', false)}${pestana('expProgreso', 'Medidas y fotos', false)}${pestana('expComunicacion', 'Check-ins y WhatsApp', false)}
+              </div>
+
+              <div id="expResumen" class="subtab-exp space-y-4">
+                <div id="vivoCoach" aria-live="polite"></div>
                 <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
                   ${kpiCard('Adherencia', kpi.adherencia, true)}
                   ${kpiCard('Masa magra', kpi.masaTxt, kpi.masaPos)}
                   ${kpiCard('% Grasa', kpi.grasaTxt, kpi.grasaPos)}
                   ${kpiCard('Carga total', kpi.cargaTxt, kpi.cargaPos)}
                 </div>
+                ${construirTarjetaCheckinReciente(res.checkins || [])}
               </div>
 
-              <!-- ÚLTIMO CHECK-IN -->
-              ${construirTarjetaCheckinReciente(res.checkins || [])}
-
-              <!-- 2 ACCIONES PRINCIPALES -->
-              <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                <button id="btnReporte-${escHtml(idAlumno)}" onclick="generarReportePDFCliente('${escHtml(idAlumno)}', true)"
-                  class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15">
-                  ${ico('file-text', 'w-4 h-4')} Generar reporte PDF
-                </button>
-                <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','resumen')"
-                  class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15">
-                  ${ico('chart-column', 'w-4 h-4')} Resumen semanal
-                </button>
-              </div>
-              <div id="estadoReporteCoach-${escHtml(idAlumno)}">${barraDescargaReporteCoach(idAlumno)}</div>
-
-              <!-- PESTAÑAS INTERNAS DEL EXPEDIENTE -->
-              <div class="flex gap-2 overflow-x-auto no-scrollbar pt-2 border-t border-slate-800/80">
-                <button id="btnSub-expRutina" onclick="cambiarSubTabExpediente('expRutina')"
-                  class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-extrabold transition bg-emerald-500/15 text-emerald-300 border border-emerald-500/50">
-                  ${ico('dumbbell', 'w-4 h-4')} Rutina e Historial
-                </button>
-                <button id="btnSub-expProgreso" onclick="cambiarSubTabExpediente('expProgreso')"
-                  class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
-                  ${ico('chart-column', 'w-4 h-4')} Medidas, Gráficos y Fotos
-                </button>
-                <button id="btnSub-expComunicacion" onclick="cambiarSubTabExpediente('expComunicacion')"
-                  class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
-                  ${ico('message-circle', 'w-4 h-4')} WhatsApp y Check-ins
-                </button>
-              </div>
-
-              <!-- CONTENIDO DE CADA PESTAÑA INTERNA -->
-              <div id="expRutina" class="subtab-exp">
+              <div id="expRutina" class="subtab-exp hidden">
                 ${construirResumenRutinaCoach(estadoGlobal.rutinaActual, estadoGlobal.historialRutinas)}
               </div>
 
@@ -1036,6 +1027,7 @@
           seleccionarDiaResumen(estadoGlobal.diaSeleccionado);
           inicializarSelectoresFotos();
           renderComparadorSemanas();
+          iniciarVivoCoach(idAlumno, res.rutina || []);
         })
         .obtenerDetallesAlumnoParaCoach(idAlumno);
     }
@@ -1074,6 +1066,7 @@
         const dest = document.getElementById('tarjetaCheckinDestacado');
         if (dest) dest.outerHTML = construirTarjetaCheckinReciente(ctx.lista);
         mostrarToast('✅ ' + res.mensaje);
+        cargarPanelCoach();
       }).responderCheckin(ctx.idAlumno, semanaISO, inp.value.trim());
     }
  
@@ -1266,4 +1259,445 @@
         mostrarToast((res && res.success ? '✅ ' : '❌ ') + ((res && (res.mensaje || res.error)) || ''));
         cargarRecords(recordsContenedor);
       }).guardarClubes(clubesEdicion || []);
+    }
+
+
+    // ==================== v17 · NAVEGACIÓN DEL COACH, «HOY» Y MENSAJES ====================
+    const NAV_COACH = {
+      tabHoyCoach: ['HOY', 'Hoy'], tabComparativaCoach: ['ALUMNOS', 'Alumnos'], tabNuevoAlumno: ['ALUMNOS', 'Nuevo alumno'],
+      tabMedidasFotos: ['EVALUACIONES', 'Evaluaciones'], tabCrearRutina: ['RUTINAS', 'Rutinas'], tabRecordsCoach: ['RECORDS', 'Récords'],
+      tabMensajesCoach: ['MENSAJES', 'Mensajes']
+    };
+    let panelCoach = null, panelCoachCargando = false, hoyVerTodos = false, mensajesFiltro = 'PEND';
+
+    function cambiarTabCoach(tabId) {
+      if (tabId !== 'tabComparativaCoach') detenerVivoCoach();
+      if (!document.getElementById(tabId)) tabId = 'tabHoyCoach';
+      document.querySelectorAll('.tab-coach').forEach(el => el.classList.add('hidden'));
+      document.getElementById(tabId).classList.remove('hidden');
+      const [clave, titulo] = NAV_COACH[tabId] || ['HOY', 'Hoy'];
+      const claveBot = (clave === 'EVALUACIONES' || clave === 'MENSAJES') ? 'MAS' : clave;
+      document.querySelectorAll('.navc-side').forEach(b => {
+        const on = b.dataset.navc === clave;
+        b.classList.toggle('bg-emerald-500', on); b.classList.toggle('text-slate-950', on);
+        b.classList.toggle('text-slate-300', !on); b.classList.toggle('hover:bg-slate-800/70', !on);
+        if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      });
+      document.querySelectorAll('.navc-bot').forEach(b => {
+        const on = b.dataset.navc === claveBot;
+        b.classList.toggle('text-emerald-400', on); b.classList.toggle('text-slate-400', !on);
+        const barra = b.querySelector('.navc-barra');
+        if (on && !barra) b.insertAdjacentHTML('afterbegin', '<span class="navc-barra absolute top-0 left-1/2 -translate-x-1/2 w-9 h-[3px] rounded-full bg-emerald-400"></span>');
+        if (!on && barra) barra.remove();
+        if (on) b.setAttribute('aria-current', 'page'); else b.removeAttribute('aria-current');
+      });
+      const t = document.getElementById('tituloCoachMovil'); if (t) t.textContent = titulo;
+      if (tabId === 'tabRecordsCoach') cargarRecords('contenedorRecordsCoach');
+      if (tabId === 'tabHoyCoach') { renderHoyCoach(); cargarPanelCoach(); }
+      if (tabId === 'tabMensajesCoach') { renderMensajesCoach(); cargarPanelCoach(); }
+      if (tabId === 'tabComparativaCoach' && !panelCoach) cargarPanelCoach();
+      if (tabId === 'tabMedidasFotos' && typeof irPasoEvaluacion === 'function') irPasoEvaluacion(evalPaso || 1, true);
+      window.scrollTo({ top: 0, behavior: 'auto' });
+    }
+
+    function abrirMasCoach() { document.getElementById('hojaMasCoach').classList.remove('hidden'); }
+    function cerrarMasCoach() { document.getElementById('hojaMasCoach').classList.add('hidden'); }
+
+    function cargarPanelCoach() {
+      if (panelCoachCargando) return;
+      panelCoachCargando = true;
+      // v18: el último panel guardado en el teléfono se muestra al instante; luego se reemplaza por el del servidor
+      const clavePanel = 'panel/' + ((estadoGlobal.user && estadoGlobal.user.id) || '');
+      if (!panelCoach) CajaLocal.leerJSON(CAJA_VISTAS, clavePanel).then(g => {
+        if (!g || !g.success || !g.resumen || panelCoach || !estadoGlobal.user) return;
+        panelCoach = g;
+        renderHoyCoach(); renderMensajesCoach(); actualizarBadgesCoach(); renderTarjetasAlumnos();
+      });
+      GS().withFailureHandler(() => { panelCoachCargando = false; })
+        .withSuccessHandler(res => {
+          panelCoachCargando = false;
+          if (!res || !res.success || !res.resumen) {
+            const c = document.getElementById('contenedorHoyCoach');
+            if (c && !panelCoach) c.innerHTML = `<p class="text-rose-300 text-sm">${escHtml((res && res.error) || 'No se pudo cargar el panel. Verifica que el Apps Script esté actualizado a la última versión.')}</p>`;
+            return;
+          }
+          panelCoach = res;
+          if (estadoGlobal.user) CajaLocal.guardarJSON(CAJA_VISTAS, clavePanel, res);
+          renderHoyCoach(); renderMensajesCoach(); actualizarBadgesCoach();
+          if (typeof renderTarjetasAlumnos === 'function') renderTarjetasAlumnos();
+        }).obtenerPanelCoach();
+    }
+
+    function actualizarBadgesCoach() {
+      const n = panelCoach ? panelCoach.resumen.checkinsPendientes : 0;
+      ['badgeMensajesSide', 'badgeMensajesMovil', 'badgeMensajesMas'].forEach(id => {
+        const b = document.getElementById(id); if (!b) return;
+        b.textContent = n; b.classList.toggle('hidden', !n);
+        b.setAttribute('aria-label', n + (n === 1 ? ' check-in sin responder' : ' check-ins sin responder'));
+      });
+      const d = document.getElementById('badgeMasCoach'); if (d) d.classList.toggle('hidden', !n);
+    }
+
+    function avatarAlumnoCoach(id, tam = 'w-10 h-10', texto = 'text-sm') {
+      const a = alumnoPorId(id) || {};
+      const ini = escHtml(inicialesDe(a.nombre || '?').toUpperCase());
+      return a.foto
+        ? `<img src="${escHtml(urlFotoConCache(a.foto))}" alt="" data-mini="1" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" class="${tam} rounded-full object-cover border border-slate-700 shrink-0">`
+        : `<span class="${tam} ${texto} rounded-full bg-slate-800 text-slate-200 font-black flex items-center justify-center shrink-0" aria-hidden="true">${ini}</span>`;
+    }
+    const nombreCortoCoach = n => String(n || '').trim().split(/\s+/).slice(0, 2).map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ');
+
+    const ESTILO_PENDIENTE = {
+      CHECKIN: { ico: 'message-circle', tono: 'bg-amber-500/15 text-amber-300', accion: 'Responder' },
+      RECORD: { ico: 'trophy', tono: 'bg-amber-500/15 text-amber-300', accion: 'Revisar' },
+      SIN_ENTRENAR: { ico: 'activity', tono: 'bg-rose-500/15 text-rose-300', accion: 'WhatsApp' },
+      EVALUACION: { ico: 'calendar-check', tono: 'bg-rose-500/15 text-rose-300', accion: 'Evaluar' }
+    };
+
+    function accionPendiente(i) {
+      const p = panelCoach && panelCoach.pendientes[i]; if (!p) return;
+      if (p.tipo === 'CHECKIN') return irAMensajeCoach(p.idAlumno, p.semanaISO);
+      if (p.tipo === 'RECORD') return cambiarTabCoach('tabRecordsCoach');
+      if (p.tipo === 'EVALUACION') return abrirEvaluacionPara(p.idAlumno);
+      if (p.tipo === 'SIN_ENTRENAR') {
+        const a = alumnoPorId(p.idAlumno) || {};
+        const txt = p.dias
+          ? `Hola ${primerNombreDe(a.nombre)}, hace ${p.dias} días que no registras entrenamiento en la app. ¿Todo bien? Si necesitas ajustar la rutina o los horarios, avísame y lo vemos. — Tu coach`
+          : `Hola ${primerNombreDe(a.nombre)}, aún no veo entrenamientos registrados en la app. ¿Necesitas ayuda para empezar? — Tu coach`;
+        if (!telWhatsApp(a.whatsapp)) return pedirWhatsApp(p.idAlumno);
+        return abrirWhatsApp(a.whatsapp, txt);
+      }
+    }
+    function abrirFichaAlumno(id) { cambiarTabCoach('tabComparativaCoach'); cargarProgresoParaCoach(id); }
+
+    function renderHoyCoach() {
+      const cont = document.getElementById('contenedorHoyCoach');
+      if (!cont) return;
+      if (!panelCoach) { cont.innerHTML = esqueleto('tarjetas', 3, 'Cargando tu panel'); return; }
+      const r = panelCoach.resumen, pend = panelCoach.pendientes || [];
+      const nombre = (estadoGlobal.user && estadoGlobal.user.nombre) || '';
+      const primero = primerNombreDe(nombre);
+      let fecha = '';
+      try { fecha = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }); fecha = fecha.charAt(0).toUpperCase() + fecha.slice(1); } catch (e) {}
+      const kpi = (valor, etiqueta, sub, color, onclick) => `
+        <button type="button" ${onclick ? `onclick="${onclick}"` : 'tabindex="-1"'} class="text-left bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 ${onclick ? 'hover:border-emerald-500/40 active:scale-[0.99] transition' : 'cursor-default'}">
+          <span class="block text-xs text-slate-400 font-semibold">${etiqueta}</span>
+          <span class="block text-2xl sm:text-3xl font-black mt-0.5 ${color}">${valor}</span>
+          <span class="block text-xs text-slate-400 mt-0.5">${sub}</span>
+        </button>`;
+      const visibles = hoyVerTodos ? pend : pend.slice(0, 6);
+      const filas = visibles.length ? visibles.map((p, i) => {
+        const e = ESTILO_PENDIENTE[p.tipo];
+        return `
+          <li class="flex items-center gap-3 py-3 ${i ? 'border-t border-slate-800' : ''}">
+            <span class="w-10 h-10 rounded-xl ${e.tono} flex items-center justify-center shrink-0">${ico(e.ico, 'w-5 h-5')}</span>
+            <button type="button" onclick="abrirFichaAlumno('${escHtml(p.idAlumno)}')" class="flex-1 min-w-0 text-left min-h-[44px]">
+              <span class="block text-sm font-bold text-white truncate">${escHtml(nombreCortoCoach(p.nombre))}</span>
+              <span class="block text-xs text-slate-400 truncate">${escHtml(p.detalle)}</span>
+            </button>
+            <button type="button" onclick="accionPendiente(${pend.indexOf(p)})" class="shrink-0 min-h-[44px] px-3 rounded-xl text-sm font-extrabold text-emerald-300 hover:bg-emerald-500/10">${e.accion}</button>
+          </li>`;
+      }).join('') : `<li class="py-6 text-center"><span class="inline-flex w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-300 items-center justify-center mb-2">${ico('circle-check', 'w-6 h-6')}</span><span class="block text-sm font-bold text-white">Todo al día</span><span class="block text-xs text-slate-400">No hay check-ins, récords, evaluaciones ni alumnos inactivos pendientes.</span></li>`;
+      const verTodos = pend.length > 6 ? `<button type="button" onclick="hoyVerTodos = !hoyVerTodos; renderHoyCoach()" class="w-full min-h-[44px] mt-1 text-sm font-bold text-emerald-300 rounded-xl hover:bg-slate-800/60">${hoyVerTodos ? 'Ver menos' : `Ver todos (${pend.length})`}</button>` : '';
+      cont.innerHTML = `
+        <div class="hidden md:flex items-end justify-between gap-3 flex-wrap">
+          <div><h2 class="text-2xl font-black text-white">Hola, ${escHtml(primero)}</h2><p class="text-sm text-slate-400">${escHtml(fecha)} · ${r.totalAlumnos} ${r.totalAlumnos === 1 ? 'alumno' : 'alumnos'}</p></div>
+          <div class="flex gap-2 flex-wrap">
+            <button type="button" onclick="abrirEvaluacionPara('')" class="min-h-[44px] px-4 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold inline-flex items-center gap-2">${ico('clipboard-pen', 'w-4 h-4')} Nueva evaluación</button>
+            <button type="button" onclick="cambiarTabCoach('tabNuevoAlumno')" class="min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold inline-flex items-center gap-2">${ico('user-plus', 'w-4 h-4')} Nuevo alumno</button>
+          </div>
+        </div>
+        <p class="md:hidden text-sm text-slate-400 -mt-1">Hola, <strong class="text-white">${escHtml(primero)}</strong> · ${escHtml(fecha)}</p>
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          ${kpi(`${r.entrenaronHoy} de ${r.totalAlumnos}`, 'Entrenaron hoy', r.enLinea ? `${r.enLinea} en línea ahora` : 'Nadie en línea ahora', 'text-emerald-400', 'abrirActividadHoy()')}
+          ${kpi(`${r.entrenaronSemana} de ${r.totalAlumnos}`, 'Entrenaron esta semana', 'Últimos 7 días', 'text-white', '')}
+          ${kpi(r.checkinsPendientes, 'Check-ins sin responder', r.checkinsPendientes ? 'Toca para responder' : 'Todo respondido', r.checkinsPendientes ? 'text-amber-300' : 'text-white', "cambiarTabCoach('tabMensajesCoach')")}
+          ${kpi(r.recordsPendientes, 'Récords por aprobar', r.recordsPendientes ? 'Toca para revisar' : 'Nada por revisar', r.recordsPendientes ? 'text-amber-300' : 'text-white', "cambiarTabCoach('tabRecordsCoach')")}
+        </div>
+        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4 items-start">
+          <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloAtencion">
+            <div class="flex items-center justify-between gap-2 mb-1">
+              <h3 id="tituloAtencion" class="text-base font-extrabold text-white flex items-center gap-2">${ico('list-checks', 'w-5 h-5 text-emerald-400')} Requiere tu atención</h3>
+              ${pend.length ? `<span class="bg-amber-500/15 text-amber-300 text-xs font-extrabold px-2.5 py-1 rounded-full">${pend.length} pendiente${pend.length === 1 ? '' : 's'}</span>` : ''}
+            </div>
+            <ul>${filas}</ul>${verTodos}
+          </section>
+          <div class="space-y-3">
+            <div id="resumenActividadCoach"></div>
+            <div class="grid grid-cols-2 gap-3 md:hidden">
+              <button type="button" onclick="cambiarTabCoach('tabNuevoAlumno')" class="min-h-[48px] px-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold inline-flex items-center justify-center gap-2">${ico('user-plus', 'w-4 h-4')} Nuevo alumno</button>
+              <button type="button" onclick="abrirEvaluacionPara('')" class="min-h-[48px] px-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold inline-flex items-center justify-center gap-2">${ico('clipboard-pen', 'w-4 h-4')} Evaluar</button>
+            </div>
+            <p class="text-xs text-slate-400 px-1">Evaluación vencida: ${panelCoach.reglas.diasEvaluacion} días o más desde la última. Sin entrenar: ${panelCoach.reglas.diasSinEntrenar} días o más sin registrar series.</p>
+          </div>
+        </div>`;
+      renderResumenActividadCoach();
+    }
+
+    function irAMensajeCoach(idAlumno, semana) {
+      mensajesFiltro = 'PEND';
+      cambiarTabCoach('tabMensajesCoach');
+      setTimeout(() => {
+        const inp = document.getElementById('msgResp-' + idAlumno + '-' + semana);
+        if (inp) { inp.scrollIntoView({ behavior: modoScroll(), block: 'center' }); inp.focus(); }
+      }, 50);
+    }
+
+    function renderMensajesCoach() {
+      const cont = document.getElementById('contenedorMensajesCoach');
+      if (!cont) return;
+      if (!panelCoach) { cont.innerHTML = esqueleto('lista', 4, 'Cargando mensajes'); return; }
+      const todos = panelCoach.mensajes || [];
+      const pend = todos.filter(m => !m.respuesta);
+      const lista = mensajesFiltro === 'PEND' ? pend : todos;
+      const seg = [['PEND', `Sin responder (${pend.length})`], ['TODOS', 'Todos']].map(([k, t]) =>
+        `<button type="button" onclick="mensajesFiltro='${k}'; renderMensajesCoach()" aria-pressed="${mensajesFiltro === k}" class="flex-1 min-h-[40px] rounded-lg text-sm font-extrabold ${mensajesFiltro === k ? 'bg-emerald-500 text-slate-950' : 'text-slate-300'}">${t}</button>`).join('');
+      const cara = v => CARAS[(parseInt(v, 10) || 3) - 1] || '';
+      const tarjetas = lista.length ? lista.map(m => {
+        const idInp = `msgResp-${escHtml(m.idAlumno)}-${escHtml(m.semanaISO)}`;
+        return `
+        <article class="bg-slate-900 border ${m.respuesta ? 'border-slate-800' : 'border-amber-500/40'} rounded-2xl p-4 space-y-3">
+          <div class="flex items-center gap-3">
+            ${avatarAlumnoCoach(m.idAlumno)}
+            <button type="button" onclick="abrirFichaAlumno('${escHtml(m.idAlumno)}')" class="flex-1 min-w-0 text-left min-h-[44px]">
+              <span class="block text-sm font-extrabold text-white truncate">${escHtml(nombreCortoCoach(m.nombre))}</span>
+              <span class="block text-xs text-slate-400">Semana ${escHtml(String(m.semanaISO).replace(/^\d{4}-W/, ''))} · ${escHtml(fechaCorta(m.fecha))}</span>
+            </button>
+            <span class="shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full ${m.respuesta ? 'bg-emerald-500/15 text-emerald-300' : 'bg-amber-500/15 text-amber-300'}">${m.respuesta ? 'Respondido' : 'Sin responder'}</span>
+          </div>
+          <div class="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-300">
+            ${m.peso ? `<span class="inline-flex items-center gap-1">${ico('scale', 'w-3.5 h-3.5')} ${escHtml(m.peso)} kg</span>` : ''}
+            <span class="inline-flex items-center gap-1">${ico('zap', 'w-3.5 h-3.5')} Energía ${cara(m.energia)}</span>
+            <span class="inline-flex items-center gap-1">${ico('moon', 'w-3.5 h-3.5')} Sueño ${cara(m.sueno)}</span>
+            ${m.molestias ? `<span class="inline-flex items-center gap-1 text-rose-300">${ico('triangle-alert', 'w-3.5 h-3.5')} ${escHtml(m.molestias)}</span>` : ''}
+          </div>
+          ${m.nota ? `<p class="text-sm text-slate-200 italic">“${escHtml(m.nota)}”</p>` : ''}
+          ${m.respuesta
+            ? `<div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><span class="block text-xs font-bold text-emerald-300 mb-1">Tu respuesta · ${escHtml(fechaCorta(m.fechaRespuesta))}</span><p class="text-sm text-slate-200">${escHtml(m.respuesta)}</p></div>`
+            : `<div class="flex gap-2"><label for="${idInp}" class="sr-only">Responder a ${escHtml(nombreCortoCoach(m.nombre))}</label>
+                <input id="${idInp}" type="text" maxlength="500" placeholder="Responder a ${escHtml(primerNombreDe(m.nombre))}…" onkeydown="if (event.key === 'Enter') responderMensajeCoach('${escHtml(m.idAlumno)}', '${escHtml(m.semanaISO)}')"
+                  class="flex-1 min-w-0 min-h-[44px] bg-slate-950 border border-slate-700 rounded-xl px-3 text-sm text-white focus:border-emerald-500">
+                <button type="button" id="btn-${idInp}" onclick="responderMensajeCoach('${escHtml(m.idAlumno)}', '${escHtml(m.semanaISO)}')" class="shrink-0 min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold inline-flex items-center gap-1.5">${ico('send', 'w-4 h-4')} Enviar</button></div>`}
+        </article>`;
+      }).join('') : `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-8 text-center"><span class="inline-flex w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-300 items-center justify-center mb-2">${ico('circle-check', 'w-6 h-6')}</span><p class="text-sm font-bold text-white">${mensajesFiltro === 'PEND' ? 'No tienes check-ins sin responder' : 'Aún no hay check-ins'}</p><p class="text-xs text-slate-400 mt-1">Los check-ins semanales de tus alumnos aparecerán aquí.</p></div>`;
+      cont.innerHTML = `
+        <div class="hidden md:block"><h2 class="text-2xl font-black text-white">Mensajes</h2><p class="text-sm text-slate-400">Check-ins semanales de tus alumnos</p></div>
+        <div class="flex p-1 bg-slate-900 border border-slate-800 rounded-xl max-w-md">${seg}</div>
+        <div class="space-y-3 max-w-3xl">${tarjetas}</div>`;
+    }
+    const fechaCorta = f => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || '')); return m ? m[3] + '/' + m[2] : String(f || ''); };
+
+    function responderMensajeCoach(idAlumno, semana) {
+      const idInp = 'msgResp-' + idAlumno + '-' + semana;
+      const inp = document.getElementById(idInp), btn = document.getElementById('btn-' + idInp);
+      const texto = inp ? inp.value.trim() : '';
+      if (!texto) { if (inp) inp.focus(); return mostrarToast('⚠️ Escribe tu respuesta antes de enviar.'); }
+      if (btn) { btn.disabled = true; btn.classList.add('opacity-60'); }
+      GS().withFailureHandler(() => { if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); } })
+        .withSuccessHandler(res => {
+          if (!res || !res.success) { if (btn) { btn.disabled = false; btn.classList.remove('opacity-60'); } return mostrarToast('❌ ' + ((res && res.error) || 'No se pudo responder.')); }
+          mostrarToast('✅ ' + res.mensaje);
+          const m = (panelCoach.mensajes || []).find(x => x.idAlumno === idAlumno && x.semanaISO === semana);
+          if (m) { m.respuesta = texto; m.fechaRespuesta = fechaLocalISO(); }
+          panelCoach.pendientes = panelCoach.pendientes.filter(p => !(p.tipo === 'CHECKIN' && p.idAlumno === idAlumno && p.semanaISO === semana));
+          panelCoach.resumen.checkinsPendientes = panelCoach.pendientes.filter(p => p.tipo === 'CHECKIN').length;
+          if (estadoGlobal.checkinsCoach && estadoGlobal.checkinsCoach.idAlumno === idAlumno) estadoGlobal.checkinsCoach.lista = res.checkins || estadoGlobal.checkinsCoach.lista;
+          renderMensajesCoach(); renderHoyCoach(); actualizarBadgesCoach();
+        }).responderCheckin(idAlumno, semana, texto);
+    }
+
+    function abrirEvaluacionPara(idAlumno) {
+      evalPaso = 1;
+      cambiarTabCoach('tabMedidasFotos');
+      const sel = document.getElementById('selectAlumnoMedidas');
+      if (sel && idAlumno) { sel.value = idAlumno; sel.dispatchEvent(new Event('change')); }
+    }
+    let evalPaso = 1;
+
+    // ==================== v17 · EVALUACIÓN POR PASOS ====================
+    // Mismos campos y validaciones de siempre (procesarYGuardarEvaluacion); solo se muestran por partes.
+    const TOTAL_PASOS_EVAL = 5;
+    function irPasoEvaluacion(n, silencioso) {
+      n = Math.max(1, Math.min(TOTAL_PASOS_EVAL, Number(n) || 1));
+      evalPaso = n;
+      for (let i = 1; i <= TOTAL_PASOS_EVAL; i++) {
+        const sec = document.getElementById('evalPaso-' + i);
+        if (sec) sec.classList.toggle('hidden', i !== n);
+        const b = document.getElementById('evalPasoBtn-' + i);
+        if (!b) continue;
+        const num = b.querySelector('.eval-num'), txt = b.querySelector('.eval-txt');
+        const hecho = i < n, actual = i === n;
+        num.className = 'eval-num w-8 h-8 rounded-full flex items-center justify-center text-xs font-black border ' +
+          (actual ? 'bg-emerald-500 text-slate-950 border-emerald-500' : hecho ? 'bg-emerald-500/15 text-emerald-300 border-emerald-500/50' : 'bg-slate-950 text-slate-400 border-slate-700');
+        num.innerHTML = hecho ? ico('check', 'w-4 h-4') : String(i);
+        txt.className = 'eval-txt text-[11px] font-bold ' + (actual ? 'text-emerald-300' : 'text-slate-400');
+        if (actual) b.setAttribute('aria-current', 'step'); else b.removeAttribute('aria-current');
+      }
+      const atras = document.getElementById('evalBtnAtras'), sig = document.getElementById('evalBtnSiguiente');
+      if (atras) atras.classList.toggle('invisible', n === 1);
+      if (sig) sig.classList.toggle('hidden', n === TOTAL_PASOS_EVAL);
+      actualizarSubtituloEvaluacion();
+      if (!silencioso) {
+        const tab = document.getElementById('tabMedidasFotos');
+        if (tab) tab.scrollIntoView({ behavior: modoScroll(), block: 'start' });
+        const t = document.getElementById('evalTitulo-' + n); if (t) { t.setAttribute('tabindex', '-1'); t.focus({ preventScroll: true }); }
+      }
+    }
+    function siguientePasoEvaluacion() {
+      if (evalPaso === 1) {
+        const alu = document.getElementById('selectAlumnoMedidas').value, fecha = document.getElementById('evFecha').value;
+        if (!alu || !fecha) return avisar('Selecciona alumno y fecha.', 'atencion');
+      }
+      irPasoEvaluacion(evalPaso + 1);
+    }
+    function actualizarSubtituloEvaluacion() {
+      const el = document.getElementById('evalSubtitulo'); if (!el) return;
+      const sel = document.getElementById('selectAlumnoMedidas');
+      const a = sel && alumnoPorId(sel.value);
+      const f = (document.getElementById('evFecha') || {}).value || '';
+      el.textContent = (a ? nombreCortoCoach(a.nombre) : 'Elige un alumno') + (f ? ' · ' + f.split('-').reverse().join('/') : '');
+    }
+    document.addEventListener('change', e => { if (e.target && (e.target.id === 'selectAlumnoMedidas' || e.target.id === 'evFecha')) actualizarSubtituloEvaluacion(); });
+
+    // ==================== v18 · CAMBIAR NIVEL DESDE LA FICHA DEL ALUMNO ====================
+    const NIVELES = [
+      ['NIVEL I: PRINCIPIANTE', 'Nivel I', 'Principiante', 'Aprende la técnica, cargas moderadas'],
+      ['NIVEL II: INTERMEDIO', 'Nivel II', 'Intermedio', 'Progresión de cargas y volumen'],
+      ['NIVEL III: AVANZADO', 'Nivel III', 'Avanzado', 'Técnicas de intensidad y mayor volumen']
+    ];
+    /** Índice del nivel guardado (acepta «NIVEL II: INTERMEDIO», «NIVEL II» o «INTERMEDIO»); -1 si no coincide. */
+    function indiceNivel(nivel) {
+      const t = String(nivel || '').toUpperCase();
+      const m = t.match(/NIVEL\s+(I{1,3})\b/);
+      if (m) return m[1].length - 1;
+      return NIVELES.findIndex(n => t.includes(n[2].toUpperCase()));
+    }
+    function textoNivel(nivel) {
+      const i = indiceNivel(nivel);
+      return i >= 0 ? NIVELES[i][1] + ' · ' + NIVELES[i][2] : (String(nivel || '').trim() || 'Sin nivel');
+    }
+    /** «Nivel II» en el celular y «Nivel II · Intermedio» en pantallas más anchas. */
+    function htmlNivelCorto(nivel) {
+      const i = indiceNivel(nivel);
+      return i >= 0 ? escHtml(NIVELES[i][1]) + '<span class="hidden sm:inline"> · ' + escHtml(NIVELES[i][2]) + '</span>' : escHtml(textoNivel(nivel));
+    }
+    let nivelEdicion = { id: '', sel: -1 };
+    function abrirCambioNivel(idAlumno) {
+      const a = alumnoPorId(idAlumno); if (!a) return;
+      nivelEdicion = { id: idAlumno, sel: indiceNivel(a.nivel), actual: indiceNivel(a.nivel) };
+      document.getElementById('subHojaNivel').textContent = nombreCortoCoach(a.nombre) + ' · su app lo mostrará la próxima vez que se actualice';
+      pintarOpcionesNivel();
+      document.getElementById('hojaNivelCoach').classList.remove('hidden');
+      const sel = document.querySelector('#opcionesNivel [aria-checked="true"]') || document.querySelector('#opcionesNivel button');
+      if (sel) sel.focus();
+    }
+    function pintarOpcionesNivel() {
+      const { sel, actual } = nivelEdicion;
+      document.getElementById('opcionesNivel').innerHTML = NIVELES.map((n, i) => `
+        <button type="button" role="radio" aria-checked="${i === sel}" onclick="nivelEdicion.sel = ${i}; pintarOpcionesNivel()"
+          class="w-full flex items-center gap-3 p-3.5 min-h-[64px] rounded-2xl border-2 text-left transition ${i === sel ? 'border-emerald-500 bg-emerald-500/10' : 'border-slate-800 bg-slate-950 hover:border-slate-700'}">
+          <span class="w-5 h-5 shrink-0 rounded-full border-2 flex items-center justify-center ${i === sel ? 'border-emerald-500' : 'border-slate-600'}">${i === sel ? '<span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span>' : ''}</span>
+          <span class="flex-1 min-w-0"><span class="block text-[15px] font-extrabold text-white">${n[1]} · ${n[2]}</span><span class="block text-xs text-slate-400">${n[3]}</span></span>
+          ${i === actual ? '<span class="shrink-0 bg-slate-800 text-slate-300 text-[11px] font-extrabold px-2 py-1 rounded-full">Actual</span>' : ''}
+        </button>`).join('');
+      const b = document.getElementById('btnGuardarNivel');
+      b.disabled = sel < 0 || sel === actual;
+      b.textContent = sel >= 0 && sel !== actual ? 'Guardar ' + NIVELES[sel][1] : 'Guardar nivel';
+    }
+    function cerrarCambioNivel() { document.getElementById('hojaNivelCoach').classList.add('hidden'); }
+    document.addEventListener('keydown', e => {
+      if (e.key === 'Escape' && !document.getElementById('hojaNivelCoach').classList.contains('hidden')) cerrarCambioNivel();
+    });
+    function guardarCambioNivel() {
+      const { id, sel } = nivelEdicion;
+      if (!id || sel < 0) return;
+      const nivel = NIVELES[sel][0], b = document.getElementById('btnGuardarNivel');
+      b.disabled = true; b.textContent = 'Guardando…';
+      GS()
+        .withFailureHandler(err => { pintarOpcionesNivel(); avisar((err && err.message) || 'No se pudo guardar el nivel.', 'error'); })
+        .withSuccessHandler(res => {
+          if (!res || !res.success) { pintarOpcionesNivel(); return avisar((res && res.error) || 'No se pudo guardar el nivel.', 'error'); }
+          const a = alumnoPorId(id); if (a) a.nivel = nivel;
+          // También en la copia guardada en el teléfono, para que al reabrir ya se vea el nivel nuevo
+          try { const c = leerCacheSesion(); if (c && Array.isArray(c.alumnos)) { const x = c.alumnos.find(z => z.id === id); if (x) { x.nivel = nivel; LS.set(CLAVE_CACHE_SESION, JSON.stringify(c)); } } } catch (e) {}
+          cerrarCambioNivel();
+          actualizarSelectoresAlumnos();
+          const chip = document.getElementById('chipNivel-' + id);
+          if (chip) chip.querySelector('span').innerHTML = htmlNivelCorto(nivel);
+          mostrarToast('✅ Nivel actualizado: ' + NIVELES[sel][1] + ' · ' + NIVELES[sel][2]);
+        })
+        .actualizarNivelAlumno(id, nivel);
+    }
+
+    // ==================== v18 · AVANCE DEL ALUMNO EN VIVO (ficha del coach) ====================
+    // Mientras la ficha está abierta y visible, pregunta cada 20 s qué series marcó hoy el alumno.
+    // No es instantáneo al segundo (Apps Script no permite conexión en tiempo real): el retraso típico es 10–30 s.
+    const SEG_VIVO_COACH = 20;
+    let vivoCoach = { id: '', rutina: [], reloj: null, datos: null };
+    function iniciarVivoCoach(idAlumno, rutina) {
+      detenerVivoCoach();
+      vivoCoach = { id: idAlumno, rutina: rutina || [], reloj: null, datos: null };
+      consultarVivoCoach();
+      vivoCoach.reloj = setInterval(consultarVivoCoach, SEG_VIVO_COACH * 1000);
+    }
+    function detenerVivoCoach() { if (vivoCoach.reloj) clearInterval(vivoCoach.reloj); vivoCoach.reloj = null; }
+    function consultarVivoCoach() {
+      const id = vivoCoach.id;
+      const tab = document.getElementById('tabComparativaCoach');
+      if (!id || document.hidden || !tab || tab.classList.contains('hidden') || !document.getElementById('vivoCoach')) return;
+      GS().withFailureHandler(() => {})
+        .withSuccessHandler(res => {
+          if (!res || !res.success || vivoCoach.id !== id) return;
+          vivoCoach.datos = res;
+          renderVivoCoach();
+        })
+        .obtenerEnVivoAlumno(id);
+    }
+    const horaCorta = iso => { const d = new Date(iso); return isNaN(d) ? '' : d.toLocaleTimeString('es-PE', { hour: 'numeric', minute: '2-digit' }); };
+    function renderVivoCoach() {
+      const cont = document.getElementById('vivoCoach'); if (!cont) return;
+      const r = vivoCoach.datos, v = r && r.vivo;
+      if (!v || !Array.isArray(v.e) || !v.e.length) { cont.innerHTML = ''; return; }
+      const diaN = normalizarDia(v.d);
+      const ejs = vivoCoach.rutina.filter(x => normalizarDia(x.dia) === diaN);
+      const bases = basesEjerciciosDia(ejs);
+      const porBase = {}; v.e.forEach(x => { porBase[x.b] = x; });
+      let hechos = 0, seriesHechas = 0, seriesTotal = 0;
+      const filas = ejs.map((ej, i) => {
+        const total = Math.max(1, parseInt(ej.serie, 10) || 1);
+        const m = porBase[bases[i]] || { s: [], kg: [], ok: false };
+        const n = Math.min(total, m.s.length);
+        const ok = m.ok || n >= total;
+        seriesTotal += total; seriesHechas += ok ? total : n; if (ok) hechos++;
+        const kg = m.kg.filter(k => k).slice(-1)[0];
+        const estado = ok ? 'ok' : n ? 'ahora' : 'pend';
+        const icono = estado === 'ok'
+          ? `<span class="w-7 h-7 shrink-0 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center">${ico('check', 'w-4 h-4')}</span>`
+          : estado === 'ahora'
+            ? '<span class="w-7 h-7 shrink-0 rounded-full border-[3px] border-amber-400 flex items-center justify-center"><span class="w-2.5 h-2.5 rounded-full bg-amber-400"></span></span>'
+            : '<span class="w-7 h-7 shrink-0 rounded-full border-2 border-slate-700"></span>';
+        const detalle = estado === 'ok' ? `${total}/${total} series${kg ? ' · ' + escHtml(kg) + ' kg' : ''}`
+          : estado === 'ahora' ? `En curso · ${n} de ${total} series${kg ? ' · ' + escHtml(kg) + ' kg' : ''}` : `${total} series · pendiente`;
+        return `<li class="flex items-center gap-3 py-2.5 border-t border-slate-800">${icono}
+          <div class="min-w-0"><p class="text-sm font-extrabold truncate ${estado === 'ahora' ? 'text-amber-300' : estado === 'ok' ? 'text-white' : 'text-slate-400'}">${escHtml(ej.ejercicio)}</p>
+          <p class="text-xs text-slate-400">${detalle}</p></div></li>`;
+      }).join('');
+      const pct = seriesTotal ? Math.round(seriesHechas / seriesTotal * 100) : 0;
+      const punto = r.enLinea
+        ? '<span class="relative flex w-2.5 h-2.5"><span class="absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-60 animate-ping motion-reduce:animate-none"></span><span class="relative inline-flex w-2.5 h-2.5 rounded-full bg-rose-500"></span></span>'
+        : '<span class="w-2.5 h-2.5 rounded-full bg-slate-500"></span>';
+      cont.innerHTML = `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
+          <div class="flex items-center justify-between gap-2">
+            <p class="flex items-center gap-2 text-sm font-black text-white">${punto}${r.enLinea ? 'EN VIVO' : 'HOY'} · ${escHtml(v.d || '')}</p>
+            <span class="text-[11px] text-slate-400">última marca ${escHtml(horaCorta(v.t))}</span>
+          </div>
+          <div class="flex items-end justify-between mt-3 mb-2">
+            <p><span class="text-3xl font-black text-emerald-400">${hechos}</span><span class="text-sm font-bold text-slate-400"> de ${ejs.length || v.e.length} ejercicios</span></p>
+            <p class="text-xs text-slate-400 text-right">${seriesHechas} de ${seriesTotal} series</p>
+          </div>
+          <div class="h-2 rounded-full bg-slate-800 overflow-hidden" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Avance de hoy"><div class="h-full bg-emerald-500 rounded-full" style="width:${pct}%"></div></div>
+          <ul class="mt-2">${filas || '<li class="text-xs text-slate-400 py-2">Marcó series de un ejercicio que ya no está en su rutina.</li>'}</ul>
+          <p class="text-[11px] text-slate-500 mt-1">Se actualiza solo cada ${SEG_VIVO_COACH} s mientras tienes abierta esta ficha.</p>
+        </div>`;
     }

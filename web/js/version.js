@@ -5,6 +5,15 @@
   const meta = document.querySelector('meta[name="app-version"]');
   const actual = meta ? meta.getAttribute('content') : '';
   if (!actual || actual.indexOf('__') === 0) return;        // copia local sin publicar: no se revisa
+
+  // v18: memoria de la web (sw.js) para abrir más rápido. Solo en el navegador:
+  // no en la app Android (tiene su propia memoria) ni en el enlace de Apps Script.
+  try {
+    const nativo = !!(window.Capacitor && (typeof Capacitor.isNativePlatform !== 'function' || Capacitor.isNativePlatform()));
+    if (!nativo && 'serviceWorker' in navigator && window.isSecureContext && !/(^|\.)(googleusercontent|google)\.com$/.test(location.hostname)) {
+      window.addEventListener('load', () => navigator.serviceWorker.register('sw.js').catch(() => {}));
+    }
+  } catch (e) {}
   let oculta = 0, avisado = false;
   async function revisar() {
     if (avisado) return;

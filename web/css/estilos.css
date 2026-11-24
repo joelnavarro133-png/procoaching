@@ -88,3 +88,10 @@
     *, *::before, *::after { animation-duration: 0.01ms !important; animation-iteration-count: 1 !important; transition-duration: 0.01ms !important; scroll-behavior: auto !important; }
     .animate-spin, .animate-pulse, .animate-bounce, .animate-ping { animation: none !important; }
   }
+
+/* v17 · Panel del coach en PC: barra lateral + contenido.
+   Solo cuando la vista está visible (si se usara md:flex en el HTML, anularía "hidden"
+   y el panel se vería debajo del login o de la vista del alumno). */
+@media (min-width: 768px) {
+  #coachView:not(.hidden) { display: flex; gap: 1.5rem; padding: 1.25rem; }
+}

@@ -121,7 +121,7 @@
   }
 
   // --- Botón «Atrás» de Android: cierra la ventana abierta; si no hay ninguna, minimiza la app ---
-  const CIERRES = { modalEjercicio: 'cerrarModalEjercicio', hojaDuplicar: 'cerrarDuplicar' };
+  const CIERRES = { modalEjercicio: 'cerrarModalEjercicio', hojaDuplicar: 'cerrarDuplicar', modalGuiado: 'cerrarModoGuiado' };
   if (P.App && P.App.addListener) {
     P.App.addListener('backButton', () => {
       const abiertos = Array.from(document.querySelectorAll('[id^="modal"], #hojaDuplicar'))
