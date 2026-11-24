@@ -8,3 +8,56 @@
      Se muestran a 180 px en la tarjeta (tamaño original) y a 360 px en el modal (2× exacto). */
   .gif-inteligente, #ejGif { image-rendering: auto; filter: none; }
   .gif-nativo { width: 180px; height: 180px; }
+  /* ===== RÉCORDS v12 · «Kinetic Obsidian» (solo dentro de .ko) ===== */
+  /* v12.1: mismos colores que el resto de la app (fondo azul noche, tarjetas slate con borde, acento esmeralda) */
+  .ko { --ko-low:#020617; --ko-c:#0f172a; --ko-hi:#1e293b; --ko-top:#334155; --ko-min:#020617; --ko-borde:#1e293b;
+        --ko-tx:#f1f5f9; --ko-mu:#94a3b8; --ko-dim:#64748b; --ko-lima:#10b981; --ko-lima2:#6ee7b7; --ko-on:#020617;
+        --ko-cian:#fbbf24; --ko-nar:#f97316; --ko-err:#fda4af;
+        background:transparent; color:var(--ko-tx); font-family:'Inter',system-ui,sans-serif; }
+  .ko .kf { font-family:'Inter',system-ui,sans-serif; letter-spacing:-0.01em; }
+  .ko .ms { font-family:'Material Symbols Outlined'; font-weight:normal; font-style:normal; line-height:1; letter-spacing:normal;
+        text-transform:none; white-space:nowrap; direction:ltr; font-size:20px; display:inline-block; width:1em; height:1em; overflow:hidden;
+        vertical-align:middle; -webkit-font-smoothing:antialiased; font-feature-settings:'liga'; font-variation-settings:'FILL' 0; }
+  .ko .ms.f { font-variation-settings:'FILL' 1; }
+  .ko .ko-card { background:var(--ko-c); border:1px solid var(--ko-borde); border-radius:16px; padding:16px; }
+  .ko .ko-card.ko-dest { border-color:rgba(16,185,129,.55); }
+  .ko .ko-hi { background:var(--ko-hi); }
+  .ko .ko-min { background:var(--ko-min); }
+  .ko .ko-low { background:var(--ko-low); border:1px solid var(--ko-borde); }
+  .ko .ko-glow { box-shadow:0 0 20px -4px rgba(16,185,129,.25); }
+  .ko .t-lima { color:var(--ko-lima); } .ko .t-lima2 { color:var(--ko-lima2); } .ko .t-cian { color:var(--ko-cian); }
+  .ko .t-mu { color:var(--ko-mu); } .ko .t-dim { color:var(--ko-dim); } .ko .t-nar { color:var(--ko-nar); } .ko .t-err { color:var(--ko-err); }
+  .ko .b-lima { background:var(--ko-lima); color:var(--ko-on); } .ko .b-lima-s { background:rgba(16,185,129,.14); color:var(--ko-lima2); }
+  .ko .b-cian-s { background:rgba(251,191,36,.14); color:var(--ko-cian); } .ko .b-nar-s { background:rgba(249,115,22,.15); color:#ffb690; }
+  .ko .ko-chip { flex-shrink:0; white-space:nowrap; padding:7px 14px; border-radius:999px; font-size:12px; font-weight:600; background:var(--ko-c); border:1px solid var(--ko-borde); color:var(--ko-mu); transition:.15s; }
+  .ko .ko-chip.on { background:var(--ko-lima); border-color:var(--ko-lima); color:var(--ko-on); font-weight:700; }
+  .ko .ko-seg { display:flex; background:var(--ko-c); border:1px solid var(--ko-borde); padding:4px; border-radius:12px; }
+  .ko .ko-seg button { flex:1; padding:7px 4px; border-radius:9px; font-size:12px; font-weight:600; color:var(--ko-mu); }
+  .ko .ko-seg button.on { background:var(--ko-lima); color:var(--ko-on); font-weight:700; }
+  .ko .ko-lbl { font-size:10px; line-height:12px; letter-spacing:.08em; font-weight:700; text-transform:uppercase; }
+  .ko .ko-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+  .ko .ko-av { position:relative; flex-shrink:0; border-radius:999px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;
+        font-family:'Inter',sans-serif; font-weight:700; background:var(--ko-top); color:var(--ko-tx); }
+  .ko .ko-av img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
+  .ko .ko-stack .ko-av { box-shadow:0 0 0 2px var(--ko-c); margin-left:-6px; } .ko .ko-stack .ko-av:first-child { margin-left:0; }
+  .ko .ko-reac { display:inline-flex; align-items:center; gap:6px; padding:6px 12px; border-radius:999px; background:var(--ko-low); font-size:12px; font-weight:700; color:var(--ko-tx); transition:.15s; }
+  .ko .ko-reac.on { background:rgba(16,185,129,.16); color:var(--ko-lima2); box-shadow:inset 0 0 0 1px rgba(16,185,129,.5); }
+  .ko .ko-reac:disabled { opacity:.55; }
+  .ko .ko-btn { background:var(--ko-lima); color:var(--ko-on); font-weight:800; border-radius:12px; transition:transform .1s; }
+  .ko .ko-btn:active { transform:scale(.98); } .ko .ko-btn:disabled { opacity:.4; }
+  .ko .ko-btn2 { background:var(--ko-hi); color:var(--ko-tx); font-weight:700; border-radius:12px; }
+  .ko .ko-in { background:var(--ko-min); color:var(--ko-tx); border:1px solid var(--ko-top); border-radius:10px; padding:9px 11px; font-size:13px; width:100%; }
+  .ko .ko-in:focus { outline:none; border-color:var(--ko-lima); }
+  .ko .ko-row { display:flex; align-items:center; gap:12px; padding:10px 12px; border-radius:12px; background:var(--ko-low); border:1px solid var(--ko-borde); }
+  .ko .ko-row.yo { background:rgba(16,185,129,.10); box-shadow:inset 0 0 0 1px rgba(16,185,129,.45); }
+  .ko .ko-cta { position:sticky; bottom:calc(4.75rem + env(safe-area-inset-bottom)); z-index:20; }
+  @media (min-width:768px) { .ko .ko-cta { bottom:1rem; } }
+  .ko .ko-ping { position:relative; display:inline-flex; width:8px; height:8px; }
+  .ko .ko-ping::before { content:''; position:absolute; inset:0; border-radius:999px; background:var(--ko-lima); opacity:.75; animation:koPing 1.4s cubic-bezier(0,0,.2,1) infinite; }
+  .ko .ko-ping::after { content:''; position:relative; width:8px; height:8px; border-radius:999px; background:var(--ko-lima); }
+  @keyframes koPing { 75%,100% { transform:scale(2.2); opacity:0; } }
+  .ko .ko-sw { flex-shrink:0; width:52px; height:30px; border-radius:999px; padding:3px; background:var(--ko-top); transition:.2s; }
+  .ko .ko-sw span { display:block; width:24px; height:24px; border-radius:999px; background:#fff; transition:.2s; }
+  .ko .ko-sw.on { background:var(--ko-lima); } .ko .ko-sw.on span { transform:translateX(22px); background:var(--ko-on); }
+  /* Si la fuente de íconos no carga (sin internet), se ocultan en vez de mostrar su nombre en texto */
+  .ko .ms { visibility:hidden; } html.ms-ok .ko .ms { visibility:visible; }

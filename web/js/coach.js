@@ -8,6 +8,7 @@
       renumerarConstructor();
       document.getElementById('evFecha').value = fechaLocalISO();
       cambiarTabCoach('tabNuevoAlumno');
+      iniciarActividadCoach();
     }
 
     function cambiarTabCoach(tabId) {
@@ -18,6 +19,7 @@
       document.querySelectorAll('.btn-tab-coach').forEach(btn => {
         btn.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800';
       });
+      if (tabId === 'tabRecordsCoach') cargarRecords('contenedorRecordsCoach');
       const btnActivo = document.getElementById('btnTab-' + tabId);
       if (btnActivo) {
         btnActivo.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-extrabold transition bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20';
@@ -736,6 +738,7 @@
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white truncate">${escHtml(a.nombre)}</span>
             <span class="block text-[11px] font-semibold truncate mt-0.5 ${activo ? 'text-emerald-300' : 'text-slate-400'}">${escHtml(a.nivel || 'Sin nivel')}</span>
+            ${textoActividad(a.id) ? `<span class="block text-[10px] font-semibold truncate mt-0.5 ${(actividadCoach[a.id] || {}).enLinea ? 'text-emerald-400' : 'text-slate-500'}">${escHtml(textoActividad(a.id))}${(actividadCoach[a.id] || {}).entrenoHoy ? ' · ✅ entrenó hoy' : ''}</span>` : ''}
           </span>
           <span class="${activo ? 'text-emerald-400' : 'text-slate-600'} font-bold text-sm shrink-0">›</span>
         </button>`;
@@ -1068,3 +1071,189 @@
       }).responderCheckin(ctx.idAlumno, semanaISO, inp.value.trim());
     }
  
+
+    // ==================== ACTIVIDAD DE LOS ALUMNOS (v11) ====================
+    let actividadCoach = {}, actividadHoy = '', actividadTimer = null;
+
+    function iniciarActividadCoach() {
+      cargarActividadCoach();
+      clearInterval(actividadTimer);
+      actividadTimer = setInterval(() => { if (!document.hidden && esCoach()) cargarActividadCoach(); }, 60000);
+    }
+    function detenerActividadCoach() { clearInterval(actividadTimer); actividadTimer = null; actividadCoach = {}; }
+    function cargarActividadCoach() {
+      GS().withSuccessHandler(res => {
+        if (!res || !res.success) return;
+        actividadCoach = {}; actividadHoy = res.hoy;
+        (res.actividad || []).forEach(a => { actividadCoach[a.id] = a; });
+        renderResumenActividadCoach();
+        renderListaMisAlumnosTab1();
+        renderTarjetasAlumnos();
+        const modal = document.getElementById('modalActividadHoy');
+        if (modal && !modal.classList.contains('hidden')) renderListaActividadHoy();
+      }).withFailureHandler(() => {}).obtenerActividadAlumnos();
+    }
+
+    function haceCuanto(iso) {
+      const t = Date.parse(iso || '');
+      if (!t) return 'sin conexiones';
+      const min = Math.max(0, Math.round((Date.now() - t) / 60000));
+      if (min < 2) return 'hace un momento';
+      if (min < 60) return 'hace ' + min + ' min';
+      const h = Math.round(min / 60);
+      if (h < 24) return 'hace ' + h + ' h';
+      const dias = Math.round(h / 24);
+      return dias === 1 ? 'ayer' : 'hace ' + dias + ' días';
+    }
+    function textoActividad(id) {
+      const a = actividadCoach[id];
+      if (!a) return '';
+      if (a.enLinea) return '🟢 En línea · ' + (a.origen === 'app' ? 'app' : 'web');
+      return haceCuanto(a.ultimaConexion) + (a.ultimaConexion && a.origen ? ' · ' + a.origen : '');
+    }
+
+    function renderResumenActividadCoach() {
+      const cont = document.getElementById('resumenActividadCoach');
+      if (!cont) return;
+      const lista = Object.values(actividadCoach);
+      if (!lista.length) { cont.innerHTML = ''; return; }
+      const entrenaron = lista.filter(a => a.entrenoHoy).length;
+      const enLinea = lista.filter(a => a.enLinea).length;
+      cont.innerHTML = `
+        <button type="button" onclick="abrirActividadHoy()" class="w-full text-left bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3 active:scale-[0.99] transition">
+          <span class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xl flex items-center justify-center shrink-0">🏋️</span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-extrabold text-white">Hoy entrenaron ${entrenaron} de ${lista.length}</span>
+            <span class="block text-[11px] text-slate-400 mt-0.5">${enLinea ? `🟢 ${enLinea} en línea ahora` : 'Nadie en línea ahora'} · toca para ver el detalle</span>
+          </span>
+          <span class="text-emerald-400 text-lg font-black">›</span>
+        </button>`;
+    }
+
+    function abrirActividadHoy() {
+      renderListaActividadHoy();
+      document.getElementById('modalActividadHoy').classList.remove('hidden');
+    }
+    function renderListaActividadHoy() {
+      const cont = document.getElementById('listaActividadHoy');
+      if (!cont) return;
+      const nombre = id => (alumnoPorId(id) || {}).nombre || 'Alumno';
+      const lista = Object.values(actividadCoach).sort((x, y) =>
+        (y.entrenoHoy - x.entrenoHoy) || (y.enLinea - x.enLinea) || ((Date.parse(y.ultimaConexion) || 0) - (Date.parse(x.ultimaConexion) || 0)));
+      cont.innerHTML = lista.map(a => `
+        <button type="button" onclick="document.getElementById('modalActividadHoy').classList.add('hidden'); cambiarTabCoach('tabComparativaCoach'); cargarProgresoParaCoach('${escHtml(a.id)}')"
+          class="w-full text-left flex items-center gap-3 px-3 py-2.5 rounded-xl border ${a.entrenoHoy ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-slate-950 border-slate-800'}">
+          <span class="w-2.5 h-2.5 rounded-full shrink-0 ${a.enLinea ? 'bg-emerald-400' : 'bg-slate-600'}"></span>
+          <span class="min-w-0 flex-1">
+            <span class="block text-sm font-bold text-white truncate">${escHtml(nombre(a.id))}</span>
+            <span class="block text-[11px] text-slate-400">${escHtml(textoActividad(a.id))}</span>
+          </span>
+          <span class="shrink-0 text-[11px] font-bold ${a.entrenoHoy ? 'text-emerald-300' : 'text-slate-500'}">${a.entrenoHoy ? `✅ ${a.ejerciciosHoy} ej. · ${a.seriesHoy} series` : 'No entrenó hoy'}</span>
+        </button>`).join('') || '<p class="text-xs text-slate-500">Aún no tienes alumnos.</p>';
+    }
+
+    // ==================== RÉCORDS DEL COACH (v11) ====================
+    function bloquePendientesRecords(d) {
+      const p = d.pendientes || [];
+      const cuerpo = p.length ? `<div class="space-y-2">${p.map((r, i) => `
+        <div class="ko-low rounded-xl p-3" style="box-shadow:inset 0 0 0 1px rgba(249,115,22,.4)">
+          <div class="flex items-center gap-3">${avatarRec({ nombre: r.alumno, foto: r.foto }, 36)}
+            <div class="min-w-0"><p class="text-sm font-bold truncate">${escHtml(r.alumno)}</p>
+            <p class="text-xs t-mu">${escHtml(r.ejercicio)} · <strong class="t-lima2">${kgRec(r.peso)}</strong> × ${escHtml(r.reps)} · ${escHtml(fechaRec(r.fecha))}</p></div></div>
+          <label class="ko-lbl t-mu block mt-3 mb-1">Comentario del logro (lo verán sus compañeros)</label>
+          <input id="comRec-${i}" maxlength="140" value="${escHtml(r.comentario || '')}" placeholder="Ej. Bloqueo limpio, sin correas" class="ko-in">
+          <div class="flex gap-2 mt-2.5">
+            <button onclick="revisarRecordCoach('${escHtml(r.id)}', true, ${i})" class="ko-btn flex-1 text-xs py-2.5">✅ Aprobar</button>
+            <button onclick="revisarRecordCoach('${escHtml(r.id)}', false, ${i})" class="ko-btn2 flex-1 text-xs py-2.5 t-err">✖ Rechazar</button>
+          </div>
+        </div>`).join('')}</div>` : '<p class="text-xs t-mu">No hay récords esperando tu aprobación.</p>';
+      return `<div class="ko-card" style="${p.length ? 'box-shadow:inset 0 0 0 1px rgba(249,115,22,.45)' : ''}">${tituloRec('inbox', 'Récords por aprobar', p.length ? `<span class="ko-pill b-nar-s">${p.length}</span>` : '')}${cuerpo}</div>`;
+    }
+    function revisarRecordCoach(id, aprobar, i) {
+      let nota = '';
+      if (!aprobar) { nota = prompt('Motivo del rechazo (opcional, el alumno lo verá):', ''); if (nota === null) return; }
+      const campo = document.getElementById('comRec-' + i);
+      const arg = aprobar ? { nota: '', comentario: campo ? campo.value.trim() : '' } : nota;
+      GS().withSuccessHandler(res => {
+        mostrarToast((res && res.success ? '✅ ' : '❌ ') + ((res && (res.mensaje || res.error)) || ''));
+        cargarRecords(recordsContenedor);
+      }).revisarRecord(id, aprobar, arg);
+    }
+
+    function bloqueEjerciciosRanking() {
+      const lista = recordsEdicion || [];
+      const chips = lista.map((e, i) => `
+        <span class="inline-flex items-center gap-1 ko-hi text-xs font-bold pl-3 pr-1 py-1 rounded-full">
+          ${escHtml(e.nombre)}
+          <button onclick="quitarEjercicioRanking(${i})" class="w-6 h-6 rounded-full t-err flex items-center justify-center" title="Quitar">${icoRec('close', '!text-[16px]')}</button>
+        </span>`).join('');
+      const cambiado = JSON.stringify(lista) !== JSON.stringify((recordsData.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre })));
+      return `<div class="ko-card">${tituloRec('fitness_center', 'Ejercicios del ranking')}
+        <p class="text-[11px] t-mu mb-3">Elige hasta 12. Los pesos que tus alumnos registran en estos ejercicios cuentan para el ranking.</p>
+        <div class="flex flex-wrap gap-2 mb-3">${chips || '<span class="text-xs t-dim">Todavía no elegiste ejercicios.</span>'}</div>
+        <div class="flex flex-wrap gap-2">
+          <button onclick="agregarEjercicioRanking()" ${lista.length >= 12 ? 'disabled' : ''} class="ko-btn2 flex-1 min-w-[150px] text-xs py-3 disabled:opacity-40">📚 Añadir de la biblioteca</button>
+          <button onclick="guardarEjerciciosRankingCoach()" id="btnGuardarRanking" ${cambiado ? '' : 'disabled'} class="ko-btn flex-1 min-w-[150px] text-xs py-3">💾 Guardar</button>
+        </div></div>`;
+    }
+    function agregarEjercicioRanking() {
+      abrirCatalogo(e => {
+        const nombre = String(nombreEsDe(e) || e.nombre || '').toUpperCase();
+        if ((recordsEdicion || []).some(x => x.idEjercicio === e.id || x.nombre === nombre)) return mostrarToast('Ese ejercicio ya está en el ranking.');
+        recordsEdicion.push({ idEjercicio: e.id, nombre: nombre });
+        renderRecords();
+      });
+    }
+    function quitarEjercicioRanking(i) { recordsEdicion.splice(i, 1); renderRecords(); }
+    function guardarEjerciciosRankingCoach() {
+      const btn = document.getElementById('btnGuardarRanking'); if (btn) { btn.disabled = true; btn.innerText = 'Guardando...'; }
+      GS().withSuccessHandler(res => {
+        mostrarToast((res && res.success ? '✅ ' : '❌ ') + ((res && (res.mensaje || res.error)) || ''));
+        cargarRecords(recordsContenedor);
+      }).guardarEjerciciosRanking(recordsEdicion || []);
+    }
+
+    // ---- Clubes de honor (v12): el coach define metas por ejercicio del ranking ----
+    function bloqueEditarClubes(d) {
+      const ejs = d.ejercicios || [];
+      const lista = clubesEdicion || [];
+      const chips = lista.map((c, i) => `
+        <span class="inline-flex items-center gap-1 ko-hi text-xs font-bold pl-3 pr-1 py-1 rounded-full">
+          ${icoRec('shield', 't-cian !text-[15px]', true)} ${escHtml(c.nombre)} · ${numRec(c.kg)} kg
+          <button onclick="quitarClub(${i})" class="w-6 h-6 rounded-full t-err flex items-center justify-center" title="Quitar">${icoRec('close', '!text-[16px]')}</button>
+        </span>`).join('');
+      const cambiado = JSON.stringify(lista) !== JSON.stringify((d.clubes || []).map(c => ({ idEjercicio: c.idEjercicio, nombre: c.ejercicio, kg: c.kg })));
+      const form = ejs.length ? `
+        <div class="grid grid-cols-[1fr_90px_auto] gap-2 items-end">
+          <div><label class="ko-lbl t-mu block mb-1">Ejercicio</label>
+            <select id="clubEj" class="ko-in">${ejs.map((e, i) => `<option value="${i}">${escHtml(e.nombre)}</option>`).join('')}</select></div>
+          <div><label class="ko-lbl t-mu block mb-1">Meta (kg)</label>
+            <input id="clubKg" type="number" inputmode="decimal" min="1" max="1000" step="0.5" placeholder="100" class="ko-in"></div>
+          <button onclick="agregarClub()" ${lista.length >= 10 ? 'disabled' : ''} class="ko-btn2 h-[40px] px-3 text-xs">${icoRec('add', '!text-[18px]')}</button>
+        </div>` : '<p class="text-xs t-dim">Primero elige los ejercicios del ranking.</p>';
+      return `<div class="ko-card">${tituloRec('workspace_premium', 'Editar clubes de honor')}
+        <p class="text-[11px] t-mu mb-3">Hasta 10 metas. Solo cuentan los récords que tú apruebas. Ej.: Press banca 100 kg.</p>
+        <div class="flex flex-wrap gap-2 mb-3">${chips || '<span class="text-xs t-dim">Todavía no creaste clubes.</span>'}</div>
+        ${form}
+        <button onclick="guardarClubesCoach()" id="btnGuardarClubes" ${cambiado ? '' : 'disabled'} class="ko-btn w-full text-xs py-3 mt-3">💾 Guardar clubes</button>
+      </div>`;
+    }
+    function agregarClub() {
+      const ejs = (recordsData && recordsData.ejercicios) || [];
+      const e = ejs[parseInt(document.getElementById('clubEj').value, 10)];
+      const kg = Math.round(parseFloat(String(document.getElementById('clubKg').value).replace(',', '.')) * 10) / 10;
+      if (!e) return;
+      if (!(kg > 0 && kg <= 1000)) return mostrarToast('Escribe la meta en kg (1 a 1000).');
+      clubesEdicion = clubesEdicion || [];
+      if (clubesEdicion.some(c => c.nombre === e.nombre && c.kg === kg)) return mostrarToast('Ese club ya existe.');
+      clubesEdicion.push({ idEjercicio: e.idEjercicio, nombre: e.nombre, kg: kg });
+      renderRecords();
+    }
+    function quitarClub(i) { clubesEdicion.splice(i, 1); renderRecords(); }
+    function guardarClubesCoach() {
+      const btn = document.getElementById('btnGuardarClubes'); if (btn) { btn.disabled = true; btn.innerText = 'Guardando...'; }
+      GS().withSuccessHandler(res => {
+        mostrarToast((res && res.success ? '✅ ' : '❌ ') + ((res && (res.mensaje || res.error)) || ''));
+        cargarRecords(recordsContenedor);
+      }).guardarClubes(clubesEdicion || []);
+    }
