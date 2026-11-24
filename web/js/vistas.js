@@ -1861,6 +1861,7 @@ function calcularComposicionAutomatica() {
       const cont = document.getElementById(recordsContenedor);
       const d = recordsData;
       if (!cont || !d) return;
+      if (!d.esCoach) return renderRecordsAlumno(cont, d);
       const partes = [bloqueHeroRecords(d), bloqueFiltrosRecords(d)];
       if (d.esCoach) {
         partes.push(bloquePendientesRecords(d));
@@ -2133,11 +2134,11 @@ function calcularComposicionAutomatica() {
     }
 
     // ---- Registrar récord (alumno) ----
-    function abrirModalRecord() {
+    function abrirModalRecord(indice) {
       const ejs = (recordsData && recordsData.ejercicios) || [];
       if (!ejs.length) return mostrarToast('Tu coach aún no eligió ejercicios para el ranking.');
       document.getElementById('recEjercicio').innerHTML = ejs.map((e, i) => `<option value="${i}">${escHtml(e.nombre)}</option>`).join('');
-      document.getElementById('recEjercicio').value = String(Math.max(0, Math.min(recordsEjSel, ejs.length - 1)));
+      document.getElementById('recEjercicio').value = String(typeof indice === 'number' ? indice : Math.max(0, Math.min(recordsEjSel, ejs.length - 1)));
       document.getElementById('recPeso').value = '';
       document.getElementById('recReps').value = '1';
       document.getElementById('recFecha').value = fechaLocalISO();
@@ -2161,4 +2162,170 @@ function calcularComposicionAutomatica() {
         cargarRecords(recordsContenedor);
       }).registrarRecord({ idEjercicio: e.idEjercicio, nombre: e.nombre, peso: peso, reps: reps, fecha: document.getElementById('recFecha').value,
         comentario: document.getElementById('recComentario').value.trim() });
+    }
+
+    // ==================== RÉCORDS · vista del ALUMNO (v12.2, «Muro de récords») ====================
+    function tituloMuro(ico, txt, extra = '', color = 't-lima') {
+      return `<div class="flex items-center justify-between gap-2 mb-3"><h3 class="text-[15px] font-extrabold uppercase tracking-wide flex items-center gap-2">${icoRec(ico, color, true)} ${txt}</h3>${extra}</div>`;
+    }
+    function yoRec() {
+      const u = estadoGlobal.user || {};
+      return { nombre: nombreCompletoRec(u.nombre), foto: extraerIdDriveCliente(u.urlFotoPerfil) || '', yo: true };
+    }
+    const nombreCompletoRec = n => String(n || '').trim().split(/\s+/).filter(x => x).map(w => w[0].toUpperCase() + w.slice(1).toLowerCase()).join(' ') || 'Tú';
+
+    function renderRecordsAlumno(cont, d) {
+      const partes = [cabeceraMuro(d), bloqueFiltrosPeriodo(), bloqueRachaActual(d),
+        `<div class="grid grid-cols-1 md:grid-cols-2 gap-4 items-start">${bloqueRankingConstancia(d)}${bloqueRecientesMuro(d)}</div>`,
+        bloqueMisRecordsMuro(d)];
+      if ((d.ranking || []).length) partes.push(`<div class="space-y-2">${bloqueChipsEjercicio(d)}${bloqueRanking(d)}</div>`);
+      partes.push(bloqueClubes(d), bloqueHito(d));
+      cont.innerHTML = `<div class="ko space-y-4">${partes.filter(x => x).join('')}</div>`;
+      cargarFotosRec(cont);
+      if (!document.documentElement.classList.contains('ms-ok') && document.fonts && document.fonts.load) {
+        document.fonts.load('20px "Material Symbols Outlined"', 'add').then(f => { if (f && f.length) document.documentElement.classList.add('ms-ok'); }).catch(() => {});
+      }
+    }
+
+    function cabeceraMuro(d) {
+      const r = (d.resumen || {})[recordsPeriodo] || {};
+      const etq = { S: 'esta semana', M: 'este mes', H: 'en total' }[recordsPeriodo];
+      const on = !!d.mostrar;
+      const caja = (n, txt, color) => `<div class="rounded-xl p-3 text-center" style="background:var(--ko-min);border:1px solid var(--ko-borde)">
+          <p class="text-[26px] leading-8 font-black ${color}">${n}</p><p class="ko-lbl t-mu mt-0.5">${txt}</p></div>`;
+      return `<div class="ko-card">
+        <div class="flex items-start justify-between gap-3 flex-wrap">
+          <div class="flex items-center gap-3 min-w-0">
+            <div class="w-14 h-14 shrink-0 rounded-full ko-hi flex items-center justify-center">${icoRec('emoji_events', 't-lima !text-[28px]', true)}</div>
+            <div class="min-w-0">
+              <div class="flex items-center gap-2"><span class="ko-pill b-lima">Tu comunidad</span><span class="ko-ping"></span></div>
+              <h2 class="text-[24px] leading-8 font-black uppercase tracking-tight mt-1">Muro de récords</h2>
+              <p class="text-xs t-mu">Celebrando cada kilo y cada conquista</p>
+            </div>
+          </div>
+          <button onclick="alternarMostrarRecords()" id="btnMostrarRecords" role="switch" aria-checked="${on}"
+            title="${on ? 'Tus compañeros ven tu nombre, tu foto y tus marcas. Toca para ocultarte.' : 'Solo tú y tu coach ven tus marcas. Toca para aparecer.'}"
+            class="ml-auto shrink-0 inline-flex items-center gap-2 px-3 py-2 rounded-xl text-xs font-bold transition"
+            style="${on ? 'background:rgba(16,185,129,.12);border:1px solid rgba(16,185,129,.5);color:var(--ko-lima2)' : 'background:var(--ko-hi);border:1px solid var(--ko-borde);color:var(--ko-tx)'}">
+            ${icoRec(on ? 'visibility' : 'visibility_off', '!text-[17px]')} ${on ? 'Mostrando mis récords' : 'Mostrar mis récords'}
+          </button>
+        </div>
+        <div class="grid grid-cols-3 gap-2 mt-4">
+          ${caja(r.prs || 0, 'PRs ' + etq, 't-lima')}${caja(r.club || 0, 'Nuevos en club', 't-cian')}${caja(r.aprobados || 0, 'Validados coach', '')}
+        </div>
+      </div>`;
+    }
+
+    function bloqueFiltrosPeriodo() {
+      return `<div class="ko-seg">${PERIODOS_REC.map(([k, t]) => `<button onclick="recordsPeriodo='${k}'; renderRecords()" class="${recordsPeriodo === k ? 'on' : ''}">${t}</button>`).join('')}</div>`;
+    }
+    function bloqueChipsEjercicio(d) {
+      return `<div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
+        ${d.ranking.map((e, i) => `<button onclick="recordsEjSel=${i}; renderRecords()" class="ko-chip ${i === Math.max(0, recordsEjSel) ? 'on' : ''}">${escHtml(e.nombre)}</button>`).join('')}</div>`;
+    }
+
+    function bloqueRachaActual(d) {
+      const m = (d.mios && d.mios.constancia) || { actual: 0, mejor: 0 };
+      const yo = yoRec();
+      const txt = m.actual > 0
+        ? `${m.actual} ${m.actual === 1 ? 'semana seguida' : 'semanas seguidas'} · Mejor racha: ${m.mejor}`
+        : `Sube tu progreso esta semana para empezar tu racha · Mejor racha: ${m.mejor}`;
+      return `<div class="ko-card">
+        ${tituloMuro('local_fire_department', '¡Tu racha actual! 🔥', '', 't-nar')}
+        <div class="ko-row yo !py-3 flex-wrap">
+          ${avatarRec(yo, 48)}
+          <div class="min-w-0 flex-1"><p class="text-[15px] font-bold truncate">${escHtml(yo.nombre)} <span class="t-lima">(TÚ)</span></p>
+            <p class="text-xs t-mu">${txt}</p></div>
+          ${m.actual > 0 ? `<button onclick="compartirRacha()" class="ko-btn shrink-0 px-4 py-2.5 text-xs flex items-center gap-1.5">${icoRec('share', '!text-[17px]')} Compartir logro</button>` : ''}
+        </div>
+      </div>`;
+    }
+    async function compartirRacha() {
+      const m = (recordsData && recordsData.mios && recordsData.mios.constancia) || { actual: 0, mejor: 0 };
+      const texto = `🔥 Llevo ${m.actual} ${m.actual === 1 ? 'semana seguida' : 'semanas seguidas'} entrenando con PRO COACHING (mejor racha: ${m.mejor}). ¡Vamos por más! 💪`;
+      try {
+        const P = window.Capacitor && window.Capacitor.Plugins;
+        if (P && P.Share && window.Capacitor.isNativePlatform && window.Capacitor.isNativePlatform()) return await P.Share.share({ text: texto, dialogTitle: 'Compartir logro' });
+        if (navigator.share) return await navigator.share({ text: texto });
+      } catch (e) { if (e && /cancel|abort/i.test(String(e.message || e.name || e))) return; }
+      window.open('https://wa.me/?text=' + encodeURIComponent(texto), '_blank');
+    }
+
+    function bloqueRankingConstancia(d) {
+      const lista = d.constancia || [];
+      const filas = lista.length ? lista.map((c, i) => `
+        <div class="ko-row ${c.yo ? 'yo' : ''}" ${c.yo ? 'id="miFilaConstancia"' : ''}>
+          <span class="w-6 text-center text-[15px] font-black ${i < 3 ? 't-cian' : 't-dim'}">${i + 1}.</span>
+          ${avatarRec(c, 38)}
+          <div class="min-w-0 flex-1"><p class="text-sm font-bold truncate">${escHtml(c.nombre)}${c.yo ? ' <span class="t-lima">(TÚ)</span>' : ''}</p>
+            <p class="text-[11px] t-mu">${c.semanas} ${c.semanas === 1 ? 'semana' : 'semanas'}</p></div>
+        </div>`).join('') : '<p class="text-xs t-mu">Aún nadie tiene racha activa. ¡Empieza la tuya subiendo tu progreso!</p>';
+      const boton = lista.length ? `<button onclick="verMiPosicionConstancia()" class="ko-btn2 px-3 py-1.5 text-[11px]">Ver mi posición</button>` : '';
+      return `<div class="ko-card">${tituloMuro('emoji_events', 'Ranking de constancia', '', 't-cian')}
+        ${boton ? `<div class="flex justify-end -mt-1 mb-2">${boton}</div>` : ''}
+        <div class="space-y-2">${filas}</div></div>`;
+    }
+    function verMiPosicionConstancia() {
+      const fila = document.getElementById('miFilaConstancia');
+      if (!fila) return mostrarToast('Aún no apareces: sube tu progreso semanal para entrar al ranking de constancia.');
+      fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      fila.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }, { transform: 'scale(1)' }], { duration: 600 });
+    }
+
+    function textoLogro(f) {
+      const ej = `<strong style="color:var(--ko-tx)">${escHtml(f.ejercicio.charAt(0) + f.ejercicio.slice(1).toLowerCase())}</strong>`;
+      const kg = ` <span class="t-lima font-bold">${numRec(f.peso)} kg</span>`;
+      if (f.tipo === 'AUTO') return `subió su marca en ${ej}${kg}`;
+      if ((f.clubes || []).length) return `entró al club de ${numRec(f.clubes[f.clubes.length - 1])} kg en ${ej}`;
+      if (f.delta > 0) return `rompió su récord en ${ej}${kg}`;
+      if (f.primero) return `registró su primer récord en ${ej}${kg}`;
+      return `logró${kg} en ${ej}`;
+    }
+    function bloqueRecientesMuro(d) {
+      const lista = (d.feed || []).filter(f => enPeriodoRec(f.ts)).slice(0, 8);
+      const items = lista.length ? lista.map((f, i) => `
+        <div class="py-3 ${i ? 'border-t' : ''}" style="border-color:var(--ko-borde)">
+          <div class="flex items-start gap-3">
+            ${avatarRec(f, 38)}
+            <div class="min-w-0 flex-1">
+              <p class="text-[13px] leading-5 t-mu"><strong class="text-[13px]" style="color:var(--ko-tx)">${escHtml(f.nombre)}${f.yo ? ' (tú)' : ''}</strong> ${textoLogro(f)} <span class="t-dim">· ${haceRec(f.ts, f.fechaRevision || f.fecha)}</span></p>
+              ${f.comentario ? `<p class="text-[11px] t-mu italic mt-0.5">“${escHtml(f.comentario)}”</p>` : ''}
+              ${f.id ? `<div class="mt-2">${reaccionesRec(f)}</div>` : ''}
+            </div>
+          </div>
+        </div>`).join('') : `<p class="text-xs t-mu py-2">${(d.feed || []).length ? 'No hay récords en este periodo.' : 'Todavía no hay récords nuevos. ¡El próximo puede ser el tuyo!'}</p>`;
+      const boton = (d.ejercicios || []).length
+        ? `<button onclick="abrirModalRecord()" class="ko-btn w-full py-3 mt-3 text-sm flex items-center justify-center gap-1.5">${icoRec('add', '!text-[19px]')} Registrar mi récord</button>` : '';
+      return `<div class="ko-card">${tituloMuro('chat', 'Récords recientes')}<div>${items}</div>${boton}</div>`;
+    }
+
+    function bloqueMisRecordsMuro(d) {
+      const m = d.mios || { mejores: [], enviados: [] };
+      const mejores = m.mejores || [];
+      if (!mejores.length) return `<div class="ko-card">${tituloMuro('track_changes', 'Mis récords')}<p class="text-xs t-mu">Tu coach aún no eligió los ejercicios del ranking.</p></div>`;
+      const maxPeso = Math.max(...mejores.map(e => e.peso || 0));
+      const tiles = mejores.map((e, i) => e.peso ? `
+        <div class="rounded-xl p-3 relative" style="background:var(--ko-min);border:1px solid ${e.peso === maxPeso || e.validado ? 'rgba(16,185,129,.6)' : 'var(--ko-borde)'}">
+          <div class="flex items-center justify-between">${icoRec('fitness_center', 't-lima !text-[18px]')}${e.validado ? '<span class="text-base leading-none" title="Validado por tu coach">🏅</span>' : ''}</div>
+          <p class="text-[13px] font-semibold mt-2 leading-tight">${escHtml(e.nombre.charAt(0) + e.nombre.slice(1).toLowerCase())}</p>
+          <p class="text-[22px] leading-7 font-black mt-0.5">${numRec(e.peso)} <span class="text-sm font-bold">kg</span></p>
+          ${m.pesoCorp ? `<p class="text-[10px] t-mu">${ratioRec(Math.round(e.peso / m.pesoCorp * 100) / 100)} tu peso${e.validado ? '' : ' · de tus series'}</p>` : (e.validado ? '' : '<p class="text-[10px] t-mu">De tus series</p>')}
+        </div>` : `
+        <button onclick="abrirModalRecord(${i})" class="rounded-xl p-3 text-center flex flex-col items-center justify-center min-h-[112px] transition hover:brightness-110" style="background:var(--ko-hi);border:1px solid var(--ko-top)">
+          ${icoRec('lock', 't-mu !text-[24px]', true)}
+          <p class="text-[13px] font-semibold t-mu mt-1.5 leading-tight">${escHtml(e.nombre.charAt(0) + e.nombre.slice(1).toLowerCase())}</p>
+          <p class="text-[11px] t-cian font-semibold mt-0.5">🔒 Registra marca</p>
+        </button>`).join('');
+      const ESTADOS = { PENDIENTE: ['⏳ Pendiente', 'b-nar-s'], APROBADO: ['✅ Aprobado', 'b-lima-s'], RECHAZADO: ['✖ Rechazado', ''] };
+      const enviados = (m.enviados || []).length ? `
+        <p class="ko-lbl t-mu mt-4 mb-2">Récords enviados</p>
+        <div class="space-y-2">${m.enviados.slice(0, 5).map(r => {
+          const st = ESTADOS[r.estado] || [r.estado, ''];
+          return `<div class="ko-row !py-2.5 justify-between">
+            <div class="min-w-0"><p class="text-xs font-bold truncate">${escHtml(r.ejercicio)} · ${kgRec(r.peso)} × ${escHtml(r.reps)}</p>
+            <p class="text-[10px] t-mu">${escHtml(fechaRec(r.fecha))}${r.nota ? ' · Coach: ' + escHtml(r.nota) : ''}</p></div>
+            <span class="ko-pill ${st[1]} shrink-0" ${st[1] ? '' : 'style="background:rgba(253,164,175,.12);color:var(--ko-err)"'}>${st[0]}</span></div>`;
+        }).join('')}</div>` : '';
+      return `<div class="ko-card">${tituloMuro('track_changes', 'Mis récords')}
+        <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">${tiles}</div>${enviados}</div>`;
     }
