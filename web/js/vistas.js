@@ -206,7 +206,7 @@
       return `
         <details class="mt-4 bg-slate-950 border border-slate-800 rounded-xl">
           <summary class="cursor-pointer select-none flex items-center justify-between gap-2 px-4 py-3 text-xs font-bold text-slate-300">
-            <span>🗂️ Historial de rutinas <span class="text-slate-400 font-semibold">(${historial.length})</span></span>
+            <span>${ico('folder-open', 'w-4 h-4')} Historial de rutinas <span class="text-slate-400 font-semibold">(${historial.length})</span></span>
             <span class="text-[11px] text-slate-400 font-semibold">Toca para ver</span>
           </summary>
           <div class="px-4 pb-2">${filas}</div>
@@ -233,7 +233,7 @@
           <div id="detalleResumenDia"></div>`
         : `
           <div class="py-8 text-center bg-slate-950 rounded-xl border border-dashed border-slate-700">
-            <p class="text-3xl mb-2">📭</p>
+            <p class="text-3xl mb-2">${ico('inbox', 'w-8 h-8')}</p>
             <p class="text-sm font-bold text-slate-200">Este alumno no tiene una rutina activa</p>
             <p class="text-xs text-slate-400 mt-1 px-4">Asígnale una desde «Crear rutina» o activa una del historial.</p>
           </div>`;
@@ -270,8 +270,8 @@
       const chips = [
         r.musculo ? chip(escHtml(String(r.musculo).toUpperCase()), 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30') : '',
         chip(`${escHtml(r.serie || '—')} × ${escHtml(r.repeticiones || '—')}`, 'bg-slate-800 text-white border-slate-700'),
-        chip('⏱ ' + escHtml(tempo), 'bg-amber-500/10 text-amber-300 border-amber-500/30 font-mono'),
-        chip('💤 ' + escHtml(r.descanso || 0) + 's', 'bg-slate-800 text-slate-300 border-slate-700'),
+        chip('' + ico('timer', 'w-4 h-4') + ' ' + escHtml(tempo), 'bg-amber-500/10 text-amber-300 border-amber-500/30 font-mono'),
+        chip('' + ico('pause', 'w-4 h-4') + ' ' + escHtml(r.descanso || 0) + 's', 'bg-slate-800 text-slate-300 border-slate-700'),
         (!enGrupo && ETIQUETA_TIPO[tipo]) ? chip(ETIQUETA_TIPO[tipo], 'bg-sky-500/10 text-sky-300 border-sky-500/30') : ''
       ].join('');
       const datos = `data-id="${escHtml(r.idEjercicio)}" data-nombre="${escHtml(r.ejercicio)}" data-media="${escHtml(r.media)}"
@@ -279,7 +279,7 @@
       const mini = r.media
         ? `<button type="button" ${datos} title="Ver GIF y técnica" class="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-white border border-slate-700 overflow-hidden p-0.5 active:scale-95 transition">
              <img src="${urlMini(r.media)}" alt="" loading="lazy" decoding="async" class="w-full h-full object-contain"></button>`
-        : '<span class="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl">🏋️</span>';
+        : '<span class="shrink-0 w-14 h-14 sm:w-16 sm:h-16 rounded-xl bg-slate-800 border border-slate-700 flex items-center justify-center text-2xl">' + ico('dumbbell', 'w-7 h-7') + '</span>';
       const estado = est.completo
         ? '<span class="shrink-0 w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-sm" title="Completado esta semana">✓</span>'
         : est.hechas > 0
@@ -314,7 +314,7 @@
       if (!ejs.length) {
         cont.innerHTML = `
           <div class="py-6 text-center bg-slate-950 rounded-xl border border-slate-800">
-            <p class="text-sm font-bold text-emerald-400">🛌 ${escHtml(nombreDia(dia))}: descanso</p>
+            <p class="text-sm font-bold text-emerald-400">${ico('bed', 'w-4 h-4')} ${escHtml(nombreDia(dia))}: descanso</p>
             <p class="text-xs text-slate-400 mt-1">No hay ejercicios programados este día.</p>
           </div>`;
         return;
@@ -327,7 +327,7 @@
           const filas = b.idxs.map(i => filaResumenEjercicio(ejs[i], i + 1, diaNorm, bases[i], true)).join('');
           return `
             <div class="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-2 space-y-2">
-              <p class="text-[11px] font-black text-sky-300 uppercase tracking-wider px-1 pt-0.5">⚡ ${ETIQUETA_TIPO[b.tipo] || 'Grupo'} · sin descanso entre ejercicios</p>
+              <p class="text-[11px] font-black text-sky-300 uppercase tracking-wider px-1 pt-0.5">${ico('zap', 'w-4 h-4')} ${ETIQUETA_TIPO[b.tipo] || 'Grupo'} · sin descanso entre ejercicios</p>
               ${filas}
             </div>`;
         }
@@ -361,9 +361,12 @@
       const idAlumno = (estadoGlobal.checkinsCoach || {}).idAlumno;
       if (!idAlumno || !idRutina) return;
       const h = (estadoGlobal.historialRutinas || []).find(x => x.idRutina === idRutina);
-      if (!confirm(`¿Activar «${h ? h.nombreRutina : 'esta rutina'}»?\n\nEl alumno dejará de ver su rutina actual y verá esta. Su progreso no se borra.`)) return;
+      confirmar(`¿Activar «${h ? h.nombreRutina : 'esta rutina'}»?\n\nEl alumno dejará de ver su rutina actual y verá esta. Su progreso no se borra.`,
+        { titulo: 'Activar rutina', textoSi: 'Activar' }).then(ok => { if (ok) activarRutinaHistorialConfirmado(idRutina, idAlumno); });
+    }
+    function activarRutinaHistorialConfirmado(idRutina, idAlumno) {
       GS().withSuccessHandler(res => {
-        if (!res || !res.success) return alert((res && res.error) || 'No se pudo activar la rutina.');
+        if (!res || !res.success) return avisar((res && res.error) || 'No se pudo activar la rutina.', 'error');
         estadoGlobal.rutinaActual = res.rutina || [];
         estadoGlobal.historialRutinas = res.historialRutinas || [];
         pintarResumenRutinaCoach();
@@ -419,16 +422,16 @@
         if (diffNum === 0) return ''; 
         
         let colorClase = 'text-slate-400';
-        let icono = '➖';
+        let icono = '' + ico('minus', 'w-4 h-4') + '';
         let bgClase = 'bg-slate-950 border-slate-800';
         
         if (diffNum > 0) {
           colorClase = invertido ? 'text-rose-400' : 'text-emerald-400';
-          icono = invertido ? '📈' : '🔥';
+          icono = invertido ? '' + ico('trending-up', 'w-4 h-4') + '' : '' + ico('flame', 'w-4 h-4') + '';
           bgClase = invertido ? 'bg-rose-950/20 border-rose-500/20' : 'bg-emerald-950/20 border-emerald-500/20';
         } else if (diffNum < 0) {
           colorClase = invertido ? 'text-emerald-400' : 'text-rose-400';
-          icono = invertido ? '🔥' : '📉';
+          icono = invertido ? '' + ico('flame', 'w-4 h-4') + '' : '' + ico('trending-down', 'w-4 h-4') + '';
           bgClase = invertido ? 'bg-emerald-950/20 border-emerald-500/20' : 'bg-rose-950/20 border-rose-500/20';
         }
         
@@ -508,21 +511,21 @@
 
           <div class="grid grid-cols-1 md:grid-cols-4 gap-2.5 sm:gap-3 mb-6">
             <button onclick="cambiarSeccionProgreso('secPerimetros')" id="btn-secPerimetros" class="btn-seccion-prog text-left p-3.5 rounded-xl border transition-all bg-emerald-500 text-slate-950 font-bold border-emerald-400 shadow-lg">
-              <div class="text-xs sm:text-sm">📏 Progreso General y Medidas</div>
+              <div class="text-xs sm:text-sm">${ico('ruler', 'w-4 h-4')} Progreso General y Medidas</div>
             </button>
             
             ${tienePliegues ? `
               <button onclick="cambiarSeccionProgreso('secPliegues')" id="btn-secPliegues" class="btn-seccion-prog text-left p-3.5 rounded-xl border transition-all bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800 font-semibold">
-                <div class="text-xs sm:text-sm">📐 Pliegues Cutáneos (mm)</div>
+                <div class="text-xs sm:text-sm">${ico('ruler', 'w-4 h-4')} Pliegues Cutáneos (mm)</div>
               </button>
             ` : ''}
             
             <button onclick="cambiarSeccionProgreso('secComparativa')" id="btn-secComparativa" class="btn-seccion-prog text-left p-3.5 rounded-xl border transition-all bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800 font-semibold">
-              <div class="text-xs sm:text-sm">📸 Comparativa Visual (Antes vs. Después)</div>
+              <div class="text-xs sm:text-sm">${ico('images', 'w-4 h-4')} Comparativa Visual (Antes vs. Después)</div>
             </button>
             
             <button onclick="cambiarSeccionProgreso('secSemanal')" id="btn-secSemanal" class="btn-seccion-prog text-left p-3.5 rounded-xl border transition-all bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800 font-semibold">
-              <span class="block text-xs uppercase tracking-wider">📅 Progreso Semanal</span><span class="block text-xs font-normal text-slate-400 mt-0.5">Cargas en el Gym</span>
+              <span class="block text-xs uppercase tracking-wider">${ico('calendar', 'w-4 h-4')} Progreso Semanal</span><span class="block text-xs font-normal text-slate-400 mt-0.5">Cargas en el Gym</span>
             </button>
           </div>
 
@@ -530,17 +533,17 @@
             <!-- B2: gráficos de línea del historial (antes los canvas no existían y nunca se dibujaban) -->
             <div class="grid grid-cols-1 lg:grid-cols-2 gap-5">
               <div class="bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-3">📈 Evolución del Peso Corporal</h4>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-3">${ico('trending-up', 'w-4 h-4')} Evolución del Peso Corporal</h4>
                 <div class="relative h-60 sm:h-64"><canvas id="chartPeso"></canvas></div>
               </div>
               <div class="bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg">
-                <h4 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-3">📊 Composición Corporal (grasa, IMC y masa)</h4>
+                <h4 class="text-xs font-extrabold uppercase tracking-wider text-sky-400 mb-3">${ico('chart-column', 'w-4 h-4')} Composición Corporal (grasa, IMC y masa)</h4>
                 <div class="relative h-60 sm:h-64"><canvas id="chartComposicion"></canvas></div>
               </div>
             </div>
             <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800 shadow-lg">
               <div class="mb-4">
-                <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-400">🔥 Tarjetas Delta de Progreso</h4>
+                <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-400">${ico('flame', 'w-4 h-4')} Tarjetas Delta de Progreso</h4>
                 <p class="text-xs text-slate-400">Toca cualquier tarjeta para visualizar su gráfico de evolución.</p>
               </div>
               ${generarTarjetasDelta(progreso)}
@@ -555,7 +558,7 @@
 
           <div id="secPliegues" class="seccion-progreso-detalle hidden space-y-6">
              <div class="bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg">
-               <h4 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 mb-1">📐 Evolución de Pliegues Cutáneos</h4>
+               <h4 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 mb-1">${ico('ruler', 'w-4 h-4')} Evolución de Pliegues Cutáneos</h4>
                <p class="text-xs text-slate-400 mb-3">Mediciones con plicómetro (mm) por fecha de evaluación.</p>
                <div class="relative h-64 sm:h-72"><canvas id="chartPliegues"></canvas></div>
              </div>
@@ -625,7 +628,7 @@
     function calcular1RM() {
       const p = parseFloat(document.getElementById('rmPeso').value);
       const r = parseFloat(document.getElementById('rmReps').value);
-      if (!p || !r || p <= 0 || r <= 0) return alert('Ingresa valores válidos.');
+      if (!p || !r || p <= 0 || r <= 0) return avisar('Ingresa valores válidos.', 'atencion');
       const rm = p * (1 + r / 30);
       document.getElementById('rmValorFinal').innerText = `${rm.toFixed(1)} kg`;
       document.getElementById('rmResultadoCont').classList.remove('hidden');
@@ -741,7 +744,7 @@
         contador.innerText = `${dia}: Descanso`;
         contenedor.innerHTML = `
           <div class="py-8 px-4 text-center">
-            <p class="text-emerald-400 font-bold text-sm sm:text-base mb-1">🛌 Día de Descanso / Recuperación Activa</p>
+            <p class="text-emerald-400 font-bold text-sm sm:text-base mb-1">${ico('bed', 'w-4 h-4')} Día de Descanso / Recuperación Activa</p>
             <p class="text-slate-400 text-xs">No tienes ejercicios programados para el día ${dia}. Mantén tu hidratación y nutrición al día.</p>
           </div>
         `;
@@ -804,7 +807,7 @@
         if (bloque.tipo === 'GRUPO') {
           const esTri = bloque.subtipo === 'TRISERIE';
           const tituloGrupo = esTri ? 'TRI-SERIE (3 EJERCICIOS SEGUIDOS)' : 'SÚPER SERIE / BI-SERIE (2 EJERCICIOS)';
-          const badgeGrupo = esTri ? '🔥 TRI-SERIE' : '⚡ SÚPER SERIE';
+          const badgeGrupo = esTri ? '' + ico('flame', 'w-4 h-4') + ' TRI-SERIE' : '' + ico('zap', 'w-4 h-4') + ' SÚPER SERIE';
           const colorBorde = esTri ? 'border-purple-500/70 shadow-purple-500/10' : 'border-emerald-500/80 shadow-emerald-500/10';
           const colorBadge = esTri ? 'bg-purple-500 text-slate-950' : 'bg-emerald-400 text-slate-950';
 
@@ -824,7 +827,7 @@
             const esUltimo = pos === bloque.items.length - 1;
 
             return `
-              <div class="bg-slate-900/95 border ${estaMarcado ? 'border-emerald-500/50 bg-emerald-950/10 opacity-75' : 'border-slate-800'} rounded-xl p-3.5 transition-all">
+              <div class="border ${estaMarcado ? 'border-emerald-500/50 bg-emerald-950/10 opacity-75' : 'bg-slate-900/95 border-slate-800'} rounded-xl p-3.5 transition-all">
                 <div class="flex justify-between items-start gap-3">
                   <div>
                     <div class="flex items-center gap-2">
@@ -869,14 +872,14 @@
                 </span>
                   <h4 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">${tituloGrupo} - <span class="text-emerald-400">${escHtml(musculosUnicos)}</span></h4>
                 </div>
-                <span class="bg-slate-900 text-slate-300 border border-slate-700 px-3 py-1 rounded-lg text-xs font-extrabold">🔢 ${escHtml(seriesGrupo)} Series Totales</span>
+                <span class="bg-slate-900 text-slate-300 border border-slate-700 px-3 py-1 rounded-lg text-xs font-extrabold">${ico('hash', 'w-4 h-4')} ${escHtml(seriesGrupo)} Series Totales</span>
               </div>
 
               <div>${subTarjetasHTML}</div>
 
               <div class="mt-4 bg-slate-900 border border-slate-800 rounded-xl p-3 flex flex-wrap items-center justify-between gap-3">
                 <div class="text-xs font-extrabold text-white uppercase tracking-wider">
-                  ⏱️ DESCANSAR TRAS ${esTri ? 'TRI-SERIE' : 'SÚPER SERIE'}: <span class="text-emerald-400 text-sm">${descansoFinal}s</span>
+                  ${ico('timer', 'w-4 h-4')} DESCANSAR TRAS ${esTri ? 'TRI-SERIE' : 'SÚPER SERIE'}: <span class="text-emerald-400 text-sm">${descansoFinal}s</span>
                 </div>
                 <button onclick="iniciarCronometro(${descansoFinal})" 
                   class="w-full sm:w-auto bg-emerald-500/20 hover:bg-emerald-500 hover:text-slate-950 text-emerald-400 border border-emerald-500/50 font-extrabold text-xs px-4 py-2 rounded-xl transition">
@@ -900,12 +903,12 @@
           const caidasReps = repsPartes.length >= 2 ? repsPartes : (bloque.tipo === 'PIRAMIDE' ? ['12', '10', '8', '10', '12'] : ['8', '10', '12']);
 
           // Configurador Dinámico de Estilos y Textos según el Tipo
-          let config = { colorBorde: 'border-rose-500/50', badgeBg: 'bg-rose-500/20 text-rose-400 border-rose-500/40', titulo: '🔻 DROP SET (BAJANDO PESO)', etiquetaPaso: 'Caída', colorTextoPaso: 'text-rose-400', txtSecundario: 'Bajar Peso' };
+          let config = { colorBorde: 'border-rose-500/50', badgeBg: 'bg-rose-500/20 text-rose-400 border-rose-500/40', titulo: '' + ico('trending-down', 'w-4 h-4') + ' DROP SET (BAJANDO PESO)', etiquetaPaso: 'Caída', colorTextoPaso: 'text-rose-400', txtSecundario: 'Bajar Peso' };
           
           if (bloque.tipo === 'ASCENDING') {
-            config = { colorBorde: 'border-amber-500/50', badgeBg: 'bg-amber-500/20 text-amber-400 border-amber-500/40', titulo: '🔺 ASCENDING SERIES (SUBIENDO PESO)', etiquetaPaso: 'Serie', colorTextoPaso: 'text-amber-400', txtSecundario: 'Subir Peso' };
+            config = { colorBorde: 'border-amber-500/50', badgeBg: 'bg-amber-500/20 text-amber-400 border-amber-500/40', titulo: '' + ico('trending-up', 'w-4 h-4') + ' ASCENDING SERIES (SUBIENDO PESO)', etiquetaPaso: 'Serie', colorTextoPaso: 'text-amber-400', txtSecundario: 'Subir Peso' };
           } else if (bloque.tipo === 'PIRAMIDE') {
-            config = { colorBorde: 'border-blue-500/50', badgeBg: 'bg-blue-500/20 text-blue-400 border-blue-500/40', titulo: '🔼🔽 PIRÁMIDE COMPLETA (5 SERIES SEGUIDAS)', etiquetaPaso: 'Fase', colorTextoPaso: 'text-blue-400', txtSecundario: 'Ajustar Peso' };
+            config = { colorBorde: 'border-blue-500/50', badgeBg: 'bg-blue-500/20 text-blue-400 border-blue-500/40', titulo: '' + ico('arrow-up-down', 'w-4 h-4') + ' PIRÁMIDE COMPLETA (5 SERIES SEGUIDAS)', etiquetaPaso: 'Fase', colorTextoPaso: 'text-blue-400', txtSecundario: 'Ajustar Peso' };
           }
 
           const filasDropHTML = caidasReps.map((repNum, dropIdx) => {
@@ -915,9 +918,9 @@
             const checkDrop = leerProg(dropCheckKey) === 'true';
             
             // Lógica de etiquetas: Las primeras 3 suben (idx 0,1,2), las últimas 2 bajan (idx 3,4) para Pirámide
-            let etiquetaBajada = dropIdx === 0 ? 'Peso Inicial' : `🔥 ${config.txtSecundario}`;
+            let etiquetaBajada = dropIdx === 0 ? 'Peso Inicial' : `${ico('flame', 'w-4 h-4')} ${config.txtSecundario}`;
             if (bloque.tipo === 'PIRAMIDE' && dropIdx > 0) {
-              etiquetaBajada = dropIdx < 3 ? '🔺 Subir Peso' : '🔻 Bajar Peso';
+              etiquetaBajada = dropIdx < 3 ? '' + ico('trending-up', 'w-4 h-4') + ' Subir Peso' : '' + ico('trending-down', 'w-4 h-4') + ' Bajar Peso';
             }
 
             return `
@@ -965,7 +968,7 @@
               ${filaEspecs(r, segDescanso, 'Fases')}
 
               <div class="space-y-2 mt-2 pt-3 border-t border-slate-800">
-                <p class="text-xs text-slate-400 font-semibold">👇 Registra el peso en cada paso de la secuencia:</p>
+                <p class="text-xs text-slate-400 font-semibold">${ico('arrow-down', 'w-4 h-4')} Registra el peso en cada paso de la secuencia:</p>
                 ${filasDropHTML}
               </div>
             </div>
@@ -982,7 +985,7 @@
         const segDescanso = parseInt(r.descanso) || 0;
 
         return `
-          <div class="bg-slate-900 border ${estaMarcado ? 'border-emerald-500/50 bg-emerald-950/10 opacity-75' : 'border-slate-800'} rounded-2xl p-4 mb-4 transition-all shadow-md">
+          <div class="border ${estaMarcado ? 'border-emerald-500/50 bg-emerald-950/10 opacity-75' : 'bg-slate-900 border-slate-800'} rounded-2xl p-4 mb-4 transition-all shadow-md">
             <div class="flex justify-between items-start gap-3 mb-2">
               <div class="flex items-start gap-3 min-w-0">
                 <div class="min-w-0">
@@ -1098,11 +1101,11 @@
           </div>`;
       }
       const refGeneral = (!hayRefSerie && viejoAntes)
-        ? `<p class="text-xs text-amber-300/90 mb-2">📌 La semana pasada registraste <span class="font-bold">${escHtml(viejoAntes)}</span> en este ejercicio.</p>` : '';
+        ? `<p class="text-xs text-amber-300/90 mb-2">${ico('pin', 'w-4 h-4')} La semana pasada registraste <span class="font-bold">${escHtml(viejoAntes)}</span> en este ejercicio.</p>` : '';
       return `
         <div class="pt-3 border-t border-slate-800/80">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">⚖️ Registra cada serie</span>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">${ico('scale', 'w-4 h-4')} Registra cada serie</span>
             <span class="text-[11px] text-slate-400">peso en kg</span>
           </div>
           ${refGeneral}
@@ -1403,7 +1406,7 @@
       const btn = document.getElementById('btnGuardarPerfil');
 
       if (!nuevoNombre || !nuevoUsuario) {
-        return alert('El nombre y el usuario no pueden quedar vacíos.');
+        return avisar('El nombre y el usuario no pueden quedar vacíos.', 'atencion');
       }
 
       btn.innerText = 'Guardando en Drive y Sheets...';
@@ -1425,7 +1428,7 @@
         .withSuccessHandler(res => {
           btn.innerText = 'Guardar Cambios de Perfil';
           btn.disabled = false;
-          if (!res.success) return alert(res.error);
+          if (!res.success) return avisar(res.error, 'error');
 
           estadoGlobal.user.nombre = res.userActualizado.nombre;
           estadoGlobal.user.usuario = res.userActualizado.usuario;
@@ -1444,7 +1447,7 @@
           if (coachWel) coachWel.innerText = `Coach activo: ${estadoGlobal.user.nombre}`;
 
           actualizarAvataresUI();
-          alert(res.mensaje);
+          avisar(res.mensaje, 'exito');
           cerrarModalPerfil();
         })
         .actualizarPerfilUsuario(payload);
@@ -1456,9 +1459,9 @@
       const confirmar = document.getElementById('passConfirmar').value;
       const btn = document.getElementById('btnGuardarPass');
 
-      if (!actual || !nueva || !confirmar) return alert('Completa los tres campos de contraseña.');
-      if (nueva.length < 4) return alert('La nueva contraseña debe tener al menos 4 caracteres.');
-      if (nueva !== confirmar) return alert('La nueva contraseña y su confirmación no coinciden.');
+      if (!actual || !nueva || !confirmar) return avisar('Completa los tres campos de contraseña.', 'atencion');
+      if (nueva.length < 4) return avisar('La nueva contraseña debe tener al menos 4 caracteres.', 'atencion');
+      if (nueva !== confirmar) return avisar('La nueva contraseña y su confirmación no coinciden.', 'atencion');
 
       btn.innerText = 'Cifrando y actualizando...';
       btn.disabled = true;
@@ -1470,7 +1473,7 @@
         .withSuccessHandler(res => {
           btn.innerText = 'Actualizar Contraseña';
           btn.disabled = false;
-          alert(res.mensaje || res.error);
+          avisar(res.mensaje || res.error, res.success ? 'exito' : 'error');
           if (res.success) cerrarModalPerfil();
         })
         .cambiarPasswordUsuario(estadoGlobal.user.id, hashActual, hashNuevo);
@@ -1696,7 +1699,7 @@ function calcularComposicionAutomatica() {
         // --- DICCIONARIO GYM "EN CRISTIANO" ---
     const DICCIONARIO_GYM = {
       'TEMPO': {
-        tituloHTML: '<div class="flex items-center gap-3"><span class="text-2xl text-emerald-400 bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">⏱️</span><div><span class="block text-[11px] text-emerald-400 font-bold tracking-widest uppercase">Metodología Clave</span><h3 class="text-base sm:text-lg font-black text-white">Guía de TEMPO (4 dígitos: ej. 3-1-1-0)</h3></div></div>',
+        tituloHTML: '<div class="flex items-center gap-3"><span class="text-2xl text-emerald-400 bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">' + ico('timer', 'w-7 h-7') + '</span><div><span class="block text-[11px] text-emerald-400 font-bold tracking-widest uppercase">Metodología Clave</span><h3 class="text-base sm:text-lg font-black text-white">Guía de TEMPO (4 dígitos: ej. 3-1-1-0)</h3></div></div>',
         descHTML: '<p class="text-xs text-slate-300 mb-4">Controla los segundos exactos de cada fase de la repetición para maximizar la hipertrofia y prevenir lesiones. Los dígitos van en pareja: <b class="text-emerald-300">bajada</b> y <b class="text-amber-300">subida</b>.</p>' +
           '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
           '<div class="bg-emerald-500/5 p-3 sm:p-4 rounded-xl border border-emerald-500/30"><span class="block text-xs font-black text-emerald-300 mb-1.5 tracking-wider">1º EXCÉNTRICA</span><span class="text-xs text-slate-300">Descenso o bajada negativa, controlada, resistiendo la carga.</span></div>' +
@@ -1706,23 +1709,23 @@ function calcularComposicionAutomatica() {
           '</div>'
       },
       'BISERIE': { 
-        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">⚡ Bi-Serie (Súper Serie)</h3>', 
+        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">' + ico('zap', 'w-5 h-5') + ' Bi-Serie (Súper Serie)</h3>', 
         descHTML: 'Es hacer 2 ejercicios distintos de corrido, uno justo después del otro. Solo descansas cuando terminas ambos. Prepárate para sudar.' 
       },
       'TRISERIE': { 
-        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">🔥 Tri-Serie</h3>', 
+        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">' + ico('flame', 'w-5 h-5') + ' Tri-Serie</h3>', 
         descHTML: 'Igual que la Bi-Serie, pero con 3 ejercicios seguidos sin parar. Es un trabajo intenso para agotar el músculo rápido.' 
       },
       'DROPSET': { 
-        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">🔻 Drop Set (Serie Descendente)</h3>', 
+        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">' + ico('trending-down', 'w-5 h-5') + ' Drop Set (Serie Descendente)</h3>', 
         descHTML: 'Haces el ejercicio hasta que no puedas más (FALLO) o poner un peso que en la ultima repetición ya no puedas mas (FALLO), le bajas el peso rápido y sigues haciendo más repeticiones sin descansar. Te ayuda a exprimir al máximo tus fuerzas.' 
       },
       'ASCENDING': { 
-        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">🔺 Serie Ascendente</h3>', 
+        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">' + ico('trending-up', 'w-5 h-5') + ' Serie Ascendente</h3>', 
         descHTML: 'Vas subiendo el peso en cada serie que haces. Excelente para ganar fuerza poco a poco en el mismo entrenamiento.' 
       },
       'PIRAMIDE': { 
-        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">🔼🔽 Pirámide Completa</h3>', 
+        tituloHTML: '<h3 class="text-lg font-black text-emerald-400">' + ico('arrow-up-down', 'w-5 h-5') + ' Pirámide Completa</h3>', 
         descHTML: 'Empiezas con poco peso y hartas repeticiones, vas subiendo el peso (y bajando repeticiones) y luego vuelves a bajar el peso. Un bombardeo total para el músculo.' 
       }
     };
@@ -1801,7 +1804,7 @@ function calcularComposicionAutomatica() {
       recordsContenedor = idCont;
       const cont = document.getElementById(idCont);
       if (!cont) return;
-      if (!recordsData) cont.innerHTML = '<div class="ko"><p class="t-mu text-sm">⏳ Cargando récords...</p></div>';
+      if (!recordsData) cont.innerHTML = esqueleto('tarjetas', 3, 'Cargando récords');
       GS().withSuccessHandler(res => {
         if (!res || !res.success) {
           cont.innerHTML = '<div class="ko"><p class="t-err text-sm">' + escHtml((res && res.error) || 'No se pudieron cargar los récords.') + '</p></div>';
@@ -1820,7 +1823,16 @@ function calcularComposicionAutomatica() {
     const kgRec = n => (Math.round(Number(n) * 10) / 10).toString().replace('.', ',') + ' kg';
     const numRec = n => (Math.round(Number(n) * 10) / 10).toString().replace('.', ',');
     const fechaRec = f => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(f || '')); return m ? m[3] + '/' + m[2] : ''; };
-    const icoRec = (n, extra = '', lleno = false) => `<span class="ms ${lleno ? 'f' : ''} ${extra}" aria-hidden="true">${n}</span>`;
+    // v14: los nombres de Material Symbols se traducen a íconos Lucide integrados (funcionan sin internet)
+    const MS_A_LUCIDE = { add: 'plus', close: 'x', shield: 'shield', check_circle: 'circle-check', emoji_events: 'trophy', fact_check: 'clipboard-check',
+      fitness_center: 'dumbbell', local_fire_department: 'flame', lock: 'lock', military_tech: 'medal', share: 'share-2', trending_up: 'trending-up',
+      verified: 'badge-check', inbox: 'inbox', workspace_premium: 'award', chat: 'message-square', track_changes: 'target', history_edu: 'history',
+      person: 'user', visibility: 'eye', visibility_off: 'eye-off', add_circle: 'circle-plus', group: 'users', schedule: 'clock', monitor_weight: 'scale', arrow_upward: 'arrow-up' };
+    const icoRec = (n, extra = '') => {
+      const m = /!text-\[(\d+)px\]/.exec(extra);
+      const px = m ? +m[1] : 20;
+      return ico(MS_A_LUCIDE[n] || n, 'ms-l ' + extra.replace(/!text-\[\d+px\]/, '').trim()).replace('<svg ', `<svg style="width:${px}px;height:${px}px" `);
+    };
     function haceRec(ts, fecha) {
       if (!ts) return fechaRec(fecha);
       const min = Math.floor((Date.now() - ts) / 60000);
@@ -1882,9 +1894,6 @@ function calcularComposicionAutomatica() {
       }
       cont.innerHTML = `<div class="ko space-y-4">${partes.filter(x => x).join('')}</div>`;
       cargarFotosRec(cont);
-      if (!document.documentElement.classList.contains('ms-ok') && document.fonts && document.fonts.load) {
-        document.fonts.load('20px "Material Symbols Outlined"', 'add').then(f => { if (f && f.length) document.documentElement.classList.add('ms-ok'); }).catch(() => {});
-      }
     }
 
     const tituloRec = (ico, txt, extra = '') => `<div class="flex items-center justify-between gap-2 mb-3"><h3 class="kf text-[18px] leading-6 font-semibold flex items-center gap-2">${icoRec(ico, 't-lima')} ${txt}</h3>${extra}</div>`;
@@ -1914,7 +1923,7 @@ function calcularComposicionAutomatica() {
 
     function bloqueFiltrosRecords(d) {
       const chips = (d.ranking || []).length ? `<div class="flex gap-2 overflow-x-auto no-scrollbar py-1">
-          <button onclick="recordsEjSel=-1; renderRecords()" class="ko-chip ${recordsEjSel < 0 ? 'on' : ''}">🔥 Todos</button>
+          <button onclick="recordsEjSel=-1; renderRecords()" class="ko-chip ${recordsEjSel < 0 ? 'on' : ''}">${ico('flame', 'w-4 h-4')} Todos</button>
           ${d.ranking.map((e, i) => `<button onclick="recordsEjSel=${i}; renderRecords()" class="ko-chip ${i === recordsEjSel ? 'on' : ''}">${escHtml(e.nombre)}</button>`).join('')}
         </div>` : '';
       const seg = PERIODOS_REC.map(([k, t]) => `<button onclick="recordsPeriodo='${k}'; renderRecords()" class="${recordsPeriodo === k ? 'on' : ''}">${t}</button>`).join('');
@@ -2048,7 +2057,7 @@ function calcularComposicionAutomatica() {
           ${avatarRec(r, 34)}
           <div class="min-w-0 flex-1">
             <p class="text-sm font-bold truncate">${nombreRec(r)}</p>
-            <p class="text-[11px] t-mu">${r.validado ? '✅ Validado' : 'De sus series'}${r.fecha ? ' · ' + fechaRec(r.fecha) : ''}${r.ratio ? ' · ' + ratioRec(r.ratio) + ' su peso' : ''}${r.fueraDeRanking ? ' · solo tú lo ves' : ''}</p>
+            <p class="text-[11px] t-mu">${r.validado ? '' + ico('circle-check', 'w-4 h-4') + ' Validado' : 'De sus series'}${r.fecha ? ' · ' + fechaRec(r.fecha) : ''}${r.ratio ? ' · ' + ratioRec(r.ratio) + ' su peso' : ''}${r.fueraDeRanking ? ' · solo tú lo ves' : ''}</p>
           </div>
           <span class="kf shrink-0 text-[18px] font-bold ${r.yo ? 't-lima' : ''}">${numRec(r.peso)}<span class="text-xs t-mu ml-0.5">kg</span></span>
         </div>`).join('') : '<p class="text-xs t-mu py-2">Todavía no hay marcas en esta categoría y periodo.</p>';
@@ -2119,7 +2128,7 @@ function calcularComposicionAutomatica() {
           <p class="kf text-[22px] font-bold mt-1">${m.constancia.actual} <span class="text-xs t-mu">${m.constancia.actual === 1 ? 'semana' : 'semanas'}</span></p>
           <p class="text-[11px] t-mu mt-0.5">Mejor racha: ${m.constancia.mejor}</p>
         </div>`;
-      const ESTADOS = { PENDIENTE: ['⏳ Pendiente', 'b-nar-s'], APROBADO: ['✅ Aprobado', 'b-lima-s'], RECHAZADO: ['✖ Rechazado', ''] };
+      const ESTADOS = { PENDIENTE: [ico('clock', 'w-3.5 h-3.5') + ' Pendiente', 'b-nar-s'], APROBADO: [ico('circle-check', 'w-3.5 h-3.5') + ' Aprobado', 'b-lima-s'], RECHAZADO: ['' + ico('x', 'w-4 h-4') + ' Rechazado', ''] };
       const enviados = (m.enviados || []).length ? `
         <p class="ko-lbl t-mu mt-4 mb-2">Récords enviados</p>
         <div class="space-y-2">${m.enviados.map(r => {
@@ -2151,12 +2160,12 @@ function calcularComposicionAutomatica() {
       const e = ejs[parseInt(document.getElementById('recEjercicio').value, 10)];
       const peso = document.getElementById('recPeso').value, reps = document.getElementById('recReps').value;
       if (!e) return;
-      if (!(parseFloat(peso) > 0)) return alert('Escribe el peso que levantaste (kg).');
+      if (!(parseFloat(peso) > 0)) return avisar('Escribe el peso que levantaste (kg).', 'atencion');
       const btn = document.getElementById('btnEnviarRecord');
       btn.disabled = true; btn.innerText = 'Enviando...';
       GS().withSuccessHandler(res => {
         btn.disabled = false; btn.innerText = 'Enviar a mi coach';
-        if (!res || !res.success) return alert((res && res.error) || 'No se pudo enviar.');
+        if (!res || !res.success) return avisar((res && res.error) || 'No se pudo enviar.', 'error');
         cerrarModalRecord();
         mostrarToast('✅ ' + res.mensaje);
         cargarRecords(recordsContenedor);
@@ -2182,9 +2191,6 @@ function calcularComposicionAutomatica() {
       partes.push(bloqueClubes(d), bloqueHito(d));
       cont.innerHTML = `<div class="ko space-y-4">${partes.filter(x => x).join('')}</div>`;
       cargarFotosRec(cont);
-      if (!document.documentElement.classList.contains('ms-ok') && document.fonts && document.fonts.load) {
-        document.fonts.load('20px "Material Symbols Outlined"', 'add').then(f => { if (f && f.length) document.documentElement.classList.add('ms-ok'); }).catch(() => {});
-      }
     }
 
     function cabeceraMuro(d) {
@@ -2268,8 +2274,8 @@ function calcularComposicionAutomatica() {
     function verMiPosicionConstancia() {
       const fila = document.getElementById('miFilaConstancia');
       if (!fila) return mostrarToast('Aún no apareces: sube tu progreso semanal para entrar al ranking de constancia.');
-      fila.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      fila.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }, { transform: 'scale(1)' }], { duration: 600 });
+      fila.scrollIntoView({ behavior: modoScroll(), block: 'center' });
+      if (!movimientoReducido()) fila.animate([{ transform: 'scale(1)' }, { transform: 'scale(1.03)' }, { transform: 'scale(1)' }], { duration: 600 });
     }
 
     function textoLogro(f) {
@@ -2314,9 +2320,9 @@ function calcularComposicionAutomatica() {
         <button onclick="abrirModalRecord(${i})" class="rounded-xl p-3 text-center flex flex-col items-center justify-center min-h-[112px] transition hover:brightness-110" style="background:var(--ko-hi);border:1px solid var(--ko-top)">
           ${icoRec('lock', 't-mu !text-[24px]', true)}
           <p class="text-[13px] font-semibold t-mu mt-1.5 leading-tight">${escHtml(e.nombre.charAt(0) + e.nombre.slice(1).toLowerCase())}</p>
-          <p class="text-xs t-cian font-semibold mt-0.5">🔒 Registra marca</p>
+          <p class="text-xs t-cian font-semibold mt-0.5">${ico('lock', 'w-4 h-4')} Registra marca</p>
         </button>`).join('');
-      const ESTADOS = { PENDIENTE: ['⏳ Pendiente', 'b-nar-s'], APROBADO: ['✅ Aprobado', 'b-lima-s'], RECHAZADO: ['✖ Rechazado', ''] };
+      const ESTADOS = { PENDIENTE: [ico('clock', 'w-3.5 h-3.5') + ' Pendiente', 'b-nar-s'], APROBADO: [ico('circle-check', 'w-3.5 h-3.5') + ' Aprobado', 'b-lima-s'], RECHAZADO: ['' + ico('x', 'w-4 h-4') + ' Rechazado', ''] };
       const enviados = (m.enviados || []).length ? `
         <p class="ko-lbl t-mu mt-4 mb-2">Récords enviados</p>
         <div class="space-y-2">${m.enviados.slice(0, 5).map(r => {

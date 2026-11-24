@@ -20,6 +20,10 @@ const quitar = [
 ];
 quitar.forEach(re => { indice = indice.replace(re, ''); });
 
+// v15: los estilos de Tailwind ya preparados van dentro de Estilos.html, junto a estilos.css
+const cssTw = '<link rel="stylesheet" href="css/tailwind.css?v=__VERSION__">';
+if (!indice.includes(cssTw)) throw new Error('No encontré css/tailwind.css en index.html');
+indice = indice.replace(/\s*<!-- Estilos de Tailwind ya preparados[^>]*-->/, '').replace('\n  ' + cssTw, '').replace(cssTw, '');
 const css = '<link rel="stylesheet" href="css/estilos.css?v=__VERSION__">';
 if (!indice.includes(css)) throw new Error('No encontré la hoja de estilos en index.html');
 indice = indice.replace(css, "<?!= incluir('Estilos'); ?>");
@@ -43,7 +47,9 @@ const envolverJs = (archivo, nombre) => {
 mkdirSync(salida, { recursive: true });
 // El comentario va DESPUÉS de <!DOCTYPE html>: antes, el navegador dibujaría en modo antiguo
 writeFileSync(new URL('Index.html', salida), indice.replace(/^<!DOCTYPE html>\n/i, `<!DOCTYPE html>\n<!-- Index.html · ${aviso} -->\n`));
-writeFileSync(new URL('Estilos.html', salida), `<style>\n/* Estilos.html · ${aviso} */\n${leer('css/estilos.css')}</style>\n`);
+const tw = leer('css/tailwind.css');
+if (/<\/style/i.test(tw)) throw new Error('tailwind.css contiene «</style»');
+writeFileSync(new URL('Estilos.html', salida), `<style>\n/* Estilos.html · ${aviso} */\n/* Tailwind (preparado con tailwind.config.cjs) */\n${tw}\n/* estilos.css */\n${leer('css/estilos.css')}</style>\n`);
 writeFileSync(new URL('JS_Nucleo.html', salida), envolverJs('nucleo.js', 'JS_Nucleo'));
 writeFileSync(new URL('JS_Coach.html', salida), envolverJs('coach.js', 'JS_Coach'));
 writeFileSync(new URL('JS_Vistas.html', salida), envolverJs('vistas.js', 'JS_Vistas'));

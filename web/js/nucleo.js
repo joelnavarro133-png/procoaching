@@ -1,5 +1,14 @@
     // nucleo.js · Estado global, utilidades, conexión con el servidor, biblioteca de ejercicios,
     // progreso semanal, inicio de sesión, navegación, pantalla «Hoy» y check-in. (Se incluye dentro del <script> de Index.html)
+    // ==================== ÍCONOS (v14) · Lucide (ISC, https://lucide.dev), integrados: funcionan sin internet ====================
+    const ICONOS = {"circle-check":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m16 9-5.5 5.5L8 12\"/>","circle-x":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"m15 9-6 6\"/> <path d=\"m9 9 6 6\"/>","check":"<path d=\"M20 6 9 17l-5-5\"/>","x":"<path d=\"M18 6 6 18\"/> <path d=\"m6 6 12 12\"/>","dumbbell":"<path d=\"M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z\"/> <path d=\"m2.5 21.5 1.4-1.4\"/> <path d=\"m20.1 3.9 1.4-1.4\"/> <path d=\"M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z\"/> <path d=\"m9.6 14.4 4.8-4.8\"/>","scale":"<path d=\"M12 3v18\"/> <path d=\"m19 8 3 8a5 5 0 0 1-6 0zV7\"/> <path d=\"M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1\"/> <path d=\"m5 8 3 8a5 5 0 0 1-6 0zV7\"/> <path d=\"M7 21h10\"/>","biceps-flexed":"<path d=\"M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1\"/> <path d=\"M15 14a5 5 0 0 0-7.584 2\"/> <path d=\"M9.964 6.825C8.019 7.977 9.5 13 8 15\"/>","loader-circle":"<path d=\"M21 12a9 9 0 1 1-6.219-8.56\"/>","hourglass":"<path d=\"M5 22h14\"/> <path d=\"M5 2h14\"/> <path d=\"M17 22v-4.172a2 2 0 0 0-.586-1.414L12 12l-4.414 4.414A2 2 0 0 0 7 17.828V22\"/> <path d=\"M7 2v4.172a2 2 0 0 0 .586 1.414L12 12l4.414-4.414A2 2 0 0 0 17 6.172V2\"/>","clipboard-list":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"M12 11h4\"/> <path d=\"M12 16h4\"/> <path d=\"M8 11h.01\"/> <path d=\"M8 16h.01\"/>","chart-column":"<path d=\"M3 3v16a2 2 0 0 0 2 2h16\"/> <path d=\"M18 17V9\"/> <path d=\"M13 17V5\"/> <path d=\"M8 17v-3\"/>","timer":"<line x1=\"10\" x2=\"14\" y1=\"2\" y2=\"2\"/> <line x1=\"12\" x2=\"15\" y1=\"14\" y2=\"11\"/> <circle cx=\"12\" cy=\"14\" r=\"8\"/>","triangle-alert":"<path d=\"m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3\"/> <path d=\"M12 9v4\"/> <path d=\"M12 17h.01\"/>","lock":"<rect width=\"18\" height=\"11\" x=\"3\" y=\"11\" rx=\"2\" ry=\"2\"/> <path d=\"M7 11V7a5 5 0 0 1 10 0v4\"/>","save":"<path d=\"M15.2 3a2 2 0 0 1 1.4.6l3.8 3.8a2 2 0 0 1 .6 1.4V19a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2z\"/> <path d=\"M17 21v-7a1 1 0 0 0-1-1H8a1 1 0 0 0-1 1v7\"/> <path d=\"M7 3v4a1 1 0 0 0 1 1h7\"/>","zap":"<path d=\"M15.914 4a1.5 1.5 0 00-2.474-1.561l-9 9A1.5 1.5 0 005.5 14h4.002a.5.5 0 01.471.666L8.086 20a1.5 1.5 0 002.475 1.56l9-9A1.5 1.5 0 0018.5 10h-3.997a.5.5 0 01-.472-.667z\"/>","message-circle":"<path d=\"M2.992 16.342a2 2 0 0 1 .094 1.167l-1.065 3.29a1 1 0 0 0 1.236 1.168l3.413-.998a2 2 0 0 1 1.099.092 10 10 0 1 0-4.777-4.719\"/>","file-text":"<path d=\"M6 22a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h8a2.4 2.4 0 0 1 1.704.706l3.588 3.588A2.4 2.4 0 0 1 20 8v12a2 2 0 0 1-2 2z\"/> <path d=\"M14 2v5a1 1 0 0 0 1 1h5\"/> <path d=\"M10 9H8\"/> <path d=\"M16 13H8\"/> <path d=\"M16 17H8\"/>","library":"<path d=\"m16 6 4 14\"/> <path d=\"M12 6v14\"/> <path d=\"M8 8v12\"/> <path d=\"M4 4v16\"/>","circle-help":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5\"/> <path d=\"M12 17h.01\"/>","link":"<path d=\"M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71\"/> <path d=\"M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71\"/>","pencil":"<path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/> <path d=\"m15 5 4 4\"/>","user":"<path d=\"M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2\"/> <circle cx=\"12\" cy=\"7\" r=\"4\"/>","settings":"<path d=\"M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","trophy":"<path d=\"M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2\"/> <path d=\"M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2\"/> <path d=\"M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3\"/> <path d=\"M4 22h16\"/> <path d=\"M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z\"/> <path d=\"M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3\"/>","calendar":"<path d=\"M8 2v3\"/> <path d=\"M16 2v3\"/> <rect x=\"3\" y=\"3\" width=\"18\" height=\"18\" rx=\"2\"/> <path d=\"M3 9h18\"/>","ruler":"<path d=\"M21.3 15.3a2.4 2.4 0 0 1 0 3.4l-2.6 2.6a2.4 2.4 0 0 1-3.4 0L2.7 8.7a2.41 2.41 0 0 1 0-3.4l2.6-2.6a2.41 2.41 0 0 1 3.4 0Z\"/> <path d=\"m14.5 12.5 2-2\"/> <path d=\"m11.5 9.5 2-2\"/> <path d=\"m8.5 6.5 2-2\"/> <path d=\"m17.5 15.5 2-2\"/>","arrow-right":"<path d=\"M5 12h14\"/> <path d=\"m12 5 7 7-7 7\"/>","refresh-cw":"<path d=\"M3 12a9 9 0 0 1 9-9 9.75 9.75 0 0 1 6.74 2.74L21 8\"/> <path d=\"M21 3v5h-5\"/> <path d=\"M21 12a9 9 0 0 1-9 9 9.75 9.75 0 0 1-6.74-2.74L3 16\"/> <path d=\"M8 16H3v5\"/>","trash-2":"<path d=\"M10 11v6\"/> <path d=\"M14 11v6\"/> <path d=\"M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6\"/> <path d=\"M3 6h18\"/> <path d=\"M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2\"/>","download":"<path d=\"M12 15V3\"/> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/> <path d=\"m7 10 5 5 5-5\"/>","trending-down":"<path d=\"M16 17h6v-6\"/> <path d=\"m22 17-8.5-8.5-5 5L2 7\"/>","trending-up":"<path d=\"M16 7h6v6\"/> <path d=\"m22 7-8.5 8.5-5-5L2 17\"/>","arrow-up-down":"<path d=\"m21 16-4 4-4-4\"/> <path d=\"M17 20V4\"/> <path d=\"m3 8 4-4 4 4\"/> <path d=\"M7 4v16\"/>","search":"<path d=\"m21 21-4.34-4.34\"/> <circle cx=\"11\" cy=\"11\" r=\"8\"/>","person-standing":"<circle cx=\"12\" cy=\"5\" r=\"1\"/> <path d=\"m9 20 3-6 3 6\"/> <path d=\"m6 8 6 2 6-2\"/> <path d=\"M12 10v4\"/>","copy":"<rect width=\"14\" height=\"14\" x=\"8\" y=\"8\" rx=\"2\" ry=\"2\"/> <path d=\"M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2\"/>","hash":"<line x1=\"4\" x2=\"20\" y1=\"9\" y2=\"9\"/> <line x1=\"4\" x2=\"20\" y1=\"15\" y2=\"15\"/> <line x1=\"10\" x2=\"8\" y1=\"3\" y2=\"21\"/> <line x1=\"16\" x2=\"14\" y1=\"3\" y2=\"21\"/>","bed":"<path d=\"M2 4v16\"/> <path d=\"M2 8h18a2 2 0 0 1 2 2v10\"/> <path d=\"M2 17h20\"/> <path d=\"M6 8v9\"/>","users":"<path d=\"M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2\"/> <path d=\"M16 3.128a4 4 0 0 1 0 7.744\"/> <path d=\"M22 21v-2a4 4 0 0 0-3-3.87\"/> <circle cx=\"9\" cy=\"7\" r=\"4\"/>","folder":"<path d=\"M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z\"/>","pen-line":"<path d=\"M13 21h8\"/> <path d=\"M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z\"/>","arrow-left":"<path d=\"m12 19-7-7 7-7\"/> <path d=\"M19 12H5\"/>","house":"<path d=\"M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8\"/> <path d=\"M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z\"/>","camera":"<path d=\"M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z\"/> <circle cx=\"12\" cy=\"13\" r=\"3\"/>","chevrons-down":"<path d=\"m7 6 5 5 5-5\"/> <path d=\"m7 13 5 5 5-5\"/>","notebook-pen":"<path d=\"M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4\"/> <path d=\"M2 6h4\"/> <path d=\"M2 10h4\"/> <path d=\"M2 14h4\"/> <path d=\"M2 18h4\"/> <path d=\"M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z\"/>","wrench":"<path d=\"M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z\"/>","target":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <circle cx=\"12\" cy=\"12\" r=\"6\"/> <circle cx=\"12\" cy=\"12\" r=\"2\"/>","map-pin":"<path d=\"M20 10c0 4.993-5.539 10.193-7.399 11.799a1 1 0 0 1-1.202 0C9.539 20.193 4 14.993 4 10a8 8 0 0 1 16 0\"/> <circle cx=\"12\" cy=\"10\" r=\"3\"/>","upload":"<path d=\"M12 3v12\"/> <path d=\"m17 8-5-5-5 5\"/> <path d=\"M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4\"/>","wifi-off":"<path d=\"M12 20h.01\"/> <path d=\"M8.5 16.429a5 5 0 0 1 7 0\"/> <path d=\"M5 12.859a10 10 0 0 1 5.17-2.69\"/> <path d=\"M19 12.859a10 10 0 0 0-2.007-1.523\"/> <path d=\"M2 8.82a15 15 0 0 1 4.177-2.643\"/> <path d=\"M22 8.82a15 15 0 0 0-11.288-3.764\"/> <path d=\"m2 2 20 20\"/>","alarm-clock":"<circle cx=\"12\" cy=\"13\" r=\"8\"/> <path d=\"M12 9v4l2 2\"/> <path d=\"M5 3 2 6\"/> <path d=\"m22 6-3-3\"/> <path d=\"M6.38 18.7 4 21\"/> <path d=\"M17.64 18.67 20 21\"/>","moon":"<path d=\"M20.985 12.486a9 9 0 1 1-9.473-9.472c.405-.022.617.46.402.803a6 6 0 0 0 8.268 8.268c.344-.215.825-.004.803.401\"/>","bandage":"<path d=\"M10 10.01h.01\"/> <path d=\"M10 14.01h.01\"/> <path d=\"M14 10.01h.01\"/> <path d=\"M14 14.01h.01\"/> <path d=\"M18 6v12\"/> <path d=\"M6 6v12\"/> <rect x=\"2\" y=\"6\" width=\"20\" height=\"12\" rx=\"2\"/>","folder-open":"<path d=\"m6 14 1.5-2.9A2 2 0 0 1 9.24 10H20a2 2 0 0 1 1.94 2.5l-1.54 6a2 2 0 0 1-1.95 1.5H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h3.9a2 2 0 0 1 1.69.9l.81 1.2a2 2 0 0 0 1.67.9H18a2 2 0 0 1 2 2v2\"/>","inbox":"<polyline points=\"22 12 16 12 14 15 10 15 8 12 2 12\"/> <path d=\"M5.45 5.11 2 12v6a2 2 0 0 0 2 2h16a2 2 0 0 0 2-2v-6l-3.45-6.89A2 2 0 0 0 16.76 4H7.24a2 2 0 0 0-1.79 1.11z\"/>","pause":"<rect x=\"14\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\"/> <rect x=\"5\" y=\"3\" width=\"5\" height=\"18\" rx=\"1\"/>","minus":"<path d=\"M5 12h14\"/>","images":"<path d=\"m22 11-1.296-1.296a2.4 2.4 0 0 0-3.408 0L11 16\"/> <path d=\"M4 8a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2\"/> <circle cx=\"13\" cy=\"7\" r=\"1\" fill=\"currentColor\"/> <rect x=\"8\" y=\"2\" width=\"14\" height=\"14\" rx=\"2\"/>","arrow-down":"<path d=\"M12 5v14\"/> <path d=\"m19 12-7 7-7-7\"/>","pin":"<path d=\"M12 17v5\"/> <path d=\"M9 10.76a2 2 0 0 1-1.11 1.79l-1.78.9A2 2 0 0 0 5 15.24V16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-.76a2 2 0 0 0-1.11-1.79l-1.78-.9A2 2 0 0 1 15 10.76V7a1 1 0 0 1 1-1 2 2 0 0 0 0-4H8a2 2 0 0 0 0 4 1 1 0 0 1 1 1z\"/>","flame":"<path d=\"M12 3q1 4 4 6.5t3 5.5a1 1 0 0 1-14 0 5 5 0 0 1 1-3 1 1 0 0 0 5 0c0-2-1.5-3-1.5-5q0-2 2.5-4\"/>","badge-check":"<path d=\"M3.85 8.62a4 4 0 0 1 4.78-4.77 4 4 0 0 1 6.74 0 4 4 0 0 1 4.78 4.78 4 4 0 0 1 0 6.74 4 4 0 0 1-4.77 4.78 4 4 0 0 1-6.75 0 4 4 0 0 1-4.78-4.77 4 4 0 0 1 0-6.76Z\"/> <path d=\"m16 9-5.5 5.5L8 12\"/>","medal":"<path d=\"M7.21 15 2.66 7.14a2 2 0 0 1 .13-2.2L4.4 2.8A2 2 0 0 1 6 2h12a2 2 0 0 1 1.6.8l1.6 2.14a2 2 0 0 1 .14 2.2L16.79 15\"/> <path d=\"M11 12 5.12 2.2\"/> <path d=\"m13 12 5.88-9.8\"/> <path d=\"M8 7h8\"/> <circle cx=\"12\" cy=\"17\" r=\"5\"/> <path d=\"M12 18v-2h-.5\"/>","award":"<path d=\"m15.477 12.89 1.515 8.526a.5.5 0 0 1-.81.47l-3.58-2.687a1 1 0 0 0-1.197 0l-3.586 2.686a.5.5 0 0 1-.81-.469l1.514-8.526\"/> <circle cx=\"12\" cy=\"8\" r=\"6\"/>","shield":"<path d=\"M20 13c0 5-3.5 7.5-7.66 8.95a1 1 0 0 1-.67-.01C7.5 20.5 4 18 4 13V6a1 1 0 0 1 1-1c2 0 4.5-1.2 6.24-2.72a1.17 1.17 0 0 1 1.52 0C14.51 3.81 17 5 19 5a1 1 0 0 1 1 1z\"/>","clipboard-check":"<rect width=\"8\" height=\"4\" x=\"8\" y=\"2\" rx=\"1\" ry=\"1\"/> <path d=\"M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2\"/> <path d=\"m9 14 2 2 4-4\"/>","history":"<path d=\"M3 12a9 9 0 1 0 9-9 9.75 9.75 0 0 0-6.74 2.74L3 8\"/> <path d=\"M3 3v5h5\"/> <path d=\"M12 7v5l4 2\"/>","plus":"<path d=\"M5 12h14\"/> <path d=\"M12 5v14\"/>","eye":"<path d=\"M2.062 12.348a1 1 0 0 1 0-.696 10.75 10.75 0 0 1 19.876 0 1 1 0 0 1 0 .696 10.75 10.75 0 0 1-19.876 0\"/> <circle cx=\"12\" cy=\"12\" r=\"3\"/>","eye-off":"<path d=\"M10.733 5.076a10.744 10.744 0 0 1 11.205 6.575 1 1 0 0 1 0 .696 10.747 10.747 0 0 1-1.444 2.49\"/> <path d=\"M14.084 14.158a3 3 0 0 1-4.242-4.242\"/> <path d=\"M17.479 17.499a10.75 10.75 0 0 1-15.417-5.151 1 1 0 0 1 0-.696 10.75 10.75 0 0 1 4.446-5.143\"/> <path d=\"m2 2 20 20\"/>","share-2":"<circle cx=\"18\" cy=\"5\" r=\"3\"/> <circle cx=\"6\" cy=\"12\" r=\"3\"/> <circle cx=\"18\" cy=\"19\" r=\"3\"/> <line x1=\"8.59\" x2=\"15.42\" y1=\"13.51\" y2=\"17.49\"/> <line x1=\"15.41\" x2=\"8.59\" y1=\"6.51\" y2=\"10.49\"/>","message-square":"<path d=\"M22 17a2 2 0 0 1-2 2H6.828a2 2 0 0 0-1.414.586l-2.202 2.202A.71.71 0 0 1 2 21.286V5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2z\"/>","circle-plus":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M8 12h8\"/> <path d=\"M12 8v8\"/>","clock":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 6v6l4 2\"/>","arrow-up":"<path d=\"m5 12 7-7 7 7\"/> <path d=\"M12 19V5\"/>","info":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <path d=\"M12 16v-4\"/> <path d=\"M12 8h.01\"/>","circle-alert":"<circle cx=\"12\" cy=\"12\" r=\"10\"/> <line x1=\"12\" x2=\"12\" y1=\"8\" y2=\"12\"/> <line x1=\"12\" x2=\"12.01\" y1=\"16\" y2=\"16\"/>","chart-line":"<path d=\"M3 3v16a2 2 0 0 0 2 2h16\"/> <path d=\"m19 9-5 5-4-4-3 3\"/>","languages":"<path d=\"m5 8 6 6\"/> <path d=\"m4 14 6-6 2-3\"/> <path d=\"M2 5h12\"/> <path d=\"M7 2h1\"/> <path d=\"m22 22-5-10-5 10\"/> <path d=\"M14 18h6\"/>","layers":"<path d=\"M12.83 2.18a2 2 0 0 0-1.66 0L2.6 6.08a1 1 0 0 0 0 1.83l8.58 3.91a2 2 0 0 0 1.66 0l8.58-3.9a1 1 0 0 0 0-1.83z\"/> <path d=\"M2 12a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 12\"/> <path d=\"M2 17a1 1 0 0 0 .58.91l8.6 3.91a2 2 0 0 0 1.65 0l8.58-3.9A1 1 0 0 0 22 17\"/>","bell":"<path d=\"M10.268 21a2 2 0 0 0 3.464 0\"/> <path d=\"M3.262 15.326A1 1 0 0 0 4 17h16a1 1 0 0 0 .74-1.673C19.41 13.956 18 12.499 18 8A6 6 0 0 0 6 8c0 4.499-1.411 5.956-2.738 7.326\"/>"};
+    /** Ícono SVG en línea. clases: tamaño y color (Tailwind). Decorativo (aria-hidden) salvo que se pase etiqueta. */
+    function ico(nombre, clases = 'w-4 h-4', etiqueta = '') {
+      const p = ICONOS[nombre] || ICONOS['circle-help'];
+      const a11y = etiqueta ? `role="img" aria-label="${etiqueta}"` : 'aria-hidden="true"';
+      return `<svg class="ico ${clases}" ${a11y} viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${p}</svg>`;
+    }
+
     const DIAS_SEMANA = ['LUNES', 'MARTES', 'MIÉRCOLES', 'JUEVES', 'VIERNES', 'SÁBADO', 'DOMINGO'];
     
     const FRASES_MOTIVADORAS = [
@@ -185,7 +194,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
   const esHombre = String(sexo || '').trim().toUpperCase() === 'M';
   const sexoTxt = esHombre ? 'hombre' : 'mujer';
 
-  let datos, segmentos, emoji = '💪';
+  let datos, segmentos, emoji = '' + ico('biceps-flexed', 'w-4 h-4') + '';
   if (tipo === 'VTAPER') {
     datos = clasificarVTaper(numero, sexo);
     mtTitulo.textContent = 'RATIO V-TAPER · HOMBRO / CINTURA';
@@ -198,7 +207,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
       { corto: 'Estético', min: lims[3], max: lims[4], hex: '#a855f7' },
       { corto: 'Élite', min: lims[4], max: lims[5], hex: '#f59e0b' }
     ];
-    emoji = numero >= lims[2] ? '💪' : '📐';
+    emoji = numero >= lims[2] ? '' + ico('biceps-flexed', 'w-4 h-4') + '' : '' + ico('ruler', 'w-4 h-4') + '';
   } else if (tipo === 'IMC') {
     datos = evaluarIMC(numero, sexo);
     mtTitulo.textContent = 'ÍNDICE DE MASA CORPORAL · IMC';
@@ -209,7 +218,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
       { corto: 'Volumen', min: 25.0, max: 30.0, hex: '#0ea5e9' },
       { corto: 'Alto', min: 30.0, max: 38.0, hex: '#f43f5e' }
     ];
-    emoji = (numero >= 18.5 && numero < 25) ? '✅' : '⚖️';
+    emoji = (numero >= 18.5 && numero < 25) ? '' + ico('circle-check', 'w-4 h-4') + '' : '' + ico('scale', 'w-4 h-4') + '';
   } else if (tipo === 'GRASA') {
     datos = evaluarGrasa(numero, sexo, edad);
     mtTitulo.textContent = '% GRASA CORPORAL · COMPOSICIÓN';
@@ -221,7 +230,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
       { corto: 'Promedio', min: u1, max: u2, hex: '#f59e0b' },
       { corto: 'Alto', min: u2, max: u2 + 12, hex: '#f43f5e' }
     ];
-    emoji = numero <= u1 ? '🔥' : '📊';
+    emoji = numero <= u1 ? '' + ico('flame', 'w-4 h-4') + '' : '' + ico('chart-column', 'w-4 h-4') + '';
   }
 
   mtValor.textContent = datos.val;
@@ -290,7 +299,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
 // Lógica para abrir y calcular el gráfico tipo Donut de Masa Magra vs Masa Grasa
 function abrirModalComposicion(pesoVal, grasaPct, sexo) {
   if (!pesoVal || pesoVal === '-' || !grasaPct || grasaPct === '-') {
-    return alert("No hay datos suficientes de % Grasa Corporal en tu último control para calcular la composición.");
+    return avisar("No hay datos suficientes de % Grasa Corporal en tu último control para calcular la composición.", 'atencion');
   }
 
   const peso = parseFloat(pesoVal);
@@ -445,24 +454,142 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
     }
 
     // ---- Avisos no bloqueantes ----
+    // ==================== SILUETAS DE CARGA (v15) ====================
+    // Muestran la forma de lo que viene mientras llegan los datos, en vez de un texto «Cargando...».
+    function esqueleto(tipo = 'tarjetas', n = 3, texto = 'Cargando') {
+      const b = (cls) => `<div class="bg-slate-800/70 rounded-lg animate-pulse ${cls}"></div>`;
+      let cuerpo = '';
+      if (tipo === 'lista') {
+        cuerpo = Array.from({ length: n }, () => `<div class="flex items-center gap-3 p-3 rounded-xl bg-slate-900 border border-slate-800">
+            <div class="w-10 h-10 rounded-full bg-slate-800/70 animate-pulse shrink-0"></div>
+            <div class="flex-1 space-y-2">${b('h-3 w-2/3')}${b('h-3 w-1/3')}</div></div>`).join('');
+        cuerpo = `<div class="space-y-2">${cuerpo}</div>`;
+      } else if (tipo === 'cuadricula') {
+        cuerpo = `<div class="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 col-span-full w-full">${Array.from({ length: n }, () =>
+          `<div class="rounded-2xl bg-slate-900 border border-slate-800 p-3 space-y-2">${b('aspect-square w-full rounded-xl')}${b('h-3 w-3/4')}${b('h-3 w-1/2')}</div>`).join('')}</div>`;
+      } else if (tipo === 'texto') {
+        cuerpo = `<div class="space-y-2.5">${b('h-3 w-full')}${b('h-3 w-11/12')}${b('h-3 w-4/5')}${b('h-3 w-2/3')}</div>`;
+      } else {
+        cuerpo = `<div class="space-y-3">${Array.from({ length: n }, (x, i) => `<div class="rounded-2xl bg-slate-900 border border-slate-800 p-4 space-y-3">
+            <div class="flex items-center gap-3"><div class="w-10 h-10 rounded-full bg-slate-800/70 animate-pulse shrink-0"></div>${b('h-4 w-1/2')}</div>
+            ${b(i === 0 ? 'h-20 w-full' : 'h-12 w-full')}${b('h-3 w-2/3')}</div>`).join('')}</div>`;
+      }
+      return `<div role="status" aria-busy="true" class="w-full col-span-full"><span class="sr-only">${escHtml(texto)}…</span>${cuerpo}</div>`;
+    }
+
+    // v14: respeta la opción «reducir movimiento» del teléfono o computadora
+    function movimientoReducido() { try { return window.matchMedia('(prefers-reduced-motion: reduce)').matches; } catch (e) { return false; } }
+    function modoScroll() { return movimientoReducido() ? 'auto' : 'smooth'; }
+
+    // Emoji de estado al inicio de un mensaje → ícono y color del aviso (v14)
+    const ICONO_ESTADO = [
+      ['✅', 'circle-check', 'exito'], ['❌', 'circle-x', 'error'], ['⚠️', 'triangle-alert', 'atencion'], ['⚠', 'triangle-alert', 'atencion'],
+      ['⏱️', 'timer', 'exito'], ['🔄', 'refresh-cw', 'info'], ['📶', 'wifi-off', 'atencion'], ['📥', 'download', 'exito'],
+      ['🗑️', 'trash-2', 'info'], ['🏆', 'trophy', 'exito'], ['🔒', 'lock', 'info']
+    ];
+    const ESTILO_ESTADO = {
+      exito: { ico: 'circle-check', color: 'text-emerald-300', borde: 'border-emerald-500/50', fondo: 'bg-emerald-500/15' },
+      error: { ico: 'circle-x', color: 'text-rose-300', borde: 'border-rose-500/50', fondo: 'bg-rose-500/15' },
+      atencion: { ico: 'triangle-alert', color: 'text-amber-300', borde: 'border-amber-500/50', fondo: 'bg-amber-500/15' },
+      info: { ico: 'info', color: 'text-slate-200', borde: 'border-slate-600', fondo: 'bg-slate-700/40' }
+    };
+    function separarEstado(msg, tipo) {
+      let texto = String(msg == null ? '' : msg).trim(), icono = '';
+      for (const [e, n, t] of ICONO_ESTADO) {
+        if (texto.startsWith(e)) { texto = texto.slice(e.length).trim(); icono = n; if (!tipo) tipo = t; break; }
+      }
+      tipo = tipo || 'info';
+      return { texto, tipo, icono: icono || ESTILO_ESTADO[tipo].ico };
+    }
+
     function mostrarToast(msg, opciones) {
       let t = document.getElementById('toastGlobal');
       if (!t) {
         t = document.createElement('div');
         t.id = 'toastGlobal';
-        t.className = 'fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[60] max-w-[90vw] bg-slate-900 border border-emerald-500/50 text-emerald-300 text-xs font-bold px-4 py-3 rounded-xl shadow-lg transition-opacity duration-300';
+        t.setAttribute('role', 'status');
+        t.setAttribute('aria-live', 'polite');
         document.body.appendChild(t);
       }
-      if (opciones && opciones.accion) {
-        t.innerHTML = `<span>${escHtml(msg)}</span><button class="ml-3 underline font-extrabold text-white">${escHtml(opciones.accion)}</button>`;
-        t.querySelector('button').onclick = () => { t.style.opacity = '0'; opciones.fn && opciones.fn(); };
-      } else {
-        t.textContent = msg;
-      }
+      const e = separarEstado(msg, opciones && opciones.tipo);
+      const st = ESTILO_ESTADO[e.tipo];
+      t.className = `fixed bottom-20 md:bottom-6 left-1/2 -translate-x-1/2 z-[90] max-w-[90vw] bg-slate-900 border ${st.borde} ${st.color} text-xs font-bold px-4 py-3 rounded-xl shadow-lg transition-opacity duration-300 flex items-center gap-2`;
+      t.innerHTML = `${ico(e.icono, 'w-4 h-4 shrink-0')}<span>${escHtml(e.texto)}</span>` +
+        (opciones && opciones.accion ? `<button class="ml-2 underline font-extrabold text-white min-h-[32px]">${escHtml(opciones.accion)}</button>` : '');
+      if (opciones && opciones.accion) t.querySelector('button').onclick = () => { t.style.opacity = '0'; opciones.fn && opciones.fn(); };
       t.style.opacity = '1';
       clearTimeout(t._h);
       t._h = setTimeout(() => { t.style.opacity = '0'; }, (opciones && opciones.ms) || 4000);
     }
+
+    // ==================== AVISOS PROPIOS (v14): reemplazan alert / confirm / prompt del navegador ====================
+    // Devuelven una promesa. avisar → se cierra con «Entendido»; confirmar → true/false; preguntar → texto o null.
+    const colaDialogos = [];
+    let dialogoAbierto = false, mensajeAbierto = null;
+    function abrirDialogo(cfg) {
+      // Un mismo aviso repetido (p. ej. varios fallos de conexión seguidos) se muestra una sola vez
+      if (cfg.modo === 'aviso' && (mensajeAbierto === cfg.mensaje || colaDialogos.some(x => x.cfg.modo === 'aviso' && x.cfg.mensaje === cfg.mensaje))) return Promise.resolve();
+      return new Promise(resolve => { colaDialogos.push({ cfg, resolve }); if (!dialogoAbierto) siguienteDialogo(); });
+    }
+    function siguienteDialogo() {
+      const item = colaDialogos.shift();
+      if (!item) { dialogoAbierto = false; mensajeAbierto = null; return; }
+      dialogoAbierto = true;
+      mensajeAbierto = item.cfg.mensaje;
+      const { cfg, resolve } = item;
+      const e = separarEstado(cfg.mensaje, cfg.tipo);
+      const st = ESTILO_ESTADO[e.tipo];
+      const previo = document.activeElement;
+      const capa = document.createElement('div');
+      capa.className = 'fixed inset-0 z-[95] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-4 dlg-capa';
+      capa.innerHTML = `
+        <div role="${cfg.modo === 'aviso' ? 'alertdialog' : 'dialog'}" aria-modal="true" aria-labelledby="dlgTitulo" aria-describedby="dlgTexto"
+             class="dlg-caja w-full max-w-sm bg-slate-900 border border-slate-700 rounded-2xl p-5 shadow-2xl">
+          <div class="flex items-start gap-3">
+            <span class="w-10 h-10 shrink-0 rounded-full ${st.fondo} ${st.color} flex items-center justify-center">${ico(e.icono, 'w-5 h-5')}</span>
+            <div class="min-w-0 flex-1">
+              <h3 id="dlgTitulo" class="text-base font-extrabold text-white">${escHtml(cfg.titulo || { exito: 'Listo', error: 'No se pudo completar', atencion: 'Revisa esto', info: 'Aviso' }[e.tipo])}</h3>
+              <p id="dlgTexto" class="text-sm text-slate-300 mt-1 whitespace-pre-line break-words">${escHtml(e.texto)}</p>
+            </div>
+          </div>
+          ${cfg.modo === 'pregunta' ? `<label for="dlgEntrada" class="sr-only">${escHtml(e.texto)}</label>
+            <input id="dlgEntrada" type="${cfg.tipoEntrada || 'text'}" maxlength="${cfg.max || 200}" value="${escHtml(cfg.valor || '')}" placeholder="${escHtml(cfg.placeholder || '')}"
+              class="mt-4 w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-white text-sm focus:border-emerald-500">` : ''}
+          <div class="flex gap-2 mt-5 ${cfg.modo === 'aviso' ? 'justify-end' : ''}">
+            ${cfg.modo !== 'aviso' ? `<button data-r="no" class="flex-1 min-h-[44px] px-4 rounded-xl bg-slate-800 border border-slate-700 text-slate-200 text-sm font-bold">${escHtml(cfg.textoNo || 'Cancelar')}</button>` : ''}
+            <button data-r="si" class="${cfg.modo === 'aviso' ? 'min-w-[120px]' : 'flex-1'} min-h-[44px] px-4 rounded-xl text-sm font-extrabold ${cfg.peligro ? 'bg-rose-600 text-white' : 'bg-emerald-500 text-slate-950'}">${escHtml(cfg.textoSi || (cfg.modo === 'aviso' ? 'Entendido' : 'Aceptar'))}</button>
+          </div>
+        </div>`;
+      document.body.appendChild(capa);
+      const entrada = capa.querySelector('#dlgEntrada');
+      const cerrar = (ok) => {
+        document.removeEventListener('keydown', teclas, true);
+        capa.remove();
+        try { previo && previo.focus && previo.focus(); } catch (err) {}
+        resolve(cfg.modo === 'aviso' ? undefined : cfg.modo === 'pregunta' ? (ok ? entrada.value : null) : ok);
+        setTimeout(siguienteDialogo, 0);
+      };
+      const teclas = (ev) => {
+        if (ev.key === 'Escape') { ev.preventDefault(); cerrar(cfg.modo === 'aviso'); }
+        else if (ev.key === 'Enter' && (ev.target === entrada || cfg.modo !== 'pregunta')) { ev.preventDefault(); cerrar(true); }
+        else if (ev.key === 'Tab') {                     // el foco no sale del aviso
+          const f = [...capa.querySelectorAll('button, input')];
+          const i = f.indexOf(document.activeElement);
+          if (ev.shiftKey && i <= 0) { ev.preventDefault(); f[f.length - 1].focus(); }
+          else if (!ev.shiftKey && i === f.length - 1) { ev.preventDefault(); f[0].focus(); }
+        }
+      };
+      document.addEventListener('keydown', teclas, true);
+      capa.querySelectorAll('button[data-r]').forEach(b => b.onclick = () => cerrar(b.dataset.r === 'si'));
+      capa.addEventListener('click', ev => { if (ev.target === capa && cfg.modo !== 'aviso') cerrar(false); });
+      setTimeout(() => { (entrada || capa.querySelector(cfg.peligro ? 'button[data-r="no"]' : 'button[data-r="si"]')).focus(); }, 30);
+    }
+    /** Aviso con botón «Entendido». tipo: 'exito' | 'error' | 'atencion' | 'info' (o un emoji ✅/❌/⚠️ al inicio del texto). */
+    function avisar(mensaje, tipo, titulo) { return abrirDialogo({ modo: 'aviso', mensaje, tipo, titulo }); }
+    /** Confirmación sí/no. opciones: { titulo, textoSi, textoNo, peligro } → Promise<boolean> */
+    function confirmar(mensaje, opciones = {}) { return abrirDialogo(Object.assign({ modo: 'confirmar', mensaje, tipo: opciones.peligro ? 'atencion' : 'info' }, opciones)); }
+    /** Pregunta con un campo de texto. opciones: { titulo, valor, placeholder, textoSi, max, tipoEntrada } → Promise<string|null> */
+    function preguntar(mensaje, opciones = {}) { return abrirDialogo(Object.assign({ modo: 'pregunta', mensaje, tipo: 'info' }, opciones)); }
 
     // ---- Sonido del cronómetro ----
     // Android y los navegadores solo dejan sonar audio que nace de un toque del usuario. Por eso el
@@ -506,7 +633,7 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
       btnCrearAlumno: 'Crear Alumno',
       btnGuardarEvaluacion: 'Guardar Evaluación y Subir Fotos',
       btnGuardarRutina: 'Guardar Rutina',
-      btnAsignarPlantilla: '🔗 Designar Rutina al Alumno',
+      btnAsignarPlantilla: ico('link') + ' Designar Rutina al Alumno',
       btnGuardarPerfil: 'Guardar Cambios de Perfil',
       btnGuardarPass: 'Actualizar Contraseña',
       btnDuplicar: 'Duplicar',
@@ -518,8 +645,8 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
         const b = document.getElementById(id);
         if (b && b.disabled) {
           b.disabled = false;
-          b.innerText = (id === 'btnGuardarRutina' && estadoGlobal.edicionRutina)
-            ? '💾 Guardar cambios'
+          b.innerHTML = (id === 'btnGuardarRutina' && estadoGlobal.edicionRutina)
+            ? ico('save') + ' Guardar cambios'
             : TEXTO_BOTONES[id];
         }
       });
@@ -529,7 +656,7 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
     function manejarFalloGS(err) {
       console.error(err);
       reactivarBotones();
-      alert('No se pudo completar la operación (conexión o servidor). Revisa tu internet e inténtalo de nuevo.');
+      avisar('No se pudo completar la operación (conexión o servidor). Revisa tu internet e inténtalo de nuevo.', 'error');
     }
 
     // El servidor marca con [SESION] los errores de sesión vencida o anulada
@@ -540,7 +667,7 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
       if (!estadoGlobal.user) return;
       reactivarBotones();
       cerrarSesion(true);
-      alert('Tu sesión expiró o se cerró desde otro dispositivo. Vuelve a ingresar.');
+      avisar('Tu sesión expiró o se cerró desde otro dispositivo. Vuelve a ingresar.', 'error');
     }
     // AHORA (Interceptor que inyecta automáticamente el token de sesión en cada petición):
 function GS() {
@@ -603,7 +730,7 @@ function GS() {
               loading="lazy" decoding="async" alt="Demostración: ${escHtml(r.ejercicio)}" class="gif-inteligente gif-nativo block object-contain">
           </button>
           <button type="button" ${datos}
-            class="bg-slate-950 text-sky-300 border border-sky-500/60 rounded-xl px-3 py-2 text-xs font-extrabold active:scale-95 transition">❓ Cómo se hace · ver en grande</button>
+            class="bg-slate-950 text-sky-300 border border-sky-500/60 rounded-xl px-3 py-2 text-xs font-extrabold active:scale-95 transition">${ico('circle-help', 'w-4 h-4')} Cómo se hace · ver en grande</button>
         </div>`;
     }
     // Solo se anima el GIF que está en pantalla; fuera de pantalla vuelve a JPG (libera CPU y RAM del celular)
@@ -628,10 +755,10 @@ function GS() {
     function chipTecnica(r) {
       if (!r || !r.idEjercicio) return '';
       const en = r.nombreEn && normBusq(r.nombreEn) !== normBusq(r.ejercicio)
-        ? `<p class="text-xs text-sky-300/90 italic font-semibold mt-0.5">🇬🇧 ${escHtml(r.nombreEn)}</p>` : '';
+        ? `<p class="text-xs text-sky-300/90 italic font-semibold mt-0.5">EN · ${escHtml(r.nombreEn)}</p>` : '';
       const ayuda = !r.media ? `<button data-id="${escHtml(r.idEjercicio)}" data-nombre="${escHtml(r.ejercicio)}" data-media=""
         onclick="abrirModalEjercicio(this.dataset.id, this.dataset.nombre, this.dataset.media)"
-        class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-300 border border-sky-500/30">❓ Cómo se hace</button>` : '';
+        class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-300 border border-sky-500/30">${ico('circle-help', 'w-4 h-4')} Cómo se hace</button>` : '';
       return en + ayuda;
     }
     function miniEj() { return ''; }        // reemplazado por gifEj (se mantiene por compatibilidad)
@@ -641,7 +768,7 @@ function GS() {
     function cargarCatalogo(cb) {
       if (estadoGlobal.catalogo && estadoGlobal.catalogo.length) { if (cb) cb(); return; }
       const grid = document.getElementById('gridCatalogo');
-      if (grid) grid.innerHTML = '<p class="col-span-full text-slate-400 text-sm p-6 text-center">⏳ Cargando biblioteca...</p>';
+      if (grid) grid.innerHTML = esqueleto('cuadricula', 8, 'Cargando biblioteca');
       GS().withSuccessHandler(res => {
         if (!res || !res.success) {
           if (grid) grid.innerHTML = `<p class="col-span-full text-rose-400 text-sm p-6 text-center">${escHtml((res && res.error) || 'No se pudo cargar la biblioteca.')}</p>`;
@@ -676,7 +803,7 @@ function GS() {
       if (!selZona || selZona.options.length > 1) return;
       const zonas = [...new Set(estadoGlobal.catalogo.map(e => e.zona).filter(Boolean))];
       const op = (v, m) => `<option value="${escHtml(v)}">${escHtml(trCat(m, v))}</option>`;
-      selZona.innerHTML = '<option value="">🧍 Todas las zonas</option>' +
+      selZona.innerHTML = '<option value="">Todas las zonas</option>' +
         zonas.sort((a, b) => trCat(ZONAS_ES, a).localeCompare(trCat(ZONAS_ES, b))).map(z => op(z, ZONAS_ES)).join('');
     }
 
@@ -694,7 +821,7 @@ function GS() {
       if (selEq.dataset.firma !== firma) {
         selEq.dataset.firma = firma;
         const cuenta = eq => base.reduce((n, e) => n + (e.equipo === eq ? 1 : 0), 0);
-        selEq.innerHTML = '<option value="">🏋️ Todo el equipo' + (equipos.length ? ' (' + equipos.length + ')' : '') + '</option>' +
+        selEq.innerHTML = '<option value="">Todo el equipo' + (equipos.length ? ' (' + equipos.length + ')' : '') + '</option>' +
           equipos.map(eq => `<option value="${escHtml(eq)}">${escHtml(trCat(EQUIPOS_ES, eq))} · ${cuenta(eq)}</option>`).join('');
         selEq.disabled = equipos.length === 0;
       }
@@ -737,11 +864,11 @@ function GS() {
             <img src="${urlMini(e.media)}" loading="lazy" decoding="async" alt="" class="w-full h-full object-contain p-1">
             <button data-id="${escHtml(e.id)}" data-nombre="${escHtml(nombreEsDe(e))}" data-media="${escHtml(e.media)}"
               onclick="event.stopPropagation(); abrirModalEjercicio(this.dataset.id, this.dataset.nombre, this.dataset.media)"
-              class="absolute top-1.5 right-1.5 w-8 h-8 bg-slate-950/90 border border-sky-500/60 text-sky-300 rounded-full text-sm font-black" title="Cómo se hace">❓</button>
+              class="absolute top-1.5 right-1.5 w-8 h-8 bg-slate-950/90 border border-sky-500/60 text-sky-300 rounded-full text-sm font-black" title="Cómo se hace">${ico('circle-help', 'w-4 h-4')}</button>
           </div>
           <div class="p-2">
             <p class="text-xs font-extrabold text-white leading-tight uppercase">${escHtml(nombreEsDe(e))}</p>
-            <p class="text-[11px] text-sky-300/90 italic leading-tight mt-0.5">🇬🇧 ${escHtml(e.nombre)}</p>
+            <p class="text-[11px] text-sky-300/90 italic leading-tight mt-0.5">EN · ${escHtml(e.nombre)}</p>
             <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">${escHtml(trCat(GRUPOS_ES, e.grupo))} · ${escHtml(trCat(EQUIPOS_ES, e.equipo))}</p>
           </div>
         </div>`).join('');
@@ -760,7 +887,7 @@ function GS() {
       llenarTarjetaConEjercicio(card, e);
       mostrarToast('✅ ' + nombreEsDe(e) + ' agregado');
       cerrarModalCatalogo();
-      setTimeout(() => card.scrollIntoView({ behavior: 'smooth', block: 'center' }), 150);
+      setTimeout(() => card.scrollIntoView({ behavior: modoScroll(), block: 'center' }), 150);
     }
 
     // ---- Modal "Cómo se hace" ----
@@ -778,7 +905,7 @@ function GS() {
       const gif = document.getElementById('ejGif');
       gif.src = urlGif(media);
       document.getElementById('ejChips').innerHTML = '';
-      document.getElementById('ejInstr').innerHTML = '<p class="text-slate-400 text-sm">⏳ Cargando instrucciones...</p>';
+      document.getElementById('ejInstr').innerHTML = esqueleto('texto', 1, 'Cargando instrucciones');
       if (cacheDetalleEj[id]) { pintarDetalleEjercicio(id, nombre, media, cacheDetalleEj[id]); return; }
       GS().withSuccessHandler(d => {
         if (!d || !d.success) {
@@ -796,16 +923,16 @@ function GS() {
         const gif = document.getElementById('ejGif');
         if (!media && d.media) gif.src = urlGif(d.media);
         if (!nombre) document.getElementById('ejNombre').innerText = (d.nombreEs || d.nombre).toUpperCase();
-        document.getElementById('ejNombreEn').textContent = '🇬🇧 ' + d.nombre;
+        document.getElementById('ejNombreEn').textContent = 'EN · ' + d.nombre;
         if (esCoach()) {
           document.getElementById('ejInputEs').value = (d.nombreEs || '').toUpperCase();
           document.getElementById('ejEditarEs').classList.remove('hidden');
         }
-        const chip = (txt, cls) => `<span class="text-[11px] font-bold uppercase px-2 py-1 rounded-md border ${cls}">${escHtml(txt)}</span>`;
+        const chip = (txt, cls, icono) => `<span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase px-2 py-1 rounded-md border ${cls}">${icono ? ico(icono, 'w-3.5 h-3.5') : ''}${escHtml(txt)}</span>`;
         document.getElementById('ejChips').innerHTML =
-          chip('🎯 ' + trCat(GRUPOS_ES, d.grupo), 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30') +
-          chip('📍 ' + trCat(ZONAS_ES, d.zona), 'bg-purple-500/10 text-purple-300 border-purple-500/30') +
-          chip('🏋️ ' + trCat(EQUIPOS_ES, d.equipo), 'bg-sky-500/10 text-sky-300 border-sky-500/30');
+          chip(trCat(GRUPOS_ES, d.grupo), 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30', 'target') +
+          chip(trCat(ZONAS_ES, d.zona), 'bg-purple-500/10 text-purple-300 border-purple-500/30', 'map-pin') +
+          chip(trCat(EQUIPOS_ES, d.equipo), 'bg-sky-500/10 text-sky-300 border-sky-500/30', 'dumbbell');
         document.getElementById('ejInstr').innerHTML = d.pasos && d.pasos.length
           ? '<ol class="list-decimal pl-5 space-y-2 text-sm text-slate-200 leading-relaxed">' + d.pasos.map(p => `<li>${escHtml(p)}</li>`).join('') + '</ol>'
           : '<p class="text-slate-400 text-sm">Este ejercicio no tiene instrucciones registradas.</p>';
@@ -837,7 +964,7 @@ function GS() {
       btn.disabled = true; btn.innerText = '...';
       GS().withSuccessHandler(res => {
         btn.disabled = false; btn.innerText = 'Guardar';
-        if (!res || !res.success) { alert((res && res.error) || 'No se pudo guardar.'); return; }
+        if (!res || !res.success) { avisar((res && res.error) || 'No se pudo guardar.', 'error'); return; }
         const e = estadoGlobal.catalogo.find(x => x.id === id);
         if (e) e.nombreEs = res.nombreEs;
         document.getElementById('ejNombre').innerText = res.nombreEs.toUpperCase();
@@ -941,15 +1068,15 @@ function GS() {
       const n = Object.keys(p.datos).length;
       let estado, clase;
       if (p.soloLectura) { estado = p.enviado ? 'Última subida del alumno: ' + fmt(p.enviado) : 'El alumno aún no subió esta semana'; clase = 'text-slate-400'; }
-      else if (p.dirty) { estado = '⚠️ Tienes cambios sin subir'; clase = 'text-amber-400'; }
-      else if (p.enviado) { estado = '✅ Subido el ' + fmt(p.enviado); clase = 'text-emerald-400'; }
+      else if (p.dirty) { estado = '' + ico('triangle-alert', 'w-4 h-4') + ' Tienes cambios sin subir'; clase = 'text-amber-400'; }
+      else if (p.enviado) { estado = '' + ico('circle-check', 'w-4 h-4') + ' Subido el ' + fmt(p.enviado); clase = 'text-emerald-400'; }
       else { estado = 'Aún no subes esta semana'; clase = 'text-slate-400'; }
       // El botón aparece solo si hay al menos UN ejercicio con todas sus series completas y algo sin subir
       const completos = p.soloLectura ? 0 : ejerciciosCompletosSemana();
       const puedeSubir = !p.soloLectura && (p.subiendo || (p.dirty && completos > 0));
       if (!p.soloLectura && p.dirty && completos === 0) { estado = 'Completa al menos un ejercicio (todas sus series ✓) para subir tu semana'; clase = 'text-slate-400'; }
       const boton = !puedeSubir ? '' :
-        `<button id="btnSubirSemana" onclick="subirProgresoSemanal()" ${p.subiendo ? 'disabled' : ''} class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl transition">${p.subiendo ? 'Subiendo...' : '📤 Subir progreso semanal'}</button>`;
+        `<button id="btnSubirSemana" onclick="subirProgresoSemanal()" ${p.subiendo ? 'disabled' : ''} class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl transition">${p.subiendo ? 'Subiendo...' : '' + ico('upload', 'w-4 h-4') + ' Subir progreso semanal'}</button>`;
       el.innerHTML = `
         <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3">
           <div>
@@ -967,13 +1094,13 @@ function GS() {
         const i = k.indexOf('|');
         return { dia: k.slice(0, i), clave: k.slice(i + 1), valor: p.datos[k] };
       });
-      if (!registros.length) return alert('Aún no registraste pesos ni marcaste ejercicios esta semana.');
-      if (!ejerciciosCompletosSemana()) return alert('Completa al menos un ejercicio (todas sus series ✓) antes de subir tu semana.');
+      if (!registros.length) return avisar('Aún no registraste pesos ni marcaste ejercicios esta semana.', 'atencion');
+      if (!ejerciciosCompletosSemana()) return avisar('Completa al menos un ejercicio (todas sus series ✓) antes de subir tu semana.', 'atencion');
       p.subiendo = true;
       actualizarEstadoSubida();
       GS().withSuccessHandler(res => {
         p.subiendo = false;
-        if (!res || !res.success) { actualizarEstadoSubida(); return alert((res && res.error) || 'No se pudo subir el progreso.'); }
+        if (!res || !res.success) { actualizarEstadoSubida(); return avisar((res && res.error) || 'No se pudo subir el progreso.', 'error'); }
         p.dirty = false;
         p.enviado = res.semana.ts;
         LS.set(claveStorageProg(p), JSON.stringify({ dirty: false, datos: p.datos }));
@@ -1069,7 +1196,7 @@ function GS() {
       cont.innerHTML = `
         <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800 space-y-4">
           <div>
-            <h4 class="text-sm sm:text-base font-bold text-emerald-400 uppercase tracking-wider">📅 Comparativa por semanas</h4>
+            <h4 class="text-sm sm:text-base font-bold text-emerald-400 uppercase tracking-wider">${ico('calendar', 'w-4 h-4')} Comparativa por semanas</h4>
             <p class="text-xs text-slate-400">Elige dos semanas del calendario para ver cómo cambió cada carga.</p>
           </div>
           <div class="grid grid-cols-1 md:grid-cols-3 gap-3">
@@ -1369,7 +1496,7 @@ function GS() {
           if (res && res.success && res.user) { if (estadoGlobal.user) aplicarDatosFrescos(res); else entrarConDatos(res); return; }
           LS.del(CLAVE_TOKEN);                       // sesión vencida o anulada: pide usuario y contraseña
           LS.del(CLAVE_CACHE_SESION);
-          if (estadoGlobal.user) { cerrarSesion(true); alert('Tu sesión expiró o se cerró desde otro dispositivo. Vuelve a ingresar.'); }
+          if (estadoGlobal.user) { cerrarSesion(true); avisar('Tu sesión expiró o se cerró desde otro dispositivo. Vuelve a ingresar.', 'error'); }
         })
         .restaurarSesion(token);
     }
@@ -1426,7 +1553,7 @@ function GS() {
       if (vista === 'HISTORIAL') {
         setTimeout(() => inicializarGraficosSeparados(), 60);
       }
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: modoScroll() });
     }
 
 
@@ -1569,7 +1696,7 @@ function GS() {
       } else {
         cont.innerHTML = `
           <button onclick="abrirHojaCheckin()" class="w-full text-left bg-slate-900 border border-emerald-500/40 rounded-2xl p-4 flex items-center gap-3 active:scale-[0.99] transition">
-            <span class="w-11 h-11 rounded-xl bg-emerald-500/15 text-xl flex items-center justify-center shrink-0">📋</span>
+            <span class="w-11 h-11 rounded-xl bg-emerald-500/15 text-xl flex items-center justify-center shrink-0">${ico('clipboard-list', 'w-6 h-6')}</span>
             <span class="min-w-0"><span class="block text-sm font-extrabold text-white">Check-in de la semana</span><span class="block text-xs text-slate-400">Cuéntale a tu coach cómo te fue · 1 minuto</span></span>
             <span class="ml-auto text-emerald-400 font-black">›</span>
           </button>`;
@@ -1619,7 +1746,7 @@ function GS() {
     function irAEntrenarHoy() {
       navegarAlumno('ENTRENAMIENTO');
       seleccionarDiaRutina(obtenerDiaActualSemana());
-      setTimeout(() => { const el = document.getElementById('contenedorRutinaAlumno'); if (el) el.scrollIntoView({ behavior: 'smooth', block: 'start' }); }, 80);
+      setTimeout(() => { const el = document.getElementById('contenedorRutinaAlumno'); if (el) el.scrollIntoView({ behavior: modoScroll(), block: 'start' }); }, 80);
     }
 
     function renderPerfilAlumno() {

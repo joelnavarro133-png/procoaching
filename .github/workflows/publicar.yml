@@ -26,20 +26,22 @@ jobs:
       name: github-pages
       url: ${{ steps.despliegue.outputs.page_url }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@v7
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
+      - name: Preparar los estilos (Tailwind)
+        run: npx --yes tailwindcss@3.4.19 -c tailwind.config.cjs -i web/css/tailwind-entrada.css -o web/css/tailwind.css --minify
       - name: Versión de la interfaz y biblioteca de ejercicios
         env:
           VERSION_APP: ${{ github.run_number }}
         run: node scripts/preparar-web.mjs
-      - uses: actions/configure-pages@v5
-      - uses: actions/upload-pages-artifact@v3
+      - uses: actions/configure-pages@v6
+      - uses: actions/upload-pages-artifact@v5
         with:
           path: web
       - id: despliegue
-        uses: actions/deploy-pages@v4
+        uses: actions/deploy-pages@v5
 
   apk:
     name: Compilar APK
@@ -50,7 +52,7 @@ jobs:
       # creando la variable WEB_URL en Settings → Secrets and variables → Actions → Variables.
       WEB_URL: ${{ vars.WEB_URL != '' && vars.WEB_URL || format('https://{0}.github.io/{1}/', github.repository_owner, github.event.repository.name) }}
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
 
       - name: Revisar la llave de firma
         env:
@@ -63,18 +65,18 @@ jobs:
           fi
           echo "$PC_LLAVE_BASE64" | base64 -d > "$RUNNER_TEMP/procoaching.p12"
 
-      - uses: actions/setup-node@v4
+      - uses: actions/setup-node@v7
         with:
           node-version: 22
           cache: npm
 
-      - uses: actions/setup-java@v4
+      - uses: actions/setup-java@v6
         with:
           distribution: temurin
           java-version: 21
           cache: gradle
 
-      - uses: android-actions/setup-android@v3
+      - uses: android-actions/setup-android@v4
         with:
           packages: 'platform-tools'
 
@@ -97,7 +99,7 @@ jobs:
           cp app/build/outputs/apk/release/app-release.apk "$GITHUB_WORKSPACE/ProCoaching.apk"
 
       - name: Publicar el APK
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@v3
         with:
           tag_name: v1.0.${{ github.run_number }}
           name: PRO COACHING 1.0.${{ github.run_number }}

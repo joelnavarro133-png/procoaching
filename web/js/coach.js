@@ -41,7 +41,7 @@
       const pass = document.getElementById('regPass').value;
       const nivel = document.getElementById('regNivel').value;
       const btn = document.getElementById('btnCrearAlumno');
-      if (!nombre || !usuario || !pass) return alert('Completa todos los campos.');
+      if (!nombre || !usuario || !pass) return avisar('Completa todos los campos.', 'atencion');
 
       btn.innerText = 'Creando carpeta en Drive...';
       btn.disabled = true;
@@ -51,7 +51,7 @@
         .withSuccessHandler(res => {
           btn.innerText = 'Crear Alumno';
           btn.disabled = false;
-          alert(res.mensaje || res.error);
+          avisar(res.mensaje || res.error, res.success ? 'exito' : 'error');
           if (res.success) {
             estadoGlobal.alumnos = res.alumnos;
             actualizarSelectoresAlumnos();
@@ -67,11 +67,11 @@
     async function procesarYGuardarEvaluacion() {
       const idAlumno = document.getElementById('selectAlumnoMedidas').value;
       const fecha = document.getElementById('evFecha').value;
-      if (!idAlumno || !fecha) return alert('Selecciona alumno y fecha.');
+      if (!idAlumno || !fecha) return avisar('Selecciona alumno y fecha.', 'atencion');
       const alertaMedidas = document.getElementById('alertaMedidasAtipicas');
       if (alertaMedidas && !alertaMedidas.classList.contains('hidden')) {
-        alertaMedidas.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        return alert('Hay medidas que no cuadran (revisa el aviso rojo). Corrígelas antes de guardar la evaluación.');
+        alertaMedidas.scrollIntoView({ behavior: modoScroll(), block: 'center' });
+        return avisar('Hay medidas que no cuadran (revisa el aviso rojo). Corrígelas antes de guardar la evaluación.', 'atencion');
       }
 
       const btn = document.getElementById('btnGuardarEvaluacion');
@@ -127,7 +127,7 @@
         .withSuccessHandler(res => {
           btn.innerText = 'Guardar Evaluación y Subir Fotos';
           btn.disabled = false;
-          alert(res.mensaje || res.error);
+          avisar(res.mensaje || res.error, res.success ? 'exito' : 'error');
           if (res.success) {
             document.getElementById('fotoFrente').value = '';
             document.getElementById('fotoPerfil').value = '';
@@ -141,7 +141,7 @@
       const idAlumno = document.getElementById('selectAlumnoMedidas').value;
       const nuevoNivel = document.getElementById('updateNivelSelect').value;
       GS()
-        .withSuccessHandler(res => alert(res.mensaje || res.error))
+        .withSuccessHandler(res => avisar(res.mensaje || res.error, res.success ? 'exito' : 'error'))
         .actualizarNivelAlumno(idAlumno, nuevoNivel);
     }
 
@@ -162,24 +162,24 @@
         <div class="flex items-center gap-2 mb-3">
           <span class="r-num shrink-0 w-8 h-8 rounded-lg bg-sky-500/15 border border-sky-500/40 text-sky-300 font-black text-xs flex items-center justify-center"></span>
           <select class="r-dia flex-1 min-w-0 p-2.5 bg-slate-900 rounded-xl border border-slate-700 text-emerald-400 font-extrabold text-sm">${opcionesDias}</select>
-          <button type="button" onclick="quitarTarjetaConstructor(this)" class="shrink-0 w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold" title="Quitar ejercicio">🗑️</button>
+          <button type="button" onclick="quitarTarjetaConstructor(this)" class="shrink-0 w-10 h-10 rounded-xl bg-rose-500/10 border border-rose-500/30 text-rose-400 font-bold" title="Quitar ejercicio">${ico('trash-2', 'w-4 h-4')}</button>
         </div>
         <div class="flex gap-3 items-start">
-          <div class="r-media shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center text-3xl">🏋️</div>
+          <div class="r-media shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center text-3xl">${ico('dumbbell', 'w-8 h-8')}</div>
           <div class="flex-1 min-w-0 space-y-2">
             <textarea rows="2" placeholder="NOMBRE DEL EJERCICIO" class="r-ejer w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm font-extrabold text-white uppercase resize-none leading-snug"></textarea>
             <p class="r-en hidden text-xs text-sky-300/90 italic font-semibold leading-tight"></p>
             <input type="text" placeholder="MÚSCULO (ej. PECHO)" class="r-musc w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-emerald-300 uppercase">
           </div>
         </div>
-        <button type="button" onclick="abrirCatalogoParaFila(this)" class="mt-2 w-full py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-bold">📚 Elegir / cambiar ejercicio de la biblioteca</button>
+        <button type="button" onclick="abrirCatalogoParaFila(this)" class="mt-2 w-full py-2 rounded-xl bg-sky-500/10 border border-sky-500/30 text-sky-300 text-xs font-bold">${ico('library', 'w-4 h-4')} Elegir / cambiar ejercicio de la biblioteca</button>
         <div class="grid grid-cols-3 gap-2 mt-3">
           <div><label class="${lbl}">Series</label><input type="number" inputmode="numeric" min="1" placeholder="4" value="${escHtml(v('.r-ser', ''))}" class="r-ser ${inp}"></div>
           <div><label class="${lbl}">Reps</label><input type="text" placeholder="10 / 8-10-12" value="${escHtml(v('.r-rep', ''))}" class="r-rep ${inp}"></div>
-          <div><label class="${lbl} text-emerald-400">Descanso (s)</label><input type="number" inputmode="numeric" min="0" placeholder="90" value="${escHtml(v('.r-desc', ''))}" class="r-desc ${inp} text-emerald-400 border-emerald-800"></div>
+          <div><label class="${lbl} text-emerald-400">Descanso (s)</label><input type="number" inputmode="numeric" min="0" placeholder="90" value="${escHtml(v('.r-desc', ''))}" class="r-desc ${inp.replace('border-slate-700', 'border-emerald-800')} text-emerald-400"></div>
         </div>
         <div class="mt-3">
-          <label class="${lbl}">⚡ Tempo (segundos): bajar · pausa · subir · pausa</label>
+          <label class="${lbl}">${ico('zap', 'w-4 h-4')} Tempo (segundos): bajar · pausa · subir · pausa</label>
           <div class="grid grid-cols-4 gap-2">
             <input type="text" inputmode="numeric" placeholder="3" value="${escHtml(v('.r-exc', ''))}" class="r-exc ${inp} text-amber-300" title="Excéntrica (bajada)">
             <input type="text" inputmode="numeric" placeholder="1" value="${escHtml(v('.r-pexc', ''))}" class="r-pexc ${inp} text-amber-300" title="Pausa excéntrica">
@@ -202,7 +202,7 @@
       card.querySelector('.r-idej').value = e.id;
       card.querySelector('.r-ejer').value = nombreEsDe(e);
       const en = card.querySelector('.r-en');
-      en.textContent = '🇬🇧 ' + e.nombre;
+      en.textContent = 'EN · ' + e.nombre;
       en.classList.remove('hidden');
       card.querySelector('.r-musc').value = trCat(GRUPOS_ES, e.grupo);
       const caja = card.querySelector('.r-media');
@@ -226,7 +226,7 @@
       if (u.siguiente && u.siguiente.parentElement === u.lista) u.lista.insertBefore(u.card, u.siguiente);
       else u.lista.appendChild(u.card);
       renumerarConstructor();
-      u.card.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      u.card.scrollIntoView({ behavior: modoScroll(), block: 'center' });
     }
 
     function renumerarConstructor() {
@@ -268,8 +268,8 @@
     function ejecutarAsignacionPlantilla() {
       const idPlantilla = document.getElementById('selectPlantillaAsignar').value;
       const idAlumno = document.getElementById('selectAlumnoDestinoPlantilla').value;
-      if (!idPlantilla) return alert('Primero debes crear al menos una plantilla en el constructor.');
-      if (!idAlumno) return alert('Selecciona un alumno destino.');
+      if (!idPlantilla) return avisar('Primero debes crear al menos una plantilla en el constructor.', 'atencion');
+      if (!idAlumno) return avisar('Selecciona un alumno destino.', 'atencion');
 
       const btn = document.getElementById('btnAsignarPlantilla');
       btn.innerText = 'Asignando...';
@@ -277,9 +277,9 @@
 
       GS()
         .withSuccessHandler(res => {
-          btn.innerText = '🔗 Designar Rutina al Alumno';
+          btn.innerHTML = ico('link') + ' Designar Rutina al Alumno';
           btn.disabled = false;
-          alert(res.mensaje || res.error);
+          avisar(res.mensaje || res.error, res.success ? 'exito' : 'error');
         })
         .asignarPlantillaAAlumno(idPlantilla, idAlumno);
     }
@@ -291,9 +291,9 @@
       const id = rutina[0].idRutina, nom = rutina[0].nombreRutina || 'Rutina';
       return `
         <div class="flex gap-2 mb-4">
-          <button onclick="editarRutinaAsignada()" class="flex-1 min-w-0 bg-amber-500/15 border border-amber-500/40 text-amber-300 font-extrabold text-xs px-3 py-3 rounded-xl active:scale-[0.98] transition whitespace-nowrap">✏️ Editar</button>
-          <button onclick="abrirDuplicarRutina()" class="flex-1 min-w-0 bg-sky-500/15 border border-sky-500/40 text-sky-300 font-extrabold text-xs px-3 py-3 rounded-xl active:scale-[0.98] transition whitespace-nowrap">📑 Duplicar</button>
-          <button onclick="borrarRutinaAsignada()" class="shrink-0 bg-slate-950 border border-rose-500/30 text-rose-400 font-bold text-xs px-4 py-3 rounded-xl" title="Eliminar la rutina «${escHtml(nom)}»">🗑️</button>
+          <button onclick="editarRutinaAsignada()" class="flex-1 min-w-0 bg-amber-500/15 border border-amber-500/40 text-amber-300 font-extrabold text-xs px-3 py-3 rounded-xl active:scale-[0.98] transition whitespace-nowrap">${ico('pencil', 'w-4 h-4')} Editar</button>
+          <button onclick="abrirDuplicarRutina()" class="flex-1 min-w-0 bg-sky-500/15 border border-sky-500/40 text-sky-300 font-extrabold text-xs px-3 py-3 rounded-xl active:scale-[0.98] transition whitespace-nowrap">${ico('copy', 'w-4 h-4')} Duplicar</button>
+          <button onclick="borrarRutinaAsignada()" class="shrink-0 bg-slate-950 border border-rose-500/30 text-rose-400 font-bold text-xs px-4 py-3 rounded-xl" title="Eliminar la rutina «${escHtml(nom)}»">${ico('trash-2', 'w-4 h-4')}</button>
         </div>`;
     }
 
@@ -322,7 +322,7 @@
           const op = [...selTipo.options].find(o => o.value === String(r.tipoEjercicio).toUpperCase());
           if (op) selTipo.value = op.value;
         }
-        if (r.nombreEn) { const en = card.querySelector('.r-en'); en.textContent = '🇬🇧 ' + r.nombreEn; en.classList.remove('hidden'); }
+        if (r.nombreEn) { const en = card.querySelector('.r-en'); en.textContent = 'EN · ' + r.nombreEn; en.classList.remove('hidden'); }
         if (r.media) {
           const caja = card.querySelector('.r-media');
           caja.className = 'r-media shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-white border border-slate-700 overflow-hidden flex items-center justify-center cursor-pointer';
@@ -346,7 +346,7 @@
 
     function editarRutinaAsignada() {
       const rutina = estadoGlobal.rutinaActual || [];
-      if (!rutina.length || !rutina[0].idRutina) return alert('Este alumno no tiene una rutina guardada todavía.');
+      if (!rutina.length || !rutina[0].idRutina) return avisar('Este alumno no tiene una rutina guardada todavía.', 'atencion');
       const idAlumno = (estadoGlobal.checkinsCoach || {}).idAlumno || document.getElementById('selectAlumnoAnalizar')?.value || '';
       const alu = alumnoPorId(idAlumno) || {};
       estadoGlobal.edicionRutina = { idRutina: rutina[0].idRutina, destino: idAlumno, nombre: rutina[0].nombreRutina || '' };
@@ -362,9 +362,9 @@
       document.getElementById('txtEdicionRutina').textContent =
         `"${rutina[0].nombreRutina || 'Rutina'}" de ${alu.nombre || 'el alumno'} · ${rutina.length} ejercicio(s). Al guardar se reemplaza la rutina actual y se conservan los pesos ya registrados.`;
       document.getElementById('avisoEdicionRutina').classList.remove('hidden');
-      document.getElementById('btnGuardarRutina').innerText = '💾 Guardar cambios';
+      document.getElementById('btnGuardarRutina').innerHTML = ico('save') + ' Guardar cambios';
       cambiarTabCoach('tabCrearRutina');
-      document.getElementById('avisoEdicionRutina').scrollIntoView({ behavior: 'smooth', block: 'center' });
+      document.getElementById('avisoEdicionRutina').scrollIntoView({ behavior: modoScroll(), block: 'center' });
     }
 
     function cancelarEdicionRutina(silencioso = false) {
@@ -408,20 +408,20 @@
         }
       });
 
-      if (lista.length === 0) return alert('Agrega al menos un ejercicio.');
+      if (lista.length === 0) return avisar('Agrega al menos un ejercicio.', 'atencion');
       const btn = document.getElementById('btnGuardarRutina');
-      const textoBoton = ed ? '💾 Guardar cambios' : 'Guardar Rutina';
+      const textoBoton = ed ? ico('save') + ' Guardar cambios' : 'Guardar Rutina';
       btn.innerText = 'Guardando...';
       btn.disabled = true;
 
       const alTerminar = res => {
-        btn.innerText = textoBoton;
+        btn.innerHTML = textoBoton;
         btn.disabled = false;
         if (res && res.plantillas) {
           estadoGlobal.plantillas = res.plantillas;
           actualizarSelectorPlantillas();
         }
-        alert((res && (res.mensaje || res.error)) || 'No se pudo guardar.');
+        avisar((res && (res.mensaje || res.error)) || 'No se pudo guardar.', res && res.success ? 'exito' : 'error');
         if (ed && res && res.success) {
           const idAlumno = ed.destino;
           cancelarEdicionRutina(true); // silencioso: evita toast "Edición cancelada"
@@ -445,15 +445,15 @@
 
     function abrirDuplicarRutina() {
       const rutina = estadoGlobal.rutinaActual || [];
-      if (!rutina.length || !rutina[0].idRutina) return alert('Este alumno no tiene una rutina guardada todavía.');
+      if (!rutina.length || !rutina[0].idRutina) return avisar('Este alumno no tiene una rutina guardada todavía.', 'atencion');
       const idAlumno = (estadoGlobal.checkinsCoach || {}).idAlumno || '';
       const nom = rutina[0].nombreRutina || 'Rutina';
       estadoGlobal.duplicando = { idRutina: rutina[0].idRutina, desde: 'ALUMNO', origen: idAlumno };
 
       const otros = (estadoGlobal.alumnos || []).filter(a => a.id !== idAlumno);
       document.getElementById('dupDestino').innerHTML =
-        '<option value="PLANTILLA">📋 Mi catálogo de plantillas</option>' +
-        otros.map(a => `<option value="${escHtml(a.id)}">👤 ${escHtml(a.nombre)}</option>`).join('');
+        '<option value="PLANTILLA">Mi catálogo de plantillas</option>' +
+        otros.map(a => `<option value="${escHtml(a.id)}">${escHtml(a.nombre)}</option>`).join('');
       document.getElementById('dupNombre').value = nom + ' (copia)';
       document.getElementById('dupOrigen').textContent = `Origen: "${nom}" · ${rutina.length} ejercicio(s)`;
       document.getElementById('hojaDuplicar').classList.remove('hidden');
@@ -465,7 +465,7 @@
       if (!d) return;
       const hacia = document.getElementById('dupDestino').value;
       const nombreNuevo = document.getElementById('dupNombre').value.trim();
-      if (!hacia) return alert('Selecciona el destino.');
+      if (!hacia) return avisar('Selecciona el destino.', 'atencion');
       const btn = document.getElementById('btnDuplicar');
       btn.disabled = true; btn.innerText = 'Duplicando...';
       GS().withSuccessHandler(res => {
@@ -475,16 +475,20 @@
           cerrarDuplicar();
           mostrarToast('✅ Rutina duplicada');
         }
-        alert((res && (res.mensaje || res.error)) || 'No se pudo duplicar.');
+        avisar((res && (res.mensaje || res.error)) || 'No se pudo duplicar.', res && res.success ? 'exito' : 'error');
       }).duplicarRutina({ idRutina: d.idRutina, desde: d.desde, hacia, nombreNuevo, idCoach: estadoGlobal.user.id });
     }
 
     function borrarRutinaAsignada() {
       const rutina = estadoGlobal.rutinaActual || [];
       if (!rutina.length || !rutina[0].idRutina) return;
-      if (!confirm(`¿Eliminar la rutina "${rutina[0].nombreRutina || ''}" (${rutina.length} ejercicios)?\n\nEl progreso ya registrado por el alumno NO se borra.`)) return;
+      confirmar(`¿Eliminar la rutina «${rutina[0].nombreRutina || ''}» (${rutina.length} ejercicios)?\n\nEl progreso ya registrado por el alumno NO se borra.`,
+        { titulo: 'Eliminar rutina', textoSi: 'Eliminar', peligro: true }).then(ok => { if (ok) borrarRutinaAsignadaConfirmado(); });
+    }
+    function borrarRutinaAsignadaConfirmado() {
+      const rutina = estadoGlobal.rutinaActual || [];
       GS().withSuccessHandler(res => {
-        alert((res && (res.mensaje || res.error)) || 'No se pudo eliminar.');
+        avisar((res && (res.mensaje || res.error)) || 'No se pudo eliminar.', res && res.success ? 'exito' : 'error');
         if (res && res.success) {
           estadoGlobal.rutinaActual = [];
           const idAlumno = (estadoGlobal.checkinsCoach || {}).idAlumno;
@@ -561,7 +565,7 @@
         a.href = r.url; a.download = r.nombre; a.rel = 'noopener';
         document.body.appendChild(a); a.click(); a.remove();
       } catch (e) {
-        try { window.open(r.url, '_blank'); } catch (e2) { alert('No se pudo descargar el PDF en este navegador.'); }
+        try { window.open(r.url, '_blank'); } catch (e2) { avisar('No se pudo descargar el PDF en este navegador.', 'error'); }
       }
     }
 
@@ -574,18 +578,18 @@
         <div class="mt-3 bg-slate-950 border border-emerald-500/30 rounded-xl p-3">
           <p class="text-xs text-slate-400 mb-2">Listo: <span class="text-emerald-400 font-bold">${escHtml(hecho.nombre)}</span></p>
           <div class="flex flex-wrap gap-2">
-            <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 min-w-[130px] text-center bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">📥 Descargar PDF</button>
-            ${telDestino ? `<button onclick="enviarReportePorWhatsApp('${escHtml(idAlumno)}', ${paraCoach ? 'true' : 'false'})" class="flex-1 min-w-[130px] bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl active:scale-[0.98] transition">💬 Enviar ${escHtml(destino)}</button>` : ''}
+            <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 min-w-[130px] text-center bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">${ico('download', 'w-4 h-4')} Descargar PDF</button>
+            ${telDestino ? `<button onclick="enviarReportePorWhatsApp('${escHtml(idAlumno)}', ${paraCoach ? 'true' : 'false'})" class="flex-1 min-w-[130px] bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl active:scale-[0.98] transition">${ico('message-circle', 'w-4 h-4')} Enviar ${escHtml(destino)}</button>` : ''}
           </div>
-          <p class="text-[11px] text-slate-400 mt-2">🔒 El reporte es privado: no se comparte por enlace. Se envía como archivo adjunto.</p>
+          <p class="text-[11px] text-slate-400 mt-2">${ico('lock', 'w-4 h-4')} El reporte es privado: no se comparte por enlace. Se envía como archivo adjunto.</p>
         </div>` : '';
       return `
         <div id="bloqueReportePDF-${escHtml(idAlumno)}" class="bg-slate-900/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
-          <h3 class="text-sm font-extrabold text-white mb-1">📄 Reporte PDF de progreso</h3>
+          <h3 class="text-sm font-extrabold text-white mb-1">${ico('file-text', 'w-4 h-4')} Reporte PDF de progreso</h3>
           <p class="text-xs text-slate-400 mb-3">Incluye medidas y composición corporal, progreso de cargas, adherencia, check-ins y las fotos de antes y después.</p>
           <button id="btnReporte-${escHtml(idAlumno)}" onclick="generarReportePDFCliente('${escHtml(idAlumno)}', ${paraCoach ? 'true' : 'false'})"
             class="w-full sm:w-auto bg-emerald-500 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-xl active:scale-[0.98] transition">
-            ${hecho ? '🔄 Volver a generar' : '📄 Generar reporte PDF'}
+            ${hecho ? '' + ico('refresh-cw', 'w-4 h-4') + ' Volver a generar' : '' + ico('file-text', 'w-4 h-4') + ' Generar reporte PDF'}
           </button>
           ${enlace}
         </div>`;
@@ -593,12 +597,12 @@
 
     function generarReportePDFCliente(idAlumno, paraCoach) {
       const btn = document.getElementById('btnReporte-' + idAlumno);
-      const txtPrev = btn ? btn.innerText : '📄 Generar reporte PDF';
-      if (btn) { btn.disabled = true; btn.innerText = '⏳ Generando PDF...'; btn.classList.add('opacity-60'); }
+      const txtPrev = btn ? btn.innerHTML : ico('file-text') + ' Generar reporte PDF';
+      if (btn) { btn.disabled = true; btn.innerHTML = ico('loader-circle', 'w-4 h-4 animate-spin') + ' Generando PDF...'; btn.classList.add('opacity-60'); }
       GS().withSuccessHandler(res => {
         if (!res || !res.success) {
-          if (btn) { btn.disabled = false; btn.innerText = txtPrev; btn.classList.remove('opacity-60'); }
-          return alert((res && res.error) || 'No se pudo generar el reporte.');
+          if (btn) { btn.disabled = false; btn.innerHTML = txtPrev; btn.classList.remove('opacity-60'); }
+          return avisar((res && res.error) || 'No se pudo generar el reporte.', 'error');
         }
         const previo = reportesGenerados[idAlumno];
         if (previo && previo.url) { try { URL.revokeObjectURL(previo.url); } catch (e) {} }
@@ -610,7 +614,7 @@
 
         const contCoach = document.getElementById('estadoReporteCoach-' + idAlumno);
         if (contCoach) {
-          if (btn) { btn.disabled = false; btn.innerText = '🔄 Volver a generar PDF'; btn.classList.remove('opacity-60'); }
+          if (btn) { btn.disabled = false; btn.innerHTML = ico('refresh-cw') + ' Volver a generar PDF'; btn.classList.remove('opacity-60'); }
           contCoach.innerHTML = barraDescargaReporteCoach(idAlumno);
         }
         mostrarToast('✅ Reporte listo para descargar o enviar');
@@ -624,12 +628,12 @@
       return `
         <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
           <div class="min-w-0">
-            <p class="text-xs font-extrabold text-emerald-400 truncate">📄 ${escHtml(hecho.nombre)}</p>
-            <p class="text-[11px] text-slate-400">🔒 Privado en Drive · Se comparte como archivo adjunto</p>
+            <p class="text-xs font-extrabold text-emerald-400 truncate">${ico('file-text', 'w-4 h-4')} ${escHtml(hecho.nombre)}</p>
+            <p class="text-[11px] text-slate-400">${ico('lock', 'w-4 h-4')} Privado en Drive · Se comparte como archivo adjunto</p>
           </div>
           <div class="flex gap-2 w-full sm:w-auto">
-            <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 sm:flex-none bg-slate-950 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">📥 Descargar</button>
-            ${a.whatsapp ? `<button onclick="enviarReportePorWhatsApp('${escHtml(idAlumno)}', true)" class="flex-1 sm:flex-none bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl">💬 Enviar WhatsApp</button>` : ''}
+            <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 sm:flex-none bg-slate-950 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">${ico('download', 'w-4 h-4')} Descargar</button>
+            ${a.whatsapp ? `<button onclick="enviarReportePorWhatsApp('${escHtml(idAlumno)}', true)" class="flex-1 sm:flex-none bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl">${ico('message-circle', 'w-4 h-4')} Enviar WhatsApp</button>` : ''}
           </div>
         </div>`;
     }
@@ -666,9 +670,9 @@
       const tel = telWhatsApp(a.whatsapp);
       const cuerpo = tel
         ? `<div class="flex flex-wrap gap-2">
-             <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','resumen')" class="flex-1 min-w-[150px] bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl active:scale-[0.98] transition">📊 Resumen semanal</button>
-             <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','recordatorio')" class="flex-1 min-w-[150px] bg-slate-950 border border-emerald-500/40 text-emerald-300 font-bold text-xs px-4 py-3 rounded-xl active:scale-[0.98] transition">⏰ Recordar entrenamiento</button>
-             <button onclick="abrirWhatsApp('${escHtml(a.whatsapp)}','')" class="shrink-0 bg-slate-950 border border-slate-700 text-slate-300 font-bold text-xs px-4 py-3 rounded-xl">💬 Escribir</button>
+             <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','resumen')" class="flex-1 min-w-[150px] bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-3 rounded-xl active:scale-[0.98] transition">${ico('chart-column', 'w-4 h-4')} Resumen semanal</button>
+             <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','recordatorio')" class="flex-1 min-w-[150px] bg-slate-950 border border-emerald-500/40 text-emerald-300 font-bold text-xs px-4 py-3 rounded-xl active:scale-[0.98] transition">${ico('alarm-clock', 'w-4 h-4')} Recordar entrenamiento</button>
+             <button onclick="abrirWhatsApp('${escHtml(a.whatsapp)}','')" class="shrink-0 bg-slate-950 border border-slate-700 text-slate-300 font-bold text-xs px-4 py-3 rounded-xl">${ico('message-circle', 'w-4 h-4')} Escribir</button>
            </div>
            <p class="text-[11px] text-slate-400 mt-2">Número: +${escHtml(tel)} · <button onclick="pedirWhatsApp('${escHtml(idAlumno)}')" class="underline text-slate-400">cambiar</button></p>`
         : `<div class="flex flex-wrap items-center gap-2">
@@ -678,7 +682,7 @@
            <p class="text-[11px] text-slate-400 mt-2">Este alumno aún no tiene WhatsApp registrado.</p>`;
       return `
         <div id="bloqueWhatsAppCoach" class="bg-slate-900/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
-          <h3 class="text-sm font-extrabold text-white mb-3">💬 Enviar por WhatsApp</h3>
+          <h3 class="text-sm font-extrabold text-white mb-3">${ico('message-circle', 'w-4 h-4')} Enviar por WhatsApp</h3>
           ${cuerpo}
         </div>`;
     }
@@ -690,9 +694,9 @@
     }
     function pedirWhatsApp(idAlumno) {
       const a = alumnoPorId(idAlumno) || {};
-      const nuevo = prompt('Número de WhatsApp del alumno (sin código de país si es de Perú):', a.whatsapp || '');
-      if (nuevo === null) return;
-      guardarWhatsApp(idAlumno, nuevo);
+      preguntar('Número de WhatsApp del alumno (sin código de país si es de Perú):',
+        { titulo: 'WhatsApp del alumno', valor: a.whatsapp || '', placeholder: 'Ej. 987654321', tipoEntrada: 'tel', max: 20, textoSi: 'Guardar' })
+        .then(nuevo => { if (nuevo !== null) guardarWhatsApp(idAlumno, nuevo); });
     }
     function guardarWhatsApp(idAlumno, valorDirecto) {
       const inp = document.getElementById('inpWa-' + idAlumno);
@@ -740,7 +744,7 @@
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white truncate">${escHtml(a.nombre)}</span>
             <span class="block text-xs font-semibold truncate mt-0.5 ${activo ? 'text-emerald-300' : 'text-slate-400'}">${escHtml(a.nivel || 'Sin nivel')}</span>
-            ${textoActividad(a.id) ? `<span class="block text-[11px] font-semibold truncate mt-0.5 ${(actividadCoach[a.id] || {}).enLinea ? 'text-emerald-400' : 'text-slate-400'}">${escHtml(textoActividad(a.id))}${(actividadCoach[a.id] || {}).entrenoHoy ? ' · ✅ entrenó hoy' : ''}</span>` : ''}
+            ${textoActividad(a.id) ? `<span class="block text-[11px] font-semibold truncate mt-0.5 ${(actividadCoach[a.id] || {}).enLinea ? 'text-emerald-400' : 'text-slate-400'}">${escHtml(textoActividad(a.id))}${(actividadCoach[a.id] || {}).entrenoHoy ? ' · ' + ico('circle-check', 'w-4 h-4') + ' entrenó hoy' : ''}</span>` : ''}
           </span>
           <span class="${activo ? 'text-emerald-400' : 'text-slate-400'} font-bold text-sm shrink-0">›</span>
         </button>`;
@@ -779,7 +783,7 @@
 
     function volverAListaAlumnosMovil() {
       mostrarVistaAnalizarMovil(false);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: modoScroll() });
     }
 
     function renderTarjetasAlumnos() {
@@ -881,10 +885,10 @@
             ${badge}
           </div>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
-            ${c.peso ? `<span>⚖️ <strong>${escHtml(c.peso)} kg</strong></span>` : ''}
-            <span>⚡ Energía ${CARAS[(parseInt(c.energia) || 3) - 1]}</span>
-            <span>😴 Sueño ${CARAS[(parseInt(c.sueno) || 3) - 1]}</span>
-            <span>${c.molestias ? `<span class="text-rose-300">⚠️ ${escHtml(c.molestias)}</span>` : '🩹 Sin molestias'}</span>
+            ${c.peso ? `<span>${ico('scale', 'w-4 h-4')} <strong>${escHtml(c.peso)} kg</strong></span>` : ''}
+            <span class="inline-flex items-center gap-1">${ico('zap', 'w-3.5 h-3.5')} Energía ${CARAS[(parseInt(c.energia) || 3) - 1]}</span>
+            <span class="inline-flex items-center gap-1">${ico('moon', 'w-3.5 h-3.5')} Sueño ${CARAS[(parseInt(c.sueno) || 3) - 1]}</span>
+            <span>${c.molestias ? `<span class="text-rose-300">${ico('triangle-alert', 'w-4 h-4')} ${escHtml(c.molestias)}</span>` : '' + ico('bandage', 'w-4 h-4') + ' Sin molestias'}</span>
           </div>
           ${c.nota ? `<p class="text-xs text-slate-300 italic">“${escHtml(c.nota)}”</p>` : ''}
           ${c.respuesta
@@ -924,10 +928,10 @@
       renderTarjetasAlumnos();
       
       mostrarVistaAnalizarMovil(true);
-      window.scrollTo({ top: 0, behavior: 'smooth' });
+      window.scrollTo({ top: 0, behavior: modoScroll() });
 
       const cont = document.getElementById('contenedorComparativaCoach');
-      cont.innerHTML = '<div class="p-8 bg-slate-900/60 rounded-2xl border border-slate-800 text-slate-400 text-sm">⏳ Cargando expediente del alumno...</div>';
+      cont.innerHTML = esqueleto('tarjetas', 3, 'Cargando expediente del alumno');
 
       GS()
         .withSuccessHandler(res => {
@@ -969,7 +973,7 @@
                     </div>
                   </div>
                   <span class="shrink-0 bg-amber-500/15 text-amber-300 border border-amber-500/30 text-xs font-extrabold px-3 py-1 rounded-full">
-                    🔥 ${racha} ${racha === 1 ? 'semana' : 'semanas'}
+                    ${ico('flame', 'w-4 h-4')} ${racha} ${racha === 1 ? 'semana' : 'semanas'}
                   </span>
                 </div>
 
@@ -988,11 +992,11 @@
               <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
                 <button id="btnReporte-${escHtml(idAlumno)}" onclick="generarReportePDFCliente('${escHtml(idAlumno)}', true)"
                   class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15">
-                  📄 Generar reporte PDF
+                  ${ico('file-text', 'w-4 h-4')} Generar reporte PDF
                 </button>
                 <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','resumen')"
                   class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.99] text-slate-950 font-extrabold text-sm py-3.5 px-4 rounded-xl transition flex items-center justify-center gap-2 shadow-lg shadow-emerald-500/15">
-                  📊 Resumen semanal
+                  ${ico('chart-column', 'w-4 h-4')} Resumen semanal
                 </button>
               </div>
               <div id="estadoReporteCoach-${escHtml(idAlumno)}">${barraDescargaReporteCoach(idAlumno)}</div>
@@ -1001,15 +1005,15 @@
               <div class="flex gap-2 overflow-x-auto no-scrollbar pt-2 border-t border-slate-800/80">
                 <button id="btnSub-expRutina" onclick="cambiarSubTabExpediente('expRutina')"
                   class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-extrabold transition bg-emerald-500/15 text-emerald-300 border border-emerald-500/50">
-                  🏋️ Rutina e Historial
+                  ${ico('dumbbell', 'w-4 h-4')} Rutina e Historial
                 </button>
                 <button id="btnSub-expProgreso" onclick="cambiarSubTabExpediente('expProgreso')"
                   class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
-                  📊 Medidas, Gráficos y Fotos
+                  ${ico('chart-column', 'w-4 h-4')} Medidas, Gráficos y Fotos
                 </button>
                 <button id="btnSub-expComunicacion" onclick="cambiarSubTabExpediente('expComunicacion')"
                   class="btn-subtab-exp whitespace-nowrap px-4 py-2.5 rounded-xl text-xs font-bold transition bg-slate-900 text-slate-400 border border-slate-800 hover:text-white">
-                  💬 WhatsApp y Check-ins
+                  ${ico('message-circle', 'w-4 h-4')} WhatsApp y Check-ins
                 </button>
               </div>
 
@@ -1041,9 +1045,9 @@
         <div class="bg-slate-950 border ${c.respuesta ? 'border-slate-800' : 'border-amber-500/40'} rounded-xl p-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
             <span class="text-xs font-extrabold text-white">${escHtml(c.semanaISO)} <span class="text-slate-400 font-semibold">· ${escHtml(c.fecha)}</span></span>
-            <span class="text-xs text-slate-300">${c.peso ? '⚖️ ' + escHtml(c.peso) + ' kg · ' : ''}Energía ${CARAS[(parseInt(c.energia) || 3) - 1]} · Sueño ${CARAS[(parseInt(c.sueno) || 3) - 1]}</span>
+            <span class="text-xs text-slate-300">${c.peso ? ico('scale', 'w-3.5 h-3.5') + ' ' + escHtml(c.peso) + ' kg · ' : ''}Energía ${CARAS[(parseInt(c.energia) || 3) - 1]} · Sueño ${CARAS[(parseInt(c.sueno) || 3) - 1]}</span>
           </div>
-          ${c.molestias ? `<p class="text-xs text-rose-300 mt-2">⚠️ ${escHtml(c.molestias)}</p>` : ''}
+          ${c.molestias ? `<p class="text-xs text-rose-300 mt-2">${ico('triangle-alert', 'w-4 h-4')} ${escHtml(c.molestias)}</p>` : ''}
           ${c.nota ? `<p class="text-sm text-slate-200 mt-2 italic">“${escHtml(c.nota)}”</p>` : '<p class="text-xs text-slate-400 mt-2">Sin nota.</p>'}
           ${c.respuesta
             ? `<div class="mt-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2.5"><p class="text-[11px] font-bold text-emerald-300 uppercase">Tu respuesta · ${escHtml(c.fechaRespuesta)}</p><p class="text-sm text-white mt-0.5">${escHtml(c.respuesta)}</p></div>`
@@ -1053,7 +1057,7 @@
       const pendientes = lista.filter(c => !c.respuesta).length;
       return `
         <div id="bloqueCheckinsCoach" class="bg-slate-900/60 p-4 sm:p-6 rounded-2xl border border-slate-800">
-          <h3 class="text-sm font-extrabold text-white mb-3">📋 Historial de Check-ins ${pendientes ? `<span class="ml-2 text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">${pendientes} sin responder</span>` : ''}</h3>
+          <h3 class="text-sm font-extrabold text-white mb-3">${ico('clipboard-list', 'w-4 h-4')} Historial de Check-ins ${pendientes ? `<span class="ml-2 text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">${pendientes} sin responder</span>` : ''}</h3>
           <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1">${tarjetas}</div>
         </div>`;
     }
@@ -1110,7 +1114,7 @@
     function textoActividad(id) {
       const a = actividadCoach[id];
       if (!a) return '';
-      if (a.enLinea) return '🟢 En línea · ' + (a.origen === 'app' ? 'app' : 'web');
+      if (a.enLinea) return '● En línea · ' + (a.origen === 'app' ? 'app' : 'web');
       return haceCuanto(a.ultimaConexion) + (a.ultimaConexion && a.origen ? ' · ' + a.origen : '');
     }
 
@@ -1123,10 +1127,10 @@
       const enLinea = lista.filter(a => a.enLinea).length;
       cont.innerHTML = `
         <button type="button" onclick="abrirActividadHoy()" class="w-full text-left bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3 active:scale-[0.99] transition">
-          <span class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xl flex items-center justify-center shrink-0">🏋️</span>
+          <span class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xl flex items-center justify-center shrink-0">${ico('dumbbell', 'w-6 h-6')}</span>
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white">Hoy entrenaron ${entrenaron} de ${lista.length}</span>
-            <span class="block text-xs text-slate-400 mt-0.5">${enLinea ? `🟢 ${enLinea} en línea ahora` : 'Nadie en línea ahora'} · toca para ver el detalle</span>
+            <span class="block text-xs text-slate-400 mt-0.5">${enLinea ? `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 align-middle"></span>${enLinea} en línea ahora` : 'Nadie en línea ahora'} · toca para ver el detalle</span>
           </span>
           <span class="text-emerald-400 text-lg font-black">›</span>
         </button>`;
@@ -1150,7 +1154,7 @@
             <span class="block text-sm font-bold text-white truncate">${escHtml(nombre(a.id))}</span>
             <span class="block text-xs text-slate-400">${escHtml(textoActividad(a.id))}</span>
           </span>
-          <span class="shrink-0 text-xs font-bold ${a.entrenoHoy ? 'text-emerald-300' : 'text-slate-400'}">${a.entrenoHoy ? `✅ ${a.ejerciciosHoy} ej. · ${a.seriesHoy} series` : 'No entrenó hoy'}</span>
+          <span class="shrink-0 text-xs font-bold ${a.entrenoHoy ? 'text-emerald-300' : 'text-slate-400'}">${a.entrenoHoy ? `${ico('circle-check', 'w-4 h-4')} ${a.ejerciciosHoy} ej. · ${a.seriesHoy} series` : 'No entrenó hoy'}</span>
         </button>`).join('') || '<p class="text-xs text-slate-400">Aún no tienes alumnos.</p>';
     }
 
@@ -1165,17 +1169,21 @@
           <label class="ko-lbl t-mu block mt-3 mb-1">Comentario del logro (lo verán sus compañeros)</label>
           <input id="comRec-${i}" maxlength="140" value="${escHtml(r.comentario || '')}" placeholder="Ej. Bloqueo limpio, sin correas" class="ko-in">
           <div class="flex gap-2 mt-2.5">
-            <button onclick="revisarRecordCoach('${escHtml(r.id)}', true, ${i})" class="ko-btn flex-1 text-xs py-2.5">✅ Aprobar</button>
-            <button onclick="revisarRecordCoach('${escHtml(r.id)}', false, ${i})" class="ko-btn2 flex-1 text-xs py-2.5 t-err">✖ Rechazar</button>
+            <button onclick="revisarRecordCoach('${escHtml(r.id)}', true, ${i})" class="ko-btn flex-1 text-xs py-2.5">${ico('circle-check', 'w-4 h-4')} Aprobar</button>
+            <button onclick="revisarRecordCoach('${escHtml(r.id)}', false, ${i})" class="ko-btn2 flex-1 text-xs py-2.5 t-err">${ico('x', 'w-4 h-4')} Rechazar</button>
           </div>
         </div>`).join('')}</div>` : '<p class="text-xs t-mu">No hay récords esperando tu aprobación.</p>';
       return `<div class="ko-card" style="${p.length ? 'box-shadow:inset 0 0 0 1px rgba(249,115,22,.45)' : ''}">${tituloRec('inbox', 'Récords por aprobar', p.length ? `<span class="ko-pill b-nar-s">${p.length}</span>` : '')}${cuerpo}</div>`;
     }
     function revisarRecordCoach(id, aprobar, i) {
-      let nota = '';
-      if (!aprobar) { nota = prompt('Motivo del rechazo (opcional, el alumno lo verá):', ''); if (nota === null) return; }
+      if (!aprobar) {
+        return preguntar('Motivo del rechazo (opcional, el alumno lo verá):', { titulo: 'Rechazar récord', textoSi: 'Rechazar', peligro: true, max: 200, placeholder: 'Ej. Faltó profundidad en la sentadilla' })
+          .then(nota => { if (nota !== null) enviarRevisionRecord(id, false, nota.trim()); });
+      }
       const campo = document.getElementById('comRec-' + i);
-      const arg = aprobar ? { nota: '', comentario: campo ? campo.value.trim() : '' } : nota;
+      enviarRevisionRecord(id, true, { nota: '', comentario: campo ? campo.value.trim() : '' });
+    }
+    function enviarRevisionRecord(id, aprobar, arg) {
       GS().withSuccessHandler(res => {
         mostrarToast((res && res.success ? '✅ ' : '❌ ') + ((res && (res.mensaje || res.error)) || ''));
         cargarRecords(recordsContenedor);
@@ -1194,8 +1202,8 @@
         <p class="text-xs t-mu mb-3">Elige hasta 12. Los pesos que tus alumnos registran en estos ejercicios cuentan para el ranking.</p>
         <div class="flex flex-wrap gap-2 mb-3">${chips || '<span class="text-xs t-dim">Todavía no elegiste ejercicios.</span>'}</div>
         <div class="flex flex-wrap gap-2">
-          <button onclick="agregarEjercicioRanking()" ${lista.length >= 12 ? 'disabled' : ''} class="ko-btn2 flex-1 min-w-[150px] text-xs py-3 disabled:opacity-40">📚 Añadir de la biblioteca</button>
-          <button onclick="guardarEjerciciosRankingCoach()" id="btnGuardarRanking" ${cambiado ? '' : 'disabled'} class="ko-btn flex-1 min-w-[150px] text-xs py-3">💾 Guardar</button>
+          <button onclick="agregarEjercicioRanking()" ${lista.length >= 12 ? 'disabled' : ''} class="ko-btn2 flex-1 min-w-[150px] text-xs py-3 disabled:opacity-40">${ico('library', 'w-4 h-4')} Añadir de la biblioteca</button>
+          <button onclick="guardarEjerciciosRankingCoach()" id="btnGuardarRanking" ${cambiado ? '' : 'disabled'} class="ko-btn flex-1 min-w-[150px] text-xs py-3">${ico('save', 'w-4 h-4')} Guardar</button>
         </div></div>`;
     }
     function agregarEjercicioRanking() {
@@ -1237,7 +1245,7 @@
         <p class="text-xs t-mu mb-3">Hasta 10 metas. Solo cuentan los récords que tú apruebas. Ej.: Press banca 100 kg.</p>
         <div class="flex flex-wrap gap-2 mb-3">${chips || '<span class="text-xs t-dim">Todavía no creaste clubes.</span>'}</div>
         ${form}
-        <button onclick="guardarClubesCoach()" id="btnGuardarClubes" ${cambiado ? '' : 'disabled'} class="ko-btn w-full text-xs py-3 mt-3">💾 Guardar clubes</button>
+        <button onclick="guardarClubesCoach()" id="btnGuardarClubes" ${cambiado ? '' : 'disabled'} class="ko-btn w-full text-xs py-3 mt-3">${ico('save', 'w-4 h-4')} Guardar clubes</button>
       </div>`;
     }
     function agregarClub() {

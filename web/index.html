@@ -8,32 +8,11 @@
   <meta name="app-version" content="__VERSION__">
   <link rel="icon" type="image/png" href="icono.png">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-  <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
-  <script>
-  // ===== SISTEMA VISUAL «DEPORTIVO LIMPIO» =====
-  // Un solo color de acento. Para cambiarlo, edita ACENTO (escala 50-950).
-  const ACENTO = { 50:'#ecfdf5',100:'#d1fae5',200:'#a7f3d0',300:'#6ee7b7',400:'#34d399',500:'#10b981',600:'#059669',700:'#047857',800:'#065f46',900:'#064e3b',950:'#022c22' };
-  const CALIDO = { 50:'#fffbeb',100:'#fef3c7',200:'#fde68a',300:'#fcd34d',400:'#fbbf24',500:'#f59e0b',600:'#d97706',700:'#b45309',800:'#92400e',900:'#78350f',950:'#451a03' };
-  tailwind.config = {
-    theme: {
-      extend: {
-        fontFamily: { sans: ['Inter', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'sans-serif'] },
-        colors: {
-          // Todos los tonos decorativos pasan al acento; se conservan rojo/rosa (errores) y ámbar (avisos)
-          emerald: ACENTO, sky: ACENTO, cyan: ACENTO, teal: ACENTO, blue: ACENTO, purple: ACENTO,
-          violet: ACENTO, indigo: ACENTO, fuchsia: ACENTO, green: ACENTO, lime: ACENTO, orange: CALIDO,
-          deep: '#020617', panel: '#0f172a',
-          neon: { cyan: ACENTO[400], green: ACENTO[400], orange: CALIDO[400], purple: ACENTO[400] }
-        },
-        boxShadow: { 'neon-cyan': 'none', 'neon-green': 'none', 'neon-orange': 'none', 'hologram': '0 10px 30px rgba(0,0,0,.35)' }
-      }
-    }
-  }
-</script>
+  <!-- Estilos de Tailwind ya preparados (v15). El tema y los colores están en tailwind.config.cjs -->
+  <link rel="stylesheet" href="css/tailwind.css?v=__VERSION__">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@24,500,0..1,0&icon_names=add,add_circle,arrow_upward,chat,check_circle,close,delete,emoji_events,fact_check,fitness_center,group,history_edu,inbox,local_fire_department,lock,military_tech,monitor_weight,person,schedule,share,shield,track_changes,trending_up,verified,visibility,visibility_off,workspace_premium&display=block" rel="stylesheet">
 <link rel="stylesheet" href="css/estilos.css?v=__VERSION__">
 </head>
 <body class="bg-slate-950 text-slate-100 min-h-[100dvh] flex flex-col justify-between font-sans selection:bg-emerald-500 selection:text-slate-950">
@@ -135,7 +114,7 @@
         <!-- Botón móvil llamativo para abrir lista de alumnos -->
         <button type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', true)"
           class="sm:hidden w-full text-left bg-gradient-to-r from-emerald-500/15 via-slate-900 to-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3.5 shadow-lg shadow-emerald-500/10 active:scale-[0.98] transition">
-          <span class="w-11 h-11 rounded-xl bg-emerald-500 text-slate-950 text-xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">👥</span>
+          <span class="w-11 h-11 rounded-xl bg-emerald-500 text-slate-950 text-xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20"><svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/> <path d="M16 3.128a4 4 0 0 1 0 7.744"/> <path d="M22 21v-2a4 4 0 0 0-3-3.87"/> <circle cx="9" cy="7" r="4"/></svg></span>
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white leading-tight">Mis alumnos</span>
             <span class="block text-xs text-slate-400 mt-0.5 truncate">Ver lista y acceder a expedientes</span>
@@ -158,7 +137,7 @@
             <div class="flex items-center gap-2">
               <span id="contadorMisAlumnos" class="text-xs font-bold text-slate-400"></span>
               <button aria-label="Cerrar" type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', false)"
-                class="tap sm:hidden w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold">✕</button>
+                class="tap sm:hidden w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
             </div>
           </div>
           <div id="listaMisAlumnosTab1" class="space-y-2.5 overflow-y-auto flex-1 sm:max-h-[72vh] pr-1"></div>
@@ -209,7 +188,7 @@
           </button>
 
           <p class="mt-4 flex items-center gap-2 text-xs text-slate-400">
-            <span>📁</span>
+            <span><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 20a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.9a2 2 0 0 1-1.69-.9L9.6 3.9A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13a2 2 0 0 0 2 2Z"/></svg></span>
             <span>Se creará su carpeta privada en Google Drive automáticamente</span>
           </p>
         </div>
@@ -295,7 +274,7 @@
           </div>
 
           <div id="alertaMedidasAtipicas" class="hidden mt-4 p-3 bg-rose-950/60 border border-rose-500/50 rounded-xl flex items-start gap-3 transition-all shadow-lg">
-            <span class="text-xl leading-none">⚠️</span>
+            <span class="text-xl leading-none"><svg class="ico w-6 h-6" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/> <path d="M12 9v4"/> <path d="M12 17h.01"/></svg></span>
             <p class="text-xs sm:text-xs text-rose-300 font-semibold leading-relaxed">
               <strong>Error de cálculo:</strong> Las medidas ingresadas arrojan proporciones atípicas o matemáticamente imposibles para la fórmula. Por favor, verifica y vuelve a tomar las medidas (especialmente cintura y cuello).
             </p>
@@ -341,7 +320,7 @@
             </div>
             <div>
               <button id="btnAsignarPlantilla" onclick="ejecutarAsignacionPlantilla()" class="w-full bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-extrabold px-5 py-3 rounded-xl text-xs uppercase tracking-wider transition shadow-lg">
-                🔗 Designar Rutina al Alumno
+                <svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7.54.54l3-3a5 5 0 0 0-7.07-7.07l-1.72 1.71"/> <path d="M14 11a5 5 0 0 0-7.54-.54l-3 3a5 5 0 0 0 7.07 7.07l1.71-1.71"/></svg> Designar Rutina al Alumno
               </button>
             </div>
           </div>
@@ -350,7 +329,7 @@
         <div id="avisoEdicionRutina" class="hidden bg-amber-500/10 border border-amber-500/40 rounded-2xl p-4">
           <div class="flex flex-wrap items-center justify-between gap-3">
             <div class="min-w-0">
-              <p class="text-sm font-extrabold text-amber-300">✏️ Estás editando una rutina ya asignada</p>
+              <p class="text-sm font-extrabold text-amber-300"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/> <path d="m15 5 4 4"/></svg> Estás editando una rutina ya asignada</p>
               <p id="txtEdicionRutina" class="text-xs text-amber-200/80 mt-0.5"></p>
             </div>
             <button onclick="cancelarEdicionRutina()" class="shrink-0 bg-slate-950 border border-amber-500/40 text-amber-300 font-bold text-xs px-4 py-2.5 rounded-xl">Cancelar edición</button>
@@ -365,8 +344,8 @@
             <div>
               <label for="modoCreacionRutina" class="block text-xs text-slate-400 mb-1">Modalidad de Guardado</label>
               <select id="modoCreacionRutina" onchange="toggleDestinoCreacionRutina()" class="w-full p-3 bg-slate-950 border border-sky-500/50 rounded-xl text-sky-400 font-bold text-xs">
-                <option value="ALUMNO">👤 Crear directo para un Alumno</option>
-                <option value="PLANTILLA">📋 Guardar como Plantilla (Asignar después)</option>
+                <option value="ALUMNO">Crear directo para un Alumno</option>
+                <option value="PLANTILLA">Guardar como Plantilla (Asignar después)</option>
               </select>
             </div>
             <div id="contenedorSelectAlumnoConstructor">
@@ -381,13 +360,13 @@
 
           <div id="listaConstructorRutina" class="space-y-4 mb-4"></div>
           <div id="constructorVacio" class="text-center bg-slate-950 border border-dashed border-slate-700 rounded-2xl p-6 mb-4">
-            <p class="text-3xl mb-2">🏋️</p>
+            <p class="text-3xl mb-2"><svg class="ico w-8 h-8" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/> <path d="m2.5 21.5 1.4-1.4"/> <path d="m20.1 3.9 1.4-1.4"/> <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/> <path d="m9.6 14.4 4.8-4.8"/></svg></p>
             <p class="text-sm text-slate-300 font-bold">Aún no hay ejercicios en la rutina</p>
             <p class="text-xs text-slate-400 mt-1">Toca «Añadir ejercicio» y elígelo de la biblioteca viendo su GIF.</p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 mt-4">
-            <button onclick="agregarFilaEjercicio()" class="bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/40 px-4 py-3 rounded-xl text-sm font-extrabold">📚 Añadir ejercicio</button>
-            <button onclick="agregarFilaEjercicio(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-xl text-xs font-bold">✍️ Ejercicio libre</button>
+            <button onclick="agregarFilaEjercicio()" class="bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/40 px-4 py-3 rounded-xl text-sm font-extrabold"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/> <path d="M12 6v14"/> <path d="M8 8v12"/> <path d="M4 4v16"/></svg> Añadir ejercicio</button>
+            <button onclick="agregarFilaEjercicio(false)" class="bg-slate-800 hover:bg-slate-700 text-slate-300 px-4 py-3 rounded-xl text-xs font-bold"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13 21h8"/> <path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/></svg> Ejercicio libre</button>
             <button id="btnGuardarRutina" onclick="enviarRutinaCompleta()" class="w-full sm:w-auto bg-sky-500 hover:bg-sky-600 text-slate-950 font-extrabold px-6 py-3 rounded-xl text-xs uppercase tracking-wider">Guardar Rutina</button>
           </div>
         </div>
@@ -416,13 +395,13 @@
           <!-- Botón móvil para volver a la lista de alumnos -->
           <button type="button" onclick="volverAListaAlumnosMovil()"
             class="sm:hidden w-full bg-slate-900 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs px-4 py-3 rounded-xl flex items-center justify-between active:scale-[0.98] transition">
-            <span>← Cambiar alumno</span>
+            <span class="inline-flex items-center gap-1"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m12 19-7-7 7-7"/> <path d="M19 12H5"/></svg> Cambiar alumno</span>
             <span class="text-xs text-slate-400 font-semibold">Ver lista completa</span>
           </button>
 
           <div id="contenedorComparativaCoach" class="min-h-[260px] min-w-0">
             <div class="flex flex-col items-center justify-center p-12 bg-slate-900/60 rounded-2xl border border-slate-800 border-dashed">
-              <span class="text-3xl mb-3">🔎</span>
+              <span class="text-3xl mb-3"><svg class="ico w-8 h-8" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/> <circle cx="11" cy="11" r="8"/></svg></span>
               <p class="text-slate-400 text-sm font-semibold text-center">Selecciona un alumno de la lista para ver su resumen, check-ins, rutina y progreso.</p>
             </div>
           </div>
@@ -458,10 +437,10 @@
               <img id="avatarAlumnoSidebar" src="" class="w-10 h-10 rounded-full object-cover border border-emerald-400 shadow">
               <div class="overflow-hidden">
                 <h2 class="text-xs font-extrabold text-white tracking-wide truncate">PRO COACHING</h2>
-                <p class="text-[11px] text-emerald-400 font-semibold uppercase tracking-widest">⚙️ Editar Perfil</p>
+                <p class="text-[11px] text-emerald-400 font-semibold uppercase tracking-widest"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/> <circle cx="12" cy="12" r="3"/></svg> Editar Perfil</p>
               </div>
             </div>
-            <button aria-label="Cerrar" onclick="toggleSidebarMovil()" class="tap md:hidden text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
+            <button aria-label="Cerrar" onclick="toggleSidebarMovil()" class="tap md:hidden text-slate-400 hover:text-white text-lg font-bold px-2"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
           </div>
 
           <!-- Menú de las 3 Opciones Solicitadas -->
@@ -469,25 +448,25 @@
           <nav class="space-y-2">
             <button onclick="navegarAlumno('INICIO')" id="nav-side-INICIO"
               class="nav-btn-side w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20">
-              <span class="text-base">🏠</span>
+              <span class="text-base"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8"/> <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></span>
               <span>INICIO</span>
             </button>
 
             <button onclick="navegarAlumno('ENTRENAMIENTO')" id="nav-side-ENTRENAMIENTO"
               class="nav-btn-side w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-slate-300 hover:bg-slate-800">
-              <span class="text-base">🏋️</span>
+              <span class="text-base"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17.596 12.768a2 2 0 1 0 2.829-2.829l-1.768-1.767a2 2 0 0 0 2.828-2.829l-2.828-2.828a2 2 0 0 0-2.829 2.828l-1.767-1.768a2 2 0 1 0-2.829 2.829z"/> <path d="m2.5 21.5 1.4-1.4"/> <path d="m20.1 3.9 1.4-1.4"/> <path d="M5.343 21.485a2 2 0 1 0 2.829-2.828l1.767 1.768a2 2 0 1 0 2.829-2.829l-6.364-6.364a2 2 0 1 0-2.829 2.829l1.768 1.767a2 2 0 0 0-2.828 2.829z"/> <path d="m9.6 14.4 4.8-4.8"/></svg></span>
               <span>ENTRENAMIENTO</span>
             </button>
 
             <button onclick="navegarAlumno('HISTORIAL')" id="nav-side-HISTORIAL"
               class="nav-btn-side w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-slate-300 hover:bg-slate-800">
-              <span class="text-base">📊</span>
+              <span class="text-base"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v16a2 2 0 0 0 2 2h16"/> <path d="M18 17V9"/> <path d="M13 17V5"/> <path d="M8 17v-3"/></svg></span>
               <span>HISTORIAL</span>
             </button>
 
             <button onclick="navegarAlumno('RECORDS')" id="nav-side-RECORDS"
               class="nav-btn-side w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-slate-300 hover:bg-slate-800">
-              <span class="text-base">🏆</span>
+              <span class="text-base"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/> <path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/> <path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/> <path d="M4 22h16"/> <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/> <path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg></span>
               <span>RÉCORDS</span>
             </button>
           </nav>
@@ -496,7 +475,7 @@
         <!-- Pie de la Barra Lateral -->
         <div class="pt-4 border-t border-slate-800 space-y-2.5">
           <button onclick="abrirModalPerfil()" class="w-full bg-slate-950 hover:bg-slate-800 text-emerald-400 border border-slate-800 py-2.5 rounded-xl text-xs font-bold transition">
-            ⚙️ Mi Perfil y Contraseña
+            <svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/> <circle cx="12" cy="12" r="3"/></svg> Mi Perfil y Contraseña
           </button>
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
             <span class="block text-emerald-400 font-bold mb-0.5">BJPROYECTOS</span>
@@ -581,12 +560,12 @@
               <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mb-4"></div>
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">⏱️ Descanso entre series</p>
+                  <p class="text-xs text-slate-400 uppercase tracking-wider font-bold"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="10" x2="14" y1="2" y2="2"/> <line x1="12" x2="15" y1="14" y2="11"/> <circle cx="12" cy="14" r="8"/></svg> Descanso entre series</p>
                   <div id="cronometroDisplay" class="text-5xl font-black tabular-nums text-emerald-400 leading-none mt-1">00:00</div>
                 </div>
                 <div class="flex items-center gap-2">
                   <button onclick="detenerCronometro()" class="bg-rose-500/10 text-rose-300 border border-rose-500/30 text-xs font-bold px-4 py-3 rounded-xl">Detener</button>
-                  <button aria-label="Cerrar" onclick="cerrarHojaCronometro()" title="Cerrar" class="tap w-11 h-11 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+                  <button aria-label="Cerrar" onclick="cerrarHojaCronometro()" title="Cerrar" class="tap w-11 h-11 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
                 </div>
               </div>
               <div class="grid grid-cols-4 gap-2 mb-3">
@@ -647,7 +626,7 @@
   <div role="dialog" aria-modal="true" id="modalFotoCompleta" class="hidden fixed inset-0 z-[80] bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4 select-none" onclick="if (event.target === this) cerrarModalFotoCompleta()">
     <div class="w-full max-w-2xl flex items-center justify-between px-2 mb-2">
       <span id="galContador" class="text-xs font-bold text-slate-300"></span>
-      <button aria-label="Cerrar" onclick="cerrarModalFotoCompleta()" class="tap w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-bold">✕</button>
+      <button aria-label="Cerrar" onclick="cerrarModalFotoCompleta()" class="tap w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-bold"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
     </div>
     <div id="galZona" class="relative w-full max-w-2xl flex items-center justify-center touch-pan-y">
       <button aria-label="Foto anterior" onclick="moverGaleria(-1)" id="galPrev" class="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 text-white text-2xl items-center justify-center hover:bg-emerald-500 hover:text-slate-950 transition z-10">‹</button>
@@ -683,16 +662,16 @@
   <div role="dialog" aria-modal="true" id="modalPerfil" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-slate-900 border border-slate-800 p-5 sm:p-6 rounded-2xl w-full max-w-md shadow-2xl my-auto">
       <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
-        <h3 class="text-base sm:text-lg font-extrabold text-emerald-400">⚙️ Configurar Mi Perfil</h3>
-        <button aria-label="Cerrar" onclick="cerrarModalPerfil()" class="tap text-slate-400 hover:text-white font-bold px-2">✕</button>
+        <h3 class="text-base sm:text-lg font-extrabold text-emerald-400"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9.671 4.136a2.34 2.34 0 0 1 4.659 0 2.34 2.34 0 0 0 3.319 1.915 2.34 2.34 0 0 1 2.33 4.033 2.34 2.34 0 0 0 0 3.831 2.34 2.34 0 0 1-2.33 4.033 2.34 2.34 0 0 0-3.319 1.915 2.34 2.34 0 0 1-4.659 0 2.34 2.34 0 0 0-3.32-1.915 2.34 2.34 0 0 1-2.33-4.033 2.34 2.34 0 0 0 0-3.831A2.34 2.34 0 0 1 6.35 6.051a2.34 2.34 0 0 0 3.319-1.915"/> <circle cx="12" cy="12" r="3"/></svg> Configurar Mi Perfil</h3>
+        <button aria-label="Cerrar" onclick="cerrarModalPerfil()" class="tap text-slate-400 hover:text-white font-bold px-2"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
 
       <div class="grid grid-cols-2 gap-2 mb-5 bg-slate-950 p-1 rounded-xl border border-slate-800">
         <button onclick="cambiarTabPerfil('datos')" id="tabBtnPerfilDatos" class="py-2 rounded-lg text-xs font-extrabold bg-emerald-500 text-slate-950 transition">
-          👤 Datos y Foto
+          <svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/> <circle cx="12" cy="7" r="4"/></svg> Datos y Foto
         </button>
         <button onclick="cambiarTabPerfil('pass')" id="tabBtnPerfilPass" class="py-2 rounded-lg text-xs font-bold text-slate-400 hover:text-white transition">
-          🔒 Contraseña
+          <svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="18" height="11" x="3" y="11" rx="2" ry="2"/> <path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Contraseña
         </button>
       </div>
 
@@ -701,10 +680,10 @@
         <div class="flex flex-col items-center">
           <button type="button" onclick="ampliarFotoPerfil()" class="relative mb-3 rounded-full cursor-zoom-in active:scale-95 transition group" title="Ver foto en grande" aria-label="Ver foto de perfil en grande">
             <img id="previewFotoPerfil" src="" class="w-24 h-24 rounded-full object-cover border-2 border-emerald-400 shadow-md group-hover:brightness-110">
-            <span class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-slate-900 border border-slate-700 text-xs flex items-center justify-center">🔍</span>
+            <span class="absolute bottom-0 right-0 w-7 h-7 rounded-full bg-slate-900 border border-slate-700 text-xs flex items-center justify-center"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m21 21-4.34-4.34"/> <circle cx="11" cy="11" r="8"/></svg></span>
           </button>
           <label class="cursor-pointer bg-slate-800 hover:bg-slate-700 text-emerald-400 border border-slate-700 px-3.5 py-1.5 rounded-xl text-xs font-bold transition">
-            📷 Seleccionar Nueva Foto
+            <svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.997 4a2 2 0 0 1 1.76 1.05l.486.9A2 2 0 0 0 18.003 7H20a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V9a2 2 0 0 1 2-2h1.997a2 2 0 0 0 1.759-1.048l.489-.904A2 2 0 0 1 10.004 4z"/> <circle cx="12" cy="13" r="3"/></svg> Seleccionar Nueva Foto
             <input type="file" id="inputFotoPerfil" accept="image/*" class="hidden" onchange="previsualizarAvatar(this)">
           </label>
           <span class="text-[11px] text-slate-400 mt-1">Se guardará en tu carpeta personal de Drive</span>
@@ -762,7 +741,7 @@
           </div>
         </div>
         <button aria-label="Cerrar" onclick="document.getElementById('modalTablasMetricas').classList.add('hidden')"
-          class="tap shrink-0 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white font-bold transition">✕</button>
+          class="tap shrink-0 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white font-bold transition"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
 
       <!-- Cuerpo: Caja de rango + Barra segmentada + Desplegable discreto -->
@@ -781,7 +760,7 @@
         <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1">COMPOSICIÓN CORPORAL</h3>
         <span class="bg-emerald-500/10 text-emerald-400 text-[11px] px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block">Estimación / Calculado</span>
       </div>
-      <button aria-label="Cerrar" onclick="document.getElementById('modalComposicion').classList.add('hidden')" class="tap text-slate-400 hover:text-white font-light text-2xl leading-none px-2 -mt-1">✕</button>
+      <button aria-label="Cerrar" onclick="document.getElementById('modalComposicion').classList.add('hidden')" class="tap text-slate-400 hover:text-white font-light text-2xl leading-none px-2 -mt-1"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
     </div>
 
     <div class="px-6 pb-8 pt-2 flex flex-col items-center relative">
@@ -835,17 +814,17 @@
       <!-- SECCIÓN 3: Tarjetas de Resumen -->
       <div class="w-full space-y-3 mt-6">
         <div class="bg-slate-800/30 border border-slate-700/50 p-4 rounded-[1.25rem] relative overflow-hidden flex items-center justify-between shadow-lg">
-          <div class="absolute right-[-5%] top-[-20%] text-6xl opacity-[0.03]">💪</div>
+          <div class="absolute right-[-5%] top-[-20%] text-6xl opacity-[0.03]"><svg class="ico w-16 h-16" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/> <path d="M15 14a5 5 0 0 0-7.584 2"/> <path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/></svg></div>
           <div>
-            <span class="flex items-center gap-1.5 text-xs text-emerald-400 uppercase tracking-widest font-black mb-1"><span class="text-sm">💪</span> MASA MAGRA</span>
+            <span class="flex items-center gap-1.5 text-xs text-emerald-400 uppercase tracking-widest font-black mb-1"><span class="text-sm"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12.409 13.017A5 5 0 0 1 22 15c0 3.866-4 7-9 7-4.077 0-8.153-.82-10.371-2.462-.426-.316-.631-.832-.62-1.362C2.118 12.723 2.627 2 10 2a3 3 0 0 1 3 3 2 2 0 0 1-2 2c-1.105 0-1.64-.444-2-1"/> <path d="M15 14a5 5 0 0 0-7.584 2"/> <path d="M9.964 6.825C8.019 7.977 9.5 13 8 15"/></svg></span> MASA MAGRA</span>
             <span id="mcMasaMagraKg" class="block text-[28px] leading-none font-black text-white mb-0.5"></span>
             <span id="mcMagraDesc" class="text-xs text-slate-400 font-medium block"></span>
           </div>
         </div>
         <div class="bg-slate-800/30 border border-slate-700/50 p-4 rounded-[1.25rem] relative overflow-hidden flex items-center justify-between shadow-lg">
-          <div class="absolute right-[-5%] top-[-10%] text-6xl opacity-[0.03] grayscale">⚖️</div>
+          <div class="absolute right-[-5%] top-[-10%] text-6xl opacity-[0.03] grayscale"><svg class="ico w-16 h-16" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/> <path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/> <path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/> <path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/> <path d="M7 21h10"/></svg></div>
           <div>
-            <span class="flex items-center gap-1.5 text-xs text-amber-500 uppercase tracking-widest font-black mb-1"><span class="text-sm">⚖️</span> MASA GRASA</span>
+            <span class="flex items-center gap-1.5 text-xs text-amber-500 uppercase tracking-widest font-black mb-1"><span class="text-sm"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/> <path d="m19 8 3 8a5 5 0 0 1-6 0zV7"/> <path d="M3 7h1a17 17 0 0 0 8-2 17 17 0 0 0 8 2h1"/> <path d="m5 8 3 8a5 5 0 0 1-6 0zV7"/> <path d="M7 21h10"/></svg></span> MASA GRASA</span>
             <span id="mcMasaGrasaKg" class="block text-[28px] leading-none font-black text-white mb-0.5"></span>
             <span id="mcGrasaDesc" class="text-xs text-slate-400 font-medium block"></span>
           </div>
@@ -861,7 +840,7 @@
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl relative p-5">
           <div class="flex justify-between items-center mb-4">
             <h3 id="tituloGraficoDelta" class="text-base sm:text-lg font-bold text-emerald-400 uppercase tracking-wider"></h3>
-            <button aria-label="Cerrar" onclick="document.getElementById('modalGraficoDelta').classList.add('hidden')" class="tap text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
+            <button aria-label="Cerrar" onclick="document.getElementById('modalGraficoDelta').classList.add('hidden')" class="tap text-slate-400 hover:text-white font-bold text-xl px-2"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
           </div>
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 h-64 sm:h-80 relative">
             <canvas id="canvasGraficoDelta"></canvas>
@@ -872,7 +851,7 @@
       <!-- MODAL AYUDA GYM (DICCIONARIO EN CRISTIANO) -->
       <div role="dialog" aria-modal="true" id="modalAyudaGym" class="hidden fixed inset-0 z-[60] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4" onclick="document.getElementById('modalAyudaGym').classList.add('hidden')">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl relative p-5 sm:p-6" onclick="event.stopPropagation()">
-          <button aria-label="Cerrar" onclick="document.getElementById('modalAyudaGym').classList.add('hidden')" class="tap absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
+          <button aria-label="Cerrar" onclick="document.getElementById('modalAyudaGym').classList.add('hidden')" class="tap absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-xl px-2"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
           <div id="headerAyudaGym" class="mb-3">
         <!-- El título se inyectará aquí -->
           </div>
@@ -887,17 +866,17 @@
     <div class="bg-slate-900 border-0 sm:border border-sky-500/30 rounded-none sm:rounded-2xl w-full max-w-4xl h-[100dvh] sm:h-[90vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-800 shrink-0">
         <div class="min-w-0">
-          <h3 class="text-sm sm:text-base font-extrabold text-sky-400 uppercase tracking-wider">📚 Biblioteca de Ejercicios</h3>
-          <p class="text-xs text-slate-400">Toca un ejercicio para elegirlo · ❓ para ver cómo se hace</p>
+          <h3 class="text-sm sm:text-base font-extrabold text-sky-400 uppercase tracking-wider"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m16 6 4 14"/> <path d="M12 6v14"/> <path d="M8 8v12"/> <path d="M4 4v16"/></svg> Biblioteca de Ejercicios</h3>
+          <p class="text-xs text-slate-400">Toca un ejercicio para elegirlo · <svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/> <path d="M9 9.5a3 2.5 0 016 0c0 2-2 2-3 3.5"/> <path d="M12 17h.01"/></svg> para ver cómo se hace</p>
         </div>
-        <button aria-label="Cerrar" onclick="cerrarModalCatalogo()" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalCatalogo()" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
       <div class="p-3 border-b border-slate-800 bg-slate-950/50 space-y-2 shrink-0">
-        <input id="catBuscar" type="search" placeholder="🔍 Buscar en español o inglés: press, curl, remo, squat..." oninput="reiniciarCatalogo()"
+        <input id="catBuscar" type="search" placeholder="Buscar en español o inglés: press, curl, remo, squat..." oninput="reiniciarCatalogo()"
           class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-sm text-white placeholder-slate-500">
         <div class="grid grid-cols-2 gap-2">
-          <select id="catFiltroZona" onchange="reiniciarCatalogo()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200"><option value="">🧍 Todas las zonas</option></select>
-          <select id="catFiltroEquipo" onchange="reiniciarCatalogo()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200"><option value="">🏋️ Todo el equipo</option></select>
+          <select id="catFiltroZona" onchange="reiniciarCatalogo()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200"><option value="">Todas las zonas</option></select>
+          <select id="catFiltroEquipo" onchange="reiniciarCatalogo()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200"><option value="">Todo el equipo</option></select>
         </div>
         <p id="catContador" class="text-xs text-slate-400 font-semibold text-center"></p>
       </div>
@@ -905,7 +884,7 @@
       <div id="scrollCatalogo" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4">
         <div id="gridCatalogo" class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-3 items-start"></div>
         <div id="catMasCont" class="hidden text-center pt-4 pb-6">
-          <button onclick="masCatalogo()" class="bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold text-xs px-5 py-3 rounded-xl border border-slate-700">⬇️ Cargar más ejercicios</button>
+          <button onclick="masCatalogo()" class="bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold text-xs px-5 py-3 rounded-xl border border-slate-700"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="m7 6 5 5 5-5"/> <path d="m7 13 5 5 5-5"/></svg> Cargar más ejercicios</button>
         </div>
       </div>
       <p class="text-[11px] text-slate-400 text-center py-1.5 border-t border-slate-800 shrink-0">Dataset: hasaneyldrm/exercises-dataset · Medios © Gym Visual</p>
@@ -920,7 +899,7 @@
           <h3 id="ejNombre" class="text-base font-black text-white uppercase tracking-wide leading-tight"></h3>
           <p id="ejNombreEn" class="text-xs text-sky-300/90 italic font-semibold mt-0.5"></p>
         </div>
-        <button aria-label="Cerrar" onclick="cerrarModalEjercicio()" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalEjercicio()" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
       <div class="p-4 space-y-4">
         <div class="w-full max-w-[376px] mx-auto bg-white rounded-2xl overflow-hidden border border-slate-700 p-2" style="aspect-ratio:1/1">
@@ -928,14 +907,14 @@
         </div>
         <div id="ejChips" class="flex flex-wrap gap-2"></div>
         <div id="ejEditarEs" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-3">
-          <label for="ejInputEs" class="block text-xs text-slate-400 font-bold mb-1.5">✏️ Corregir nombre en español (se guarda en la biblioteca)</label>
+          <label for="ejInputEs" class="block text-xs text-slate-400 font-bold mb-1.5"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.174 6.812a1 1 0 0 0-3.986-3.987L3.842 16.174a2 2 0 0 0-.5.83l-1.321 4.352a.5.5 0 0 0 .623.622l4.353-1.32a2 2 0 0 0 .83-.497z"/> <path d="m15 5 4 4"/></svg> Corregir nombre en español (se guarda en la biblioteca)</label>
           <div class="flex gap-2">
             <input id="ejInputEs" type="text" maxlength="80" class="flex-1 min-w-0 p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white uppercase">
             <button id="btnGuardarNombreEs" onclick="guardarNombreEs()" class="shrink-0 px-4 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs">Guardar</button>
           </div>
         </div>
         <div>
-          <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-2">📝 Cómo se hace</h4>
+          <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-2"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M13.4 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2v-7.4"/> <path d="M2 6h4"/> <path d="M2 10h4"/> <path d="M2 14h4"/> <path d="M2 18h4"/> <path d="M21.378 5.626a1 1 0 1 0-3.004-3.004l-5.01 5.012a2 2 0 0 0-.506.854l-.837 2.87a.5.5 0 0 0 .62.62l2.87-.837a2 2 0 0 0 .854-.506z"/></svg> Cómo se hace</h4>
           <div id="ejInstr"></div>
         </div>
         <p class="text-[11px] text-slate-400 text-center pb-4">Medios e instrucciones: dataset hasaneyldrm/exercises-dataset · © Gym Visual</p>
@@ -950,10 +929,10 @@
       <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mb-4"></div>
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="min-w-0">
-          <h3 class="text-base font-extrabold text-white">📋 Check-in de la semana</h3>
+          <h3 class="text-base font-extrabold text-white"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="8" height="4" x="8" y="2" rx="1" ry="1"/> <path d="M16 4h2a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h2"/> <path d="M12 11h4"/> <path d="M12 16h4"/> <path d="M8 11h.01"/> <path d="M8 16h.01"/></svg> Check-in de la semana</h3>
           <p id="ckSemanaTxt" class="text-xs text-slate-400">Cuéntale a tu coach cómo te fue. Toma un minuto.</p>
         </div>
-        <button aria-label="Cerrar" onclick="cerrarHojaCheckin()" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarHojaCheckin()" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
       <div class="space-y-4">
         <div>
@@ -988,10 +967,10 @@
       <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mb-4 sm:hidden"></div>
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="min-w-0">
-          <h3 class="text-base font-extrabold text-white">🏆 Registrar récord</h3>
+          <h3 class="text-base font-extrabold text-white"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M10 14.66V17a1 1 0 0 1-1 1 2 2 0 0 0-2 2v2"/> <path d="M14 14.66V17a1 1 0 0 0 1 1 2 2 0 0 1 2 2v2"/> <path d="M17.916 10H19.5A2.5 2.5 0 0 0 22 7.5V5a1 1 0 0 0-1-1h-3"/> <path d="M4 22h16"/> <path d="M6 9a6 6 0 0 0 12 0V3a1 1 0 0 0-1-1H7a1 1 0 0 0-1 1z"/> <path d="M6.084 10H4.5A2.5 2.5 0 0 1 2 7.5V5a1 1 0 0 1 1-1h3"/></svg> Registrar récord</h3>
           <p class="text-xs text-slate-400">Tu coach lo revisará antes de publicarlo.</p>
         </div>
-        <button aria-label="Cerrar" onclick="cerrarModalRecord()" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalRecord()" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
       <div class="space-y-3">
         <div>
@@ -1026,10 +1005,10 @@
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[85vh] overflow-y-auto safe-bottom">
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="min-w-0">
-          <h3 class="text-base font-extrabold text-white">📅 Actividad de hoy</h3>
+          <h3 class="text-base font-extrabold text-white"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M8 2v3"/> <path d="M16 2v3"/> <rect x="3" y="3" width="18" height="18" rx="2"/> <path d="M3 9h18"/></svg> Actividad de hoy</h3>
           <p class="text-xs text-slate-400">Se actualiza sola cada minuto.</p>
         </div>
-        <button aria-label="Cerrar" onclick="document.getElementById('modalActividadHoy').classList.add('hidden')" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold">✕</button>
+        <button aria-label="Cerrar" onclick="document.getElementById('modalActividadHoy').classList.add('hidden')" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
       <div id="listaActividadHoy" class="space-y-2"></div>
     </div>
@@ -1040,7 +1019,7 @@
   <!-- FOOTER GLOBAL -->
   <footer class="pie-app w-full border-t border-slate-900 bg-slate-950/90 py-4 px-4 mt-8">
     <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left text-xs text-slate-400">
-      <div><span>🛠️ ¿Inconvenientes o dudas? <strong class="text-slate-300">Comunícate con el Administrador</strong>.</span></div>
+      <div><span><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.106-3.105c.32-.322.863-.22.983.218a6 6 0 0 1-8.259 7.057l-7.91 7.91a1 1 0 0 1-2.999-3l7.91-7.91a6 6 0 0 1 7.057-8.259c.438.12.54.662.219.984z"/></svg> ¿Inconvenientes o dudas? <strong class="text-slate-300">Comunícate con el Administrador</strong>.</span></div>
       <div class="flex items-center gap-1.5"><span>Plataforma creada por</span><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-extrabold px-2.5 py-0.5 rounded-md tracking-wider">BJPROYECTOS</span></div>
     </div>
   </footer>
@@ -1050,10 +1029,10 @@
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[90vh] overflow-y-auto">
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="min-w-0">
-          <h3 class="text-base font-extrabold text-white">📑 Duplicar rutina</h3>
+          <h3 class="text-base font-extrabold text-white"><svg class="ico w-4 h-4" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect width="14" height="14" x="8" y="8" rx="2" ry="2"/> <path d="M4 16c-1.1 0-2-.9-2-2V4c0-1.1.9-2 2-2h10c1.1 0 2 .9 2 2"/></svg> Duplicar rutina</h3>
           <p id="dupOrigen" class="text-xs text-slate-400 mt-0.5"></p>
         </div>
-        <button aria-label="Cerrar" onclick="cerrarDuplicar()" class="tap shrink-0 w-9 h-9 rounded-xl bg-slate-950 border border-slate-700 text-slate-400 font-bold">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarDuplicar()" class="tap shrink-0 w-9 h-9 rounded-xl bg-slate-950 border border-slate-700 text-slate-400 font-bold"><svg class="ico w-5 h-5" aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/> <path d="m6 6 12 12"/></svg></button>
       </div>
       <label for="dupDestino" class="block text-xs text-slate-400 mb-1">Copiarla a</label>
       <select id="dupDestino" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white mb-3"></select>

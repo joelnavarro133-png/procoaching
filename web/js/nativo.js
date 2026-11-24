@@ -30,7 +30,7 @@
   async function compartirReporte(idAlumno, texto) {
     const r = (typeof reportesGenerados !== 'undefined') ? reportesGenerados[idAlumno] : null;
     if (!r) return;
-    if (!P.Filesystem || !P.Share) { alert('Esta versión de la app no puede compartir archivos. Actualiza la app.'); return; }
+    if (!P.Filesystem || !P.Share) { avisar('Esta versión de la app no puede compartir archivos. Actualiza la app.', 'atencion'); return; }
     try {
       const datos = await blobABase64(r.blob);
       const archivo = await P.Filesystem.writeFile({ path: r.nombre, data: datos, directory: 'CACHE' });
@@ -38,7 +38,7 @@
     } catch (e) {
       const msg = String((e && e.message) || e || '');
       if (/cancel/i.test(msg)) return;   // el usuario cerró el menú
-      alert('No se pudo compartir el PDF: ' + msg);
+      avisar('No se pudo compartir el PDF: ' + msg, 'error');
     }
   }
 
