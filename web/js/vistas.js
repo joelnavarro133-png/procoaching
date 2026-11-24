@@ -42,7 +42,7 @@
     const grasaData = ultimaEval ? evaluarGrasa(ultimaEval.grasaCorporal, ultimaEval.sexo, ultimaEval.edad) : {val: '-', class: '-', desc: '-'};
     
     const listadoFechas = progreso.map(p => 
-      `<li class="text-[11px] border-b border-slate-700 py-1.5 last:border-0 flex justify-between">
+      `<li class="text-xs border-b border-slate-700 py-1.5 last:border-0 flex justify-between">
         <span class="text-emerald-400 font-bold">${p.fecha}</span> 
         <span class="text-slate-400">${p.peso}kg</span>
       </li>`
@@ -53,57 +53,57 @@
   <div onclick="abrirModalComposicion('${ultimaEval ? ultimaEval.peso : '-'}', '${ultimaEval ? ultimaEval.grasaCorporal : '-'}', '${ultimaEval ? (ultimaEval.sexo || '') : ''}')" 
        class="bg-panel p-4 rounded-2xl border border-neon-cyan/30 flex flex-col justify-center cursor-pointer transition-all relative overflow-hidden group">
     <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-neon-cyan to-transparent opacity-50 group-hover:opacity-100 transition-opacity"></div>
-    <span class="text-[10px] uppercase text-neon-cyan/80 font-bold tracking-widest block mb-1">Masa Total</span>
+    <span class="text-[11px] uppercase text-neon-cyan/80 font-bold tracking-widest block mb-1">Masa Total</span>
     <span class="text-3xl font-black text-white">${ultimaEval && ultimaEval.peso ? ultimaEval.peso + '<span class="text-sm text-neon-cyan">KG</span>' : '-'}</span>
-    <span class="text-[9px] text-neon-cyan font-bold uppercase mt-2 tracking-[0.2em]">Escaneo HUD ▾</span>
+    <span class="text-[11px] text-neon-cyan font-bold uppercase mt-2 tracking-[0.2em]">Escaneo HUD ▾</span>
   </div>
   
   <!-- Tarjeta Grasa (Orange Neon) -->
   <div onclick="abrirModalMetrica('GRASA', '${ultimaEval ? ultimaEval.grasaCorporal : '-'}', '${ultimaEval ? ultimaEval.sexo : ''}', '${ultimaEval ? ultimaEval.edad : ''}')" 
        class="bg-panel p-4 rounded-2xl border border-neon-orange/30 flex flex-col justify-center cursor-pointer transition-all relative group">
     <div class="absolute top-0 right-0 w-1 h-full bg-gradient-to-b from-transparent via-neon-orange to-transparent opacity-50"></div>
-    <span class="text-[10px] uppercase text-neon-orange/80 font-bold tracking-widest block mb-1">Tejido Adiposo</span>
+    <span class="text-[11px] uppercase text-neon-orange/80 font-bold tracking-widest block mb-1">Tejido Adiposo</span>
     <span class="text-3xl font-black text-white">${grasaData.val}</span>
-    <span class="text-[10px] text-neon-orange font-black mt-2 tracking-wider bg-neon-orange/10 px-2 py-0.5 rounded inline-block w-max border border-neon-orange/30">${grasaData.class}</span>
+    <span class="text-[11px] text-neon-orange font-black mt-2 tracking-wider bg-neon-orange/10 px-2 py-0.5 rounded inline-block max-w-full leading-tight border border-neon-orange/30">${grasaData.class}</span>
   </div>
 
   <!-- Tarjeta IMC (Green Neon) -->
   <div onclick="abrirModalMetrica('IMC', '${ultimaEval ? ultimaEval.imc : '-'}', '${ultimaEval ? ultimaEval.sexo : ''}')" 
        class="bg-panel p-4 rounded-2xl border border-[#34d399]/30 flex flex-col justify-center cursor-pointer transition-all relative group">
-    <span class="text-[10px] uppercase text-[#34d399]/80 font-bold tracking-widest block mb-1">Índice IMC</span>
+    <span class="text-[11px] uppercase text-[#34d399]/80 font-bold tracking-widest block mb-1">Índice IMC</span>
     <span class="text-3xl font-black text-white">${imcData.val}</span>
     <div class="mt-2 w-full bg-[#020617] h-1.5 rounded-full overflow-hidden border border-[#34d399]/20">
         <div class="bg-[#34d399] h-full" style="width: ${imcPct}%;"></div>
     </div>
-    <span class="text-[9px] text-[#34d399] mt-1.5 tracking-widest uppercase">Rango: ${imcData.class}</span>
+    <span class="text-[11px] text-[#34d399] mt-1.5 tracking-widest uppercase">Rango: ${imcData.class}</span>
   </div>
 
   <!-- Tarjeta V-Taper (Purple Neon) -->
   <div onclick="abrirModalMetrica('VTAPER', '${vTaperRatio}', '${ultimaEval ? ultimaEval.sexo : ''}')" 
        class="bg-panel p-4 rounded-2xl border border-purple-500/30 flex flex-col justify-center cursor-pointer transition-all relative group">
-    <span class="text-[10px] uppercase text-purple-400/80 font-bold tracking-widest block mb-1">Ratio V-Taper</span>
+    <span class="text-[11px] uppercase text-purple-400/80 font-bold tracking-widest block mb-1">Ratio V-Taper</span>
     <span class="text-3xl font-black text-white">${vTaperRatio}</span>
-    <span class="text-[10px] text-purple-400 font-black mt-2 tracking-wider bg-purple-500/10 px-2 py-0.5 rounded inline-block w-max border border-purple-500/30">${vTaperData.class}</span>
+    <span class="text-[11px] text-purple-400 font-black mt-2 tracking-wider bg-purple-500/10 px-2 py-0.5 rounded inline-block max-w-full leading-tight border border-purple-500/30">${vTaperData.class}</span>
   </div>
 
   <!-- Tarjeta Día Actual (Tech Estándar) -->
   <div class="bg-panel p-4 rounded-2xl border border-slate-700/50 flex flex-col justify-center shadow-lg relative overflow-hidden">
-    <span class="text-[10px] uppercase text-slate-500 font-bold tracking-widest block mb-1">Día Actual (${diaHoy})</span>
-    <span class="text-3xl font-black text-white leading-none">${ejerciciosHoy} <span class="text-[10px] text-slate-500 tracking-wider">EJERC.</span></span>
+    <span class="text-[11px] uppercase text-slate-400 font-bold tracking-widest block mb-1">Día Actual (${diaHoy})</span>
+    <span class="text-3xl font-black text-white leading-none">${ejerciciosHoy} <span class="text-[11px] text-slate-400 tracking-wider">EJERC.</span></span>
   </div>
 
   <!-- Tarjeta Controles (Emerald HUD) -->
   <div onclick="document.getElementById('modalFechasControles').classList.toggle('hidden')" class="bg-panel p-4 rounded-2xl border border-emerald-500/30 flex flex-col justify-center cursor-pointer transition-all relative group">
     <div class="flex justify-between items-center mb-1">
-      <span class="text-[10px] uppercase text-emerald-500/80 font-bold tracking-widest block">Controles</span>
-      <span class="text-[9px] bg-[#020617] border border-emerald-500/50 px-1.5 py-0.5 rounded text-emerald-400">VER ▾</span>
+      <span class="text-[11px] uppercase text-emerald-500/80 font-bold tracking-widest block">Controles</span>
+      <span class="text-[11px] bg-[#020617] border border-emerald-500/50 px-1.5 py-0.5 rounded text-emerald-400">VER ▾</span>
     </div>
     <span class="text-3xl font-black text-emerald-400">${progreso.length}</span>
     
     <div id="modalFechasControles" class="hidden absolute top-[105%] right-0 w-48 bg-[#0f172a]/95 backdrop-blur-md border border-emerald-500/30 rounded-xl p-3 shadow-[0_10px_30px_rgba(0,0,0,0.8)] z-50 max-h-48 overflow-y-auto cursor-default">
-      <p class="text-[10px] text-emerald-400 font-black mb-2 uppercase tracking-widest border-b border-emerald-500/30 pb-1.5">Historial Médico</p>
+      <p class="text-[11px] text-emerald-400 font-black mb-2 uppercase tracking-widest border-b border-emerald-500/30 pb-1.5">Historial Médico</p>
       <ul class="text-slate-300">
-        ${listadoFechas || '<li class="text-[10px] text-slate-600 py-2 uppercase tracking-wider font-bold">Sin registros de red</li>'}
+        ${listadoFechas || '<li class="text-[11px] text-slate-400 py-2 uppercase tracking-wider font-bold">Sin registros de red</li>'}
       </ul>
     </div>
   </div>
@@ -197,17 +197,17 @@
         <div class="flex items-center gap-3 py-2.5 border-b border-slate-800 last:border-0">
           <div class="min-w-0 flex-1">
             <p class="text-xs font-bold ${h.activa ? 'text-white' : 'text-slate-300'} truncate">${escHtml(h.nombreRutina)}</p>
-            <p class="text-[10px] text-slate-500">${h.total} ejercicio${h.total === 1 ? '' : 's'}</p>
+            <p class="text-[11px] text-slate-400">${h.total} ejercicio${h.total === 1 ? '' : 's'}</p>
           </div>
           ${h.activa
-            ? '<span class="shrink-0 text-[10px] font-black uppercase text-emerald-300 bg-emerald-500/15 border border-emerald-500/40 px-2 py-1 rounded-full">● Activa</span>'
-            : `<button onclick="activarRutinaHistorial('${escHtml(h.idRutina)}')" class="shrink-0 text-[11px] font-bold text-sky-300 bg-sky-500/10 border border-sky-500/40 px-3 py-1.5 rounded-lg active:scale-95 transition">Activar</button>`}
+            ? '<span class="shrink-0 text-[11px] font-black uppercase text-emerald-300 bg-emerald-500/15 border border-emerald-500/40 px-2 py-1 rounded-full">● Activa</span>'
+            : `<button onclick="activarRutinaHistorial('${escHtml(h.idRutina)}')" class="shrink-0 text-xs font-bold text-sky-300 bg-sky-500/10 border border-sky-500/40 px-3 py-1.5 rounded-lg active:scale-95 transition">Activar</button>`}
         </div>`).join('');
       return `
         <details class="mt-4 bg-slate-950 border border-slate-800 rounded-xl">
           <summary class="cursor-pointer select-none flex items-center justify-between gap-2 px-4 py-3 text-xs font-bold text-slate-300">
-            <span>🗂️ Historial de rutinas <span class="text-slate-500 font-semibold">(${historial.length})</span></span>
-            <span class="text-[10px] text-slate-500 font-semibold">Toca para ver</span>
+            <span>🗂️ Historial de rutinas <span class="text-slate-400 font-semibold">(${historial.length})</span></span>
+            <span class="text-[11px] text-slate-400 font-semibold">Toca para ver</span>
           </summary>
           <div class="px-4 pb-2">${filas}</div>
         </details>`;
@@ -222,8 +222,8 @@
         return `
           <button type="button" onclick="seleccionarDiaResumen('${dia}')" data-dia="${r.diaNorm}" data-n="${n}"
             class="chip-dia-resumen rounded-xl border py-2 text-center transition active:scale-95">
-            <span class="block text-[10px] font-black tracking-wider">${DIAS_ABREV_RESUMEN[r.diaNorm] || dia.slice(0, 3)}</span>
-            <span class="block text-[11px] font-bold mt-0.5">${n ? (completo ? '✓ ' : '') + n : '—'}</span>
+            <span class="block text-[11px] font-black tracking-wider">${DIAS_ABREV_RESUMEN[r.diaNorm] || dia.slice(0, 3)}</span>
+            <span class="block text-xs font-bold mt-0.5">${n ? (completo ? '✓ ' : '') + n : '—'}</span>
           </button>`;
       }).join('');
       const cuerpo = rutina.length ? `
@@ -235,17 +235,17 @@
           <div class="py-8 text-center bg-slate-950 rounded-xl border border-dashed border-slate-700">
             <p class="text-3xl mb-2">📭</p>
             <p class="text-sm font-bold text-slate-200">Este alumno no tiene una rutina activa</p>
-            <p class="text-xs text-slate-500 mt-1 px-4">Asígnale una desde «Crear rutina» o activa una del historial.</p>
+            <p class="text-xs text-slate-400 mt-1 px-4">Asígnale una desde «Crear rutina» o activa una del historial.</p>
           </div>`;
       return `
         <div id="bloqueRutinaCoach" class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800 shadow-lg">
           <div class="flex items-start justify-between gap-3 mb-4">
             <div class="min-w-0">
-              <p class="text-[10px] font-black uppercase tracking-[0.2em] text-emerald-400">Rutina asignada</p>
+              <p class="text-[11px] font-black uppercase tracking-[0.2em] text-emerald-400">Rutina asignada</p>
               <h3 class="text-base sm:text-lg font-extrabold text-white leading-tight">${escHtml(nombre || 'Sin rutina activa')}</h3>
-              ${rutina.length ? `<p class="text-[11px] text-slate-500 mt-0.5">${rutina.length} ejercicios · ${DIAS_SEMANA.filter(d => resumenDia(d).ejs.length).length} días de entrenamiento</p>` : ''}
+              ${rutina.length ? `<p class="text-xs text-slate-400 mt-0.5">${rutina.length} ejercicios · ${DIAS_SEMANA.filter(d => resumenDia(d).ejs.length).length} días de entrenamiento</p>` : ''}
             </div>
-            ${rutina.length ? '<span class="shrink-0 text-[10px] font-black uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-full">● Activa</span>' : ''}
+            ${rutina.length ? '<span class="shrink-0 text-[11px] font-black uppercase bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 px-2 py-1 rounded-full">● Activa</span>' : ''}
           </div>
           ${cuerpo}
           ${construirHistorialRutinas(historial)}
@@ -257,16 +257,16 @@
       const tipo = clasificarTipoSerie(r.tipoEjercicio);
       const tempo = `${r.excentrica || 0}-${r.pausaExcentrica || 0}-${r.concentrica || 0}-${r.pausaConcentrica || 0}`;
       const hp = historialPesoEjercicio(diaNorm, base);
-      let peso = '<span class="text-slate-500">Sin pesos registrados aún</span>';
+      let peso = '<span class="text-slate-400">Sin pesos registrados aún</span>';
       if (hp.ultimo) {
         const d = hp.previo ? Math.round((hp.ultimo.kg - hp.previo.kg) * 10) / 10 : null;
         const tendencia = d === null ? ''
           : d > 0 ? `<span class="text-emerald-400 font-bold">▲ +${fmtKg(d)}</span>`
           : d < 0 ? `<span class="text-rose-400 font-bold">▼ ${fmtKg(d)}</span>`
-          : '<span class="text-slate-500 font-bold">= igual</span>';
-        peso = `<span class="text-slate-500">Sem. ${hp.ultimo.numero}:</span> <span class="font-extrabold text-white">${fmtKg(hp.ultimo.kg)} kg</span> ${tendencia}`;
+          : '<span class="text-slate-400 font-bold">= igual</span>';
+        peso = `<span class="text-slate-400">Sem. ${hp.ultimo.numero}:</span> <span class="font-extrabold text-white">${fmtKg(hp.ultimo.kg)} kg</span> ${tendencia}`;
       }
-      const chip = (t, cls) => `<span class="text-[10px] font-bold px-1.5 py-0.5 rounded-md border ${cls}">${t}</span>`;
+      const chip = (t, cls) => `<span class="text-[11px] font-bold px-1.5 py-0.5 rounded-md border ${cls}">${t}</span>`;
       const chips = [
         r.musculo ? chip(escHtml(String(r.musculo).toUpperCase()), 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30') : '',
         chip(`${escHtml(r.serie || '—')} × ${escHtml(r.repeticiones || '—')}`, 'bg-slate-800 text-white border-slate-700'),
@@ -283,15 +283,15 @@
       const estado = est.completo
         ? '<span class="shrink-0 w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center font-black text-sm" title="Completado esta semana">✓</span>'
         : est.hechas > 0
-          ? `<span class="shrink-0 w-8 h-8 rounded-full border-2 border-amber-500/60 text-amber-300 flex items-center justify-center font-black text-[10px]" title="Series hechas esta semana">${est.hechas}/${est.total}</span>`
+          ? `<span class="shrink-0 w-8 h-8 rounded-full border-2 border-amber-500/60 text-amber-300 flex items-center justify-center font-black text-[11px]" title="Series hechas esta semana">${est.hechas}/${est.total}</span>`
           : '<span class="shrink-0 w-8 h-8 rounded-full border-2 border-slate-700" title="Pendiente esta semana"></span>';
       return `
         <div class="flex items-center gap-3 ${enGrupo ? 'bg-slate-950/80 rounded-xl p-2.5' : ''}">
           ${mini}
           <div class="min-w-0 flex-1">
-            <p class="text-[13px] font-extrabold text-white uppercase leading-tight line-clamp-2"><span class="text-slate-500">${numero}.</span> ${escHtml(r.ejercicio || 'Ejercicio')}</p>
+            <p class="text-[13px] font-extrabold text-white uppercase leading-tight line-clamp-2"><span class="text-slate-400">${numero}.</span> ${escHtml(r.ejercicio || 'Ejercicio')}</p>
             <div class="flex flex-wrap gap-1 mt-1.5">${chips}</div>
-            <p class="text-[11px] mt-1.5">${peso}</p>
+            <p class="text-xs mt-1.5">${peso}</p>
           </div>
           ${estado}
         </div>`;
@@ -305,7 +305,7 @@
         b.className = 'chip-dia-resumen rounded-xl border py-2 text-center transition active:scale-95 ' +
           (activo ? 'bg-emerald-500 text-slate-950 border-emerald-400 shadow-lg shadow-emerald-500/20'
                   : tiene ? 'bg-slate-950 text-slate-200 border-slate-700 hover:border-slate-500'
-                          : 'bg-slate-950/40 text-slate-600 border-slate-800');
+                          : 'bg-slate-950/40 text-slate-400 border-slate-800');
       });
       actualizarEstadoSubida();
       const cont = document.getElementById('detalleResumenDia');
@@ -315,7 +315,7 @@
         cont.innerHTML = `
           <div class="py-6 text-center bg-slate-950 rounded-xl border border-slate-800">
             <p class="text-sm font-bold text-emerald-400">🛌 ${escHtml(nombreDia(dia))}: descanso</p>
-            <p class="text-xs text-slate-500 mt-1">No hay ejercicios programados este día.</p>
+            <p class="text-xs text-slate-400 mt-1">No hay ejercicios programados este día.</p>
           </div>`;
         return;
       }
@@ -327,7 +327,7 @@
           const filas = b.idxs.map(i => filaResumenEjercicio(ejs[i], i + 1, diaNorm, bases[i], true)).join('');
           return `
             <div class="rounded-2xl border border-sky-500/30 bg-sky-500/5 p-2 space-y-2">
-              <p class="text-[10px] font-black text-sky-300 uppercase tracking-wider px-1 pt-0.5">⚡ ${ETIQUETA_TIPO[b.tipo] || 'Grupo'} · sin descanso entre ejercicios</p>
+              <p class="text-[11px] font-black text-sky-300 uppercase tracking-wider px-1 pt-0.5">⚡ ${ETIQUETA_TIPO[b.tipo] || 'Grupo'} · sin descanso entre ejercicios</p>
               ${filas}
             </div>`;
         }
@@ -337,17 +337,17 @@
       cont.innerHTML = `
         <div class="flex items-end justify-between gap-3 mb-2">
           <div class="min-w-0">
-            <p class="text-sm font-extrabold text-white">${escHtml(nombreDia(dia))} <span class="text-slate-500 font-semibold">· ${ejs.length} ejercicios · ${series} series</span></p>
-            <p class="text-[11px] text-emerald-300/90 font-semibold mt-0.5 truncate">${escHtml(musculos.join(' · '))}</p>
+            <p class="text-sm font-extrabold text-white">${escHtml(nombreDia(dia))} <span class="text-slate-400 font-semibold">· ${ejs.length} ejercicios · ${series} series</span></p>
+            <p class="text-xs text-emerald-300/90 font-semibold mt-0.5 truncate">${escHtml(musculos.join(' · '))}</p>
           </div>
           <div class="text-right shrink-0">
             <p class="text-lg font-black leading-none ${pct === 100 ? 'text-emerald-400' : 'text-white'}">${hechos}/${ejs.length}</p>
-            <p class="text-[9px] text-slate-500 uppercase font-bold mt-1">esta semana</p>
+            <p class="text-[11px] text-slate-400 uppercase font-bold mt-1">esta semana</p>
           </div>
         </div>
         <div class="h-1.5 bg-slate-800 rounded-full overflow-hidden mb-4"><div class="h-full bg-emerald-500 rounded-full transition-all" style="width:${pct}%"></div></div>
         <div class="space-y-2">${bloques}</div>
-        <p class="text-[10px] text-slate-600 mt-3 text-center">Toca la miniatura para ver el GIF y la técnica · ✓ completado · n/n series hechas esta semana</p>`;
+        <p class="text-[11px] text-slate-400 mt-3 text-center">Toca la miniatura para ver el GIF y la técnica · ✓ completado · n/n series hechas esta semana</p>`;
     }
 
     function pintarResumenRutinaCoach() {
@@ -403,7 +403,7 @@
 
     function generarTarjetasDelta(progreso) {
       if (progreso.length < 2) {
-        return '<div class="p-4 bg-slate-950 rounded-xl border border-slate-800 text-slate-500 text-xs">Se requieren al menos 2 controles para calcular tus variaciones (Delta).</div>';
+        return '<div class="p-4 bg-slate-950 rounded-xl border border-slate-800 text-slate-400 text-xs">Se requieren al menos 2 controles para calcular tus variaciones (Delta).</div>';
       }
       
       const inicial = progreso[0];
@@ -434,11 +434,11 @@
         
         return `
           <div onclick="abrirGraficoDelta('${key}', '${label}', '${unidad}')" class="p-4 rounded-xl border flex flex-col justify-between shadow-lg transition-all cursor-pointer hover:scale-[1.03] ${bgClase}">
-            <span class="text-[10px] uppercase font-bold text-slate-400 tracking-wider mb-2 block">${label}</span>
+            <span class="text-[11px] uppercase font-bold text-slate-400 tracking-wider mb-2 block">${label}</span>
             <div class="flex items-end justify-between">
               <div>
-                <span class="text-2xl font-black text-white leading-none block">${valAct}<span class="text-xs text-slate-500">${unidad}</span></span>
-                <span class="text-[10px] text-slate-500 line-through mt-1 block">Antes: ${valIni}${unidad}</span>
+                <span class="text-2xl font-black text-white leading-none block">${valAct}<span class="text-xs text-slate-400">${unidad}</span></span>
+                <span class="text-[11px] text-slate-400 line-through mt-1 block">Antes: ${valIni}${unidad}</span>
               </div>
               <div class="flex flex-col items-end">
                 <span class="text-xl mb-0.5">${icono}</span>
@@ -462,7 +462,7 @@
 
       return tarjetas 
         ? `<div class="grid grid-cols-2 md:grid-cols-4 gap-3">${tarjetas}</div>` 
-        : '<p class="text-slate-500 text-xs">Sin variaciones registradas aún.</p>';
+        : '<p class="text-slate-400 text-xs">Sin variaciones registradas aún.</p>';
     }
     
     function construirBloqueHistorialHTML(progreso) {
@@ -495,9 +495,9 @@
         </tr>
       `).join('');
       const tarjetasPerimetros = progreso.slice().reverse().map(p => {
-        const m = (et, v, u) => `<div class="bg-slate-950 rounded-lg px-2 py-1.5"><p class="text-[9px] text-slate-500 font-bold uppercase">${et}</p><p class="text-sm font-extrabold text-white">${(v === '' || v === undefined || v === null) ? '—' : v}<span class="text-[10px] text-slate-500 font-semibold"> ${u}</span></p></div>`;
+        const m = (et, v, u) => `<div class="bg-slate-950 rounded-lg px-2 py-1.5"><p class="text-[11px] text-slate-400 font-bold uppercase">${et}</p><p class="text-sm font-extrabold text-white">${(v === '' || v === undefined || v === null) ? '—' : v}<span class="text-[11px] text-slate-400 font-semibold"> ${u}</span></p></div>`;
         return `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3">
-          <div class="flex items-center justify-between mb-2"><span class="text-xs font-extrabold text-emerald-400">${p.fecha}</span><span class="text-[11px] font-bold text-amber-400">${p.grasaCorporal}% grasa</span></div>
+          <div class="flex items-center justify-between mb-2"><span class="text-xs font-extrabold text-emerald-400">${p.fecha}</span><span class="text-xs font-bold text-amber-400">${p.grasaCorporal}% grasa</span></div>
           <div class="grid grid-cols-3 gap-1.5">${m('Peso', p.peso, 'kg')}${m('IMC', p.imc, '')}${m('Pecho', p.pecho, 'cm')}${m('Hombros', p.hombros, 'cm')}${m('Brazo', (p.brazoRelajado || '') + ' / ' + (p.brazoFlexionado || ''), 'cm')}${m('Cintura', p.cintura, 'cm')}${m('Cadera', p.cadera, 'cm')}${m('Glúteos', p.gluteos, 'cm')}${m('Muslo', p.muslo, 'cm')}${m('Pantorrilla', p.pantorrilla, 'cm')}</div>
         </div>`;
       }).join('');
@@ -522,7 +522,7 @@
             </button>
             
             <button onclick="cambiarSeccionProgreso('secSemanal')" id="btn-secSemanal" class="btn-seccion-prog text-left p-3.5 rounded-xl border transition-all bg-slate-900 text-slate-300 hover:bg-slate-800 border-slate-800 font-semibold">
-              <span class="block text-xs uppercase tracking-wider">📅 Progreso Semanal</span><span class="block text-[11px] font-normal text-slate-400 mt-0.5">Cargas en el Gym</span>
+              <span class="block text-xs uppercase tracking-wider">📅 Progreso Semanal</span><span class="block text-xs font-normal text-slate-400 mt-0.5">Cargas en el Gym</span>
             </button>
           </div>
 
@@ -541,7 +541,7 @@
             <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-slate-800 shadow-lg">
               <div class="mb-4">
                 <h4 class="text-xs sm:text-sm font-extrabold uppercase tracking-wider text-emerald-400">🔥 Tarjetas Delta de Progreso</h4>
-                <p class="text-[11px] text-slate-400">Toca cualquier tarjeta para visualizar su gráfico de evolución.</p>
+                <p class="text-xs text-slate-400">Toca cualquier tarjeta para visualizar su gráfico de evolución.</p>
               </div>
               ${generarTarjetasDelta(progreso)}
             </div>
@@ -556,7 +556,7 @@
           <div id="secPliegues" class="seccion-progreso-detalle hidden space-y-6">
              <div class="bg-slate-900 p-4 sm:p-5 rounded-2xl border border-slate-800 shadow-lg">
                <h4 class="text-xs font-extrabold uppercase tracking-wider text-purple-400 mb-1">📐 Evolución de Pliegues Cutáneos</h4>
-               <p class="text-[11px] text-slate-400 mb-3">Mediciones con plicómetro (mm) por fecha de evaluación.</p>
+               <p class="text-xs text-slate-400 mb-3">Mediciones con plicómetro (mm) por fecha de evaluación.</p>
                <div class="relative h-64 sm:h-72"><canvas id="chartPliegues"></canvas></div>
              </div>
           </div>
@@ -833,8 +833,8 @@
                     </div>
                     <div class="pl-8">${chipTecnica(r)}</div>
                   </div>
-                  <button onclick="alternarCheckEjercicio('${storageKey}', ${idx})" 
-                    class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base transition-all shrink-0 ${estaMarcado ? 'bg-emerald-500 text-slate-950 shadow-md' : 'bg-slate-950 text-slate-500 border border-slate-800 hover:border-emerald-500'}">
+                  <button aria-label="Marcar ejercicio como completado" onclick="alternarCheckEjercicio('${storageKey}', ${idx})" 
+                    class="w-10 h-10 rounded-xl flex items-center justify-center font-bold text-base transition-all shrink-0 ${estaMarcado ? 'bg-emerald-500 text-slate-950 shadow-md' : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-emerald-500'}">
                     ✓
                   </button>
                 </div>
@@ -851,7 +851,7 @@
                     <span>│</span>
                     <span>▼</span>
                   </div>
-                  <span class="text-[10px] uppercase tracking-widest font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-0.5 rounded-full">
+                  <span class="text-[11px] uppercase tracking-widest font-extrabold text-amber-400 bg-amber-500/10 border border-amber-500/30 px-3 py-0.5 rounded-full">
                     SEGUIDO DE (0s descanso - Pasar de inmediato)
                   </span>
                 </div>
@@ -863,9 +863,9 @@
             <div class="relative bg-slate-950/90 border-2 ${colorBorde} rounded-2xl p-4 sm:p-5 mb-5 shadow-xl">
               <div class="flex flex-wrap items-center justify-between gap-2 mb-3 pb-2.5 border-b border-slate-800">
                 <div class="flex flex-wrap items-center gap-2">
-                  <span class="${colorBadge} text-[10px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider flex items-center gap-1">
+                  <span class="${colorBadge} text-[11px] font-black uppercase px-2.5 py-1 rounded-md tracking-wider flex items-center gap-1">
                     ${badgeGrupo} 
-                    <button onclick="mostrarAyudaGym('${esTri ? 'TRISERIE' : 'BISERIE'}')" class="bg-black/20 text-current rounded-full px-1.5 py-0.5 text-[10px] transition hover:bg-black/40">?</button>
+                    <button aria-label="Ver explicación" onclick="mostrarAyudaGym('${esTri ? 'TRISERIE' : 'BISERIE'}')" class="bg-black/20 text-current rounded-full px-1.5 py-0.5 text-[11px] transition hover:bg-black/40">?</button>
                 </span>
                   <h4 class="text-xs sm:text-sm font-black text-white uppercase tracking-wider">${tituloGrupo} - <span class="text-emerald-400">${escHtml(musculosUnicos)}</span></h4>
                 </div>
@@ -925,13 +925,13 @@
                 <div class="flex items-center gap-2">
                   <span class="font-extrabold ${config.colorTextoPaso}">${config.etiquetaPaso} ${dropIdx + 1}:</span>
                   <span class="font-bold text-white bg-slate-900 px-2 py-0.5 rounded border border-slate-800">${escHtml(repNum)} Reps</span>
-                  <span class="text-[10px] font-semibold ${dropIdx === 0 ? 'text-slate-400' : (etiquetaBajada.includes('Bajar') ? 'text-rose-300' : 'text-emerald-300')}">${etiquetaBajada}</span>
+                  <span class="text-[11px] font-semibold ${dropIdx === 0 ? 'text-slate-400' : (etiquetaBajada.includes('Bajar') ? 'text-rose-300' : 'text-emerald-300')}">${etiquetaBajada}</span>
                 </div>
                 <div class="flex items-center gap-2">
                   <input type="text" value="${escHtml(pesoDrop)}" placeholder="Ej. 20kg"
                     onchange="guardarCargaEjercicio('${dropLoadKey}', this.value)"
                     class="w-20 p-1 bg-slate-900 border border-slate-700 rounded-lg text-emerald-400 font-bold text-center text-xs">
-                  <button onclick="alternarCheckSubDrop('${dropCheckKey}', '${storageKey}', ${caidasReps.length}, '${userId}', '${hoyKey}', '${diaNorm}', ${idx})"
+                  <button aria-label="Marcar serie del drop set" onclick="alternarCheckSubDrop('${dropCheckKey}', '${storageKey}', ${caidasReps.length}, '${userId}', '${hoyKey}', '${diaNorm}', ${idx})"
                     class="px-2.5 py-1 rounded-lg font-bold border transition ${checkDrop ? 'bg-emerald-500 text-slate-950 border-emerald-400' : 'bg-slate-900 text-slate-400 border-slate-700'}">
                     [✓]
                   </button>
@@ -945,17 +945,17 @@
               <div class="flex justify-between items-start gap-3 mb-3">
                 <div>
                   <div class="flex flex-wrap items-center gap-2">
-                    <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-md">${escHtml(r.musculo)}</span>
-                    <span class="text-[10px] uppercase font-black px-2.5 py-0.5 ${config.badgeBg} rounded-md flex items-center gap-1">
+                    <span class="text-[11px] uppercase font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-md">${escHtml(r.musculo)}</span>
+                    <span class="text-[11px] uppercase font-black px-2.5 py-0.5 ${config.badgeBg} rounded-md flex items-center gap-1">
                       ${config.titulo} 
-                      <button onclick="mostrarAyudaGym('${bloque.tipo}')" class="bg-black/20 text-current rounded-full px-1.5 py-0.5 text-[10px] transition hover:bg-black/40">?</button>
+                      <button aria-label="Ver explicación" onclick="mostrarAyudaGym('${bloque.tipo}')" class="bg-black/20 text-current rounded-full px-1.5 py-0.5 text-[11px] transition hover:bg-black/40">?</button>
                     </span>
                   </div>
                   <h4 class="text-base sm:text-lg font-black text-white mt-1.5 tracking-wide uppercase ${estaMarcado ? 'line-through text-slate-400' : ''}">${escHtml(r.ejercicio)}</h4>
                   ${chipTecnica(r)}
                 </div>
-                <button onclick="alternarCheckEjercicio('${storageKey}', ${idx})" 
-                  class="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-lg transition-all shrink-0 ${estaMarcado ? 'bg-emerald-500 text-slate-950 shadow-lg' : 'bg-slate-950 text-slate-500 border border-slate-800 hover:border-emerald-500'}">
+                <button aria-label="Marcar ejercicio como completado" onclick="alternarCheckEjercicio('${storageKey}', ${idx})" 
+                  class="w-11 h-11 rounded-2xl flex items-center justify-center font-bold text-lg transition-all shrink-0 ${estaMarcado ? 'bg-emerald-500 text-slate-950 shadow-lg' : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-emerald-500'}">
                   ✓
                 </button>
               </div>
@@ -965,7 +965,7 @@
               ${filaEspecs(r, segDescanso, 'Fases')}
 
               <div class="space-y-2 mt-2 pt-3 border-t border-slate-800">
-                <p class="text-[11px] text-slate-400 font-semibold">👇 Registra el peso en cada paso de la secuencia:</p>
+                <p class="text-xs text-slate-400 font-semibold">👇 Registra el peso en cada paso de la secuencia:</p>
                 ${filasDropHTML}
               </div>
             </div>
@@ -986,13 +986,13 @@
             <div class="flex justify-between items-start gap-3 mb-2">
               <div class="flex items-start gap-3 min-w-0">
                 <div class="min-w-0">
-                  <span class="text-[10px] uppercase font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-md">${escHtml(r.musculo)}</span>
+                  <span class="text-[11px] uppercase font-bold px-2 py-0.5 bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 rounded-md">${escHtml(r.musculo)}</span>
                   <h4 class="text-base sm:text-lg font-black text-white mt-1 tracking-wide uppercase ${estaMarcado ? 'line-through text-slate-400' : ''}">${escHtml(r.ejercicio)}</h4>
                   ${chipTecnica(r)}
                 </div>
               </div>
-              <button onclick="alternarCheckEjercicio('${storageKey}', ${idx})" 
-                class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg transition-all shrink-0 ${estaMarcado ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 scale-95' : 'bg-slate-950 text-slate-500 border border-slate-800 hover:border-emerald-500'}">
+              <button aria-label="Marcar ejercicio como completado" onclick="alternarCheckEjercicio('${storageKey}', ${idx})" 
+                class="w-12 h-12 rounded-2xl flex items-center justify-center font-bold text-lg transition-all shrink-0 ${estaMarcado ? 'bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/30 scale-95' : 'bg-slate-950 text-slate-400 border border-slate-800 hover:border-emerald-500'}">
                 ✓
               </button>
             </div>
@@ -1035,14 +1035,14 @@
       const desc = (r.descanso !== undefined && r.descanso !== '') ? r.descanso : 0;
       const cel = (et, val) => `
         <div class="px-0.5 sm:px-1 py-2 text-center min-w-0">
-          <p class="text-[9px] font-bold text-slate-500 uppercase tracking-tight sm:tracking-wider leading-tight">${et}</p>
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-tight sm:tracking-wider leading-tight">${et}</p>
           <div class="mt-0.5 leading-none">${val}</div>
         </div>`;
       return `
         <div class="grid grid-cols-4 divide-x divide-slate-800 bg-slate-950 border border-slate-800 rounded-xl mb-3 overflow-hidden">
           ${cel(etiquetaSeries || 'Series', `<span class="text-sm font-black text-white">${escHtml(String(r.serie || '-'))}</span>`)}
           ${cel('Reps', `<span class="text-sm font-black text-white">${escHtml(String(r.repeticiones || '-'))}</span>`)}
-          ${cel('Tempo', `<span class="text-[11px] font-mono font-black text-amber-300">${tempo}</span><button onclick="mostrarAyudaGym('TEMPO')" class="ml-1 bg-amber-500/20 text-amber-400 rounded-full px-1 text-[9px] font-black border border-amber-500/30 align-middle">?</button>`)}
+          ${cel('Tempo', `<span class="text-xs font-mono font-black text-amber-300">${tempo}</span><button aria-label="Ver explicación" onclick="mostrarAyudaGym('TEMPO')" class="ml-1 bg-amber-500/20 text-amber-400 rounded-full px-1 text-[11px] font-black border border-amber-500/30 align-middle">?</button>`)}
           ${cel('Descanso', `<button onclick="iniciarCronometro(${segDescanso > 0 ? segDescanso : 60})" title="Iniciar este descanso" class="text-sm font-black text-emerald-400 underline decoration-emerald-500/40 underline-offset-2">${escHtml(String(desc))}s</button>`)}
         </div>`;
     }
@@ -1084,30 +1084,30 @@
         filas += `
           <div class="rounded-xl border p-2 ${hecha ? 'bg-emerald-500/10 border-emerald-500/40' : 'bg-slate-950 border-slate-800'}">
             <div class="grid grid-cols-[1.6rem_1fr_2.25rem] items-center gap-1.5">
-              <span class="text-[11px] font-black ${hecha ? 'text-emerald-400' : 'text-slate-500'}">S${n}</span>
+              <span class="text-xs font-black ${hecha ? 'text-emerald-400' : 'text-slate-400'}">S${n}</span>
               <div class="relative">
                 <input type="number" inputmode="decimal" step="0.5" value="${escHtml(peso)}" placeholder="${antP ? escHtml(antP) : ''}"
                   onchange="guardarCargaEjercicio('${kPeso}', this.value)"
                   class="w-full p-2 pr-8 bg-slate-900 border border-slate-700 rounded-lg text-emerald-400 font-bold text-center text-sm">
-                <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[10px] text-slate-500 font-bold pointer-events-none">kg</span>
+                <span class="absolute right-2.5 top-1/2 -translate-y-1/2 text-[11px] text-slate-400 font-bold pointer-events-none">kg</span>
               </div>
               <button type="button" onclick="alternarSerie('${kOk}', ${idx}, ${total})" title="Serie hecha"
-                class="w-9 h-9 rounded-lg flex items-center justify-center font-bold transition ${hecha ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 border border-slate-700 text-slate-500'}">✓</button>
+                class="w-9 h-9 rounded-lg flex items-center justify-center font-bold transition ${hecha ? 'bg-emerald-500 text-slate-950' : 'bg-slate-900 border border-slate-700 text-slate-400'}">✓</button>
             </div>
-            ${antP ? `<p class="text-[10px] text-slate-500 mt-1 pl-[1.9rem]">Semana pasada: <span class="text-slate-400 font-semibold">${escHtml(antP)} kg</span></p>` : ''}
+            ${antP ? `<p class="text-[11px] text-slate-400 mt-1 pl-[1.9rem]">Semana pasada: <span class="text-slate-400 font-semibold">${escHtml(antP)} kg</span></p>` : ''}
           </div>`;
       }
       const refGeneral = (!hayRefSerie && viejoAntes)
-        ? `<p class="text-[11px] text-amber-300/90 mb-2">📌 La semana pasada registraste <span class="font-bold">${escHtml(viejoAntes)}</span> en este ejercicio.</p>` : '';
+        ? `<p class="text-xs text-amber-300/90 mb-2">📌 La semana pasada registraste <span class="font-bold">${escHtml(viejoAntes)}</span> en este ejercicio.</p>` : '';
       return `
         <div class="pt-3 border-t border-slate-800/80">
           <div class="flex items-center justify-between mb-2">
-            <span class="text-[11px] font-bold text-slate-400 uppercase tracking-wide">⚖️ Registra cada serie</span>
-            <span class="text-[10px] text-slate-600">peso en kg</span>
+            <span class="text-xs font-bold text-slate-400 uppercase tracking-wide">⚖️ Registra cada serie</span>
+            <span class="text-[11px] text-slate-400">peso en kg</span>
           </div>
           ${refGeneral}
           <div class="space-y-1.5 pr-14 sm:pr-16">${filas}</div>
-          ${viejoHoy ? `<p class="text-[10px] text-amber-400/80 mt-2">Registro anterior de este ejercicio: ${escHtml(viejoHoy)}</p>` : ''}
+          ${viejoHoy ? `<p class="text-[11px] text-amber-400/80 mt-2">Registro anterior de este ejercicio: ${escHtml(viejoHoy)}</p>` : ''}
         </div>`;
     }
 
@@ -1165,9 +1165,9 @@
         const url = urlFotoConCache(reg[angulo]);
         const imgHtml = url
           ? `<img src="${escHtml(url)}" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" class="max-h-80 sm:max-h-96 w-full rounded-lg object-contain mb-3 border border-slate-700 transition-transform hover:scale-[1.02]" title="Clic para ampliar">`
-          : `<div class="h-56 flex items-center justify-center text-slate-500 text-xs">Sin foto en ${escHtml(angulo)}</div>`;
+          : `<div class="h-56 flex items-center justify-center text-slate-400 text-xs">Sin foto en ${escHtml(angulo)}</div>`;
         return `${imgHtml}
-          <div class="text-[11px] text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800 w-full text-left">
+          <div class="text-xs text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800 w-full text-left">
             <div class="border-b border-slate-700 pb-1.5 mb-1.5"><span class="font-bold text-emerald-400">${escHtml(reg.fecha)}</span> | Peso: ${escHtml(reg.peso || '-')}kg | Cintura: ${escHtml(reg.cintura || '-')}cm</div>
             <span class="text-sky-400 font-bold block">Observación Coach:</span>
             <span class="text-slate-400 italic">${escHtml(reg.observacion || 'Sin observaciones en esta fecha.')}</span>
@@ -1206,7 +1206,7 @@
       document.getElementById('galContador').innerText = `${NOMBRE_ANGULO[galeria.angulo] || ''} · ${galeria.pos + 1} / ${galeria.items.length}`;
       document.getElementById('galPuntos').innerHTML = galeria.items.map((_, k) => `<span class="w-2 h-2 rounded-full ${k === galeria.pos ? 'bg-emerald-400' : 'bg-slate-700'}"></span>`).join('');
       document.getElementById('txtFotoCompletaInfo').innerHTML = r.fecha ? `
-        <div class="text-[11px] text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800">
+        <div class="text-xs text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800">
           <div class="border-b border-slate-700 pb-1.5 mb-1.5"><span class="font-bold text-emerald-400">${escHtml(r.fecha)}</span> | Peso: ${escHtml(r.peso || '-')} kg | Cintura: ${escHtml(r.cintura || '-')} cm</div>
           <span class="text-emerald-400 font-bold block">Observación del coach:</span>
           <span class="text-slate-400 italic">${escHtml(r.observacion || 'Sin observaciones en esta fecha.')}</span>
@@ -1696,7 +1696,7 @@ function calcularComposicionAutomatica() {
         // --- DICCIONARIO GYM "EN CRISTIANO" ---
     const DICCIONARIO_GYM = {
       'TEMPO': {
-        tituloHTML: '<div class="flex items-center gap-3"><span class="text-2xl text-emerald-400 bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">⏱️</span><div><span class="block text-[10px] text-emerald-400 font-bold tracking-widest uppercase">Metodología Clave</span><h3 class="text-base sm:text-lg font-black text-white">Guía de TEMPO (4 dígitos: ej. 3-1-1-0)</h3></div></div>',
+        tituloHTML: '<div class="flex items-center gap-3"><span class="text-2xl text-emerald-400 bg-emerald-500/10 p-2 rounded-xl border border-emerald-500/20">⏱️</span><div><span class="block text-[11px] text-emerald-400 font-bold tracking-widest uppercase">Metodología Clave</span><h3 class="text-base sm:text-lg font-black text-white">Guía de TEMPO (4 dígitos: ej. 3-1-1-0)</h3></div></div>',
         descHTML: '<p class="text-xs text-slate-300 mb-4">Controla los segundos exactos de cada fase de la repetición para maximizar la hipertrofia y prevenir lesiones. Los dígitos van en pareja: <b class="text-emerald-300">bajada</b> y <b class="text-amber-300">subida</b>.</p>' +
           '<div class="grid grid-cols-1 sm:grid-cols-2 gap-3">' +
           '<div class="bg-emerald-500/5 p-3 sm:p-4 rounded-xl border border-emerald-500/30"><span class="block text-xs font-black text-emerald-300 mb-1.5 tracking-wider">1º EXCÉNTRICA</span><span class="text-xs text-slate-300">Descenso o bajada negativa, controlada, resistiendo la carga.</span></div>' +
@@ -1900,7 +1900,7 @@ function calcularComposicionAutomatica() {
             <div class="w-14 h-14 shrink-0 rounded-full ko-hi flex items-center justify-center">${icoRec('emoji_events', 't-lima !text-[30px]', true)}</div>
             <div class="min-w-0">
               <div class="flex items-center gap-2"><span class="ko-pill b-lima">${d.esCoach ? 'Tu equipo' : 'Tu comunidad'}</span><span class="ko-ping"></span></div>
-              <h2 class="kf text-[26px] leading-8 font-bold uppercase tracking-tight mt-1">Hall de PRs &amp; Hitos</h2>
+              <h2 class="kf text-[26px] leading-8 font-bold uppercase tracking-tight mt-1">Muro de récords</h2>
               <p class="text-xs t-mu truncate">Celebrando cada kilo y cada conquista</p>
             </div>
           </div>
@@ -1928,7 +1928,7 @@ function calcularComposicionAutomatica() {
           <div class="min-w-0 flex items-start gap-2.5">
             ${icoRec(on ? 'visibility' : 'lock', on ? 't-lima' : 't-mu')}
             <div><p class="text-sm font-bold">Mostrar mis récords</p>
-            <p class="text-[11px] t-mu mt-0.5">${on ? 'Tus compañeros ven tu nombre, tu foto de perfil y tus marcas.' : 'Solo tú y tu coach ven tus marcas. Actívalo para aparecer con tu nombre y foto.'}</p></div>
+            <p class="text-xs t-mu mt-0.5">${on ? 'Tus compañeros ven tu nombre, tu foto de perfil y tus marcas.' : 'Solo tú y tu coach ven tus marcas. Actívalo para aparecer con tu nombre y foto.'}</p></div>
           </div>
           <button onclick="alternarMostrarRecords()" id="btnMostrarRecords" role="switch" aria-checked="${on}" class="ko-sw ${on ? 'on' : ''}"><span></span></button>
         </div>`;
@@ -2017,14 +2017,14 @@ function calcularComposicionAutomatica() {
       const tarjetas = clubes.map((c, i) => {
         const m = c.miembros || [];
         const pila = m.length ? `<div class="ko-stack flex items-center mt-3">${m.slice(0, 4).map(p => avatarRec(p, 26)).join('')}${m.length > 4 ? `<span class="ko-av" style="width:26px;height:26px;font-size:10px;margin-left:-6px;box-shadow:0 0 0 2px var(--ko-c)">+${m.length - 4}</span>` : ''}</div>`
-          : '<p class="text-[11px] t-dim mt-3">¡Sé el primero!</p>';
+          : '<p class="text-xs t-dim mt-3">¡Sé el primero!</p>';
         const yoDentro = m.some(p => p.yo);
         return `<div class="ko-card !p-3 flex flex-col justify-between" style="${yoDentro ? 'box-shadow:inset 0 0 0 1px rgba(16,185,129,.5)' : ''}">
-          <div><div class="flex items-center justify-between mb-1 gap-1"><span class="ko-pill ${colores[i % 3]} !px-1.5 !py-0.5 !text-[9px] truncate">${escHtml(c.ejercicio.split(' ')[0])}</span>${icoRec(ico[i % 3], 't-mu !text-[16px]')}</div>
+          <div><div class="flex items-center justify-between mb-1 gap-1"><span class="ko-pill ${colores[i % 3]} !px-1.5 !py-0.5 !text-[11px] truncate">${escHtml(c.ejercicio.split(' ')[0])}</span>${icoRec(ico[i % 3], 't-mu !text-[16px]')}</div>
           <p class="kf text-[18px] font-bold">${numRec(c.kg)} KG</p>
-          <p class="text-[11px] leading-tight t-mu">${escHtml(c.ejercicio)}</p></div>
+          <p class="text-xs leading-tight t-mu">${escHtml(c.ejercicio)}</p></div>
           ${pila}
-          <p class="text-[10px] t-dim mt-1.5">${m.length} ${m.length === 1 ? 'miembro' : 'miembros'}${yoDentro ? ' · <span class="t-lima font-bold">incluido tú</span>' : ''}</p>
+          <p class="text-[11px] t-dim mt-1.5">${m.length} ${m.length === 1 ? 'miembro' : 'miembros'}${yoDentro ? ' · <span class="t-lima font-bold">incluido tú</span>' : ''}</p>
         </div>`;
       }).join('');
       return `<div>${tituloRec('workspace_premium', 'Clubes de honor')}<div class="grid grid-cols-2 sm:grid-cols-3 gap-2">${tarjetas}</div></div>`;
@@ -2048,15 +2048,15 @@ function calcularComposicionAutomatica() {
           ${avatarRec(r, 34)}
           <div class="min-w-0 flex-1">
             <p class="text-sm font-bold truncate">${nombreRec(r)}</p>
-            <p class="text-[10px] t-mu">${r.validado ? '✅ Validado' : 'De sus series'}${r.fecha ? ' · ' + fechaRec(r.fecha) : ''}${r.ratio ? ' · ' + ratioRec(r.ratio) + ' su peso' : ''}${r.fueraDeRanking ? ' · solo tú lo ves' : ''}</p>
+            <p class="text-[11px] t-mu">${r.validado ? '✅ Validado' : 'De sus series'}${r.fecha ? ' · ' + fechaRec(r.fecha) : ''}${r.ratio ? ' · ' + ratioRec(r.ratio) + ' su peso' : ''}${r.fueraDeRanking ? ' · solo tú lo ves' : ''}</p>
           </div>
           <span class="kf shrink-0 text-[18px] font-bold ${r.yo ? 't-lima' : ''}">${numRec(r.peso)}<span class="text-xs t-mu ml-0.5">kg</span></span>
         </div>`).join('') : '<p class="text-xs t-mu py-2">Todavía no hay marcas en esta categoría y periodo.</p>';
       return `<div class="ko-card">
-        ${tituloRec('emoji_events', 'Ranking', `<span class="text-[11px] t-cian font-bold uppercase truncate max-w-[45%]">${escHtml(ej.nombre)}</span>`)}
+        ${tituloRec('emoji_events', 'Ranking', `<span class="text-xs t-cian font-bold uppercase truncate max-w-[45%]">${escHtml(ej.nombre)}</span>`)}
         <div class="ko-seg mb-3">${tabs}</div>
         <div class="space-y-2">${filas}</div>
-        <p class="text-[10px] t-dim mt-3">${recordsEjSel < 0 && ranking.length > 1 ? 'Elige un ejercicio arriba para ver su ranking. ' : ''}Separado por sexo según la última evaluación.</p>
+        <p class="text-[11px] t-dim mt-3">${recordsEjSel < 0 && ranking.length > 1 ? 'Elige un ejercicio arriba para ver su ranking. ' : ''}Separado por sexo según la última evaluación.</p>
       </div>`;
     }
 
@@ -2081,15 +2081,15 @@ function calcularComposicionAutomatica() {
           </div>
           <div class="ko-min rounded-xl px-3 py-2.5 flex items-end justify-between gap-2">
             <div class="min-w-0"><span class="ko-lbl t-mu block">${escHtml(f.ejercicio)}</span>
-            ${f.ratio ? `<span class="text-[11px] t-mu">${ratioRec(f.ratio)} su peso corporal</span>` : ''}</div>
+            ${f.ratio ? `<span class="text-xs t-mu">${ratioRec(f.ratio)} su peso corporal</span>` : ''}</div>
             <span class="shrink-0"><span class="kf text-[26px] font-bold">${numRec(f.peso)}</span><span class="kf text-sm t-lima font-bold ml-0.5">KG</span>${f.reps ? `<span class="text-sm t-mu"> × ${f.reps}</span>` : ''}</span>
           </div>
           ${f.comentario ? `<p class="text-[13px] t-mu italic">“${escHtml(f.comentario)}”</p>` : ''}
           ${f.tipo === 'VALIDADO' ? `<div class="flex items-center justify-between gap-2 flex-wrap">
-            ${f.coach ? `<span class="text-[11px] t-mu flex items-center gap-1">${icoRec('fact_check', 't-lima !text-[15px]')} Validado por <strong class="t-lima2">${escHtml(f.coach)}</strong></span>` : '<span></span>'}
+            ${f.coach ? `<span class="text-xs t-mu flex items-center gap-1">${icoRec('fact_check', 't-lima !text-[15px]')} Validado por <strong class="t-lima2">${escHtml(f.coach)}</strong></span>` : '<span></span>'}
             ${reaccionesRec(f)}</div>` : ''}
         </div>`).join('');
-      return `<div>${tituloRec('history_edu', 'Récords recientes', `<span class="text-[11px] t-mu">${lista.length}</span>`)}<div class="space-y-3">${items || `<div class="ko-card">${vacio}</div>`}</div></div>`;
+      return `<div>${tituloRec('history_edu', 'Récords recientes', `<span class="text-xs t-mu">${lista.length}</span>`)}<div class="space-y-3">${items || `<div class="ko-card">${vacio}</div>`}</div></div>`;
     }
 
     function bloqueConstancia(d) {
@@ -2110,14 +2110,14 @@ function calcularComposicionAutomatica() {
         <div class="ko-low rounded-xl p-3">
           <p class="ko-lbl t-mu leading-tight">${escHtml(e.nombre)}</p>
           <p class="kf text-[22px] font-bold mt-1 ${e.peso ? '' : 't-dim'}">${e.peso ? numRec(e.peso) + '<span class="text-xs t-mu ml-0.5">kg</span>' : '—'}</p>
-          ${e.validado ? `<p class="text-[10px] t-lima font-bold mt-0.5">${icoRec('verified', '!text-[12px]', true)} Validado</p>` : (e.peso ? '<p class="text-[10px] t-dim mt-0.5">De tus series</p>' : '')}
-          ${e.peso && m.pesoCorp ? `<p class="text-[10px] t-mu">${ratioRec(Math.round(e.peso / m.pesoCorp * 100) / 100)} tu peso</p>` : ''}
+          ${e.validado ? `<p class="text-[11px] t-lima font-bold mt-0.5">${icoRec('verified', '!text-[12px]', true)} Validado</p>` : (e.peso ? '<p class="text-[11px] t-dim mt-0.5">De tus series</p>' : '')}
+          ${e.peso && m.pesoCorp ? `<p class="text-[11px] t-mu">${ratioRec(Math.round(e.peso / m.pesoCorp * 100) / 100)} tu peso</p>` : ''}
         </div>`).join('');
       const racha = `
         <div class="rounded-xl p-3" style="background:rgba(249,115,22,.12)">
           <p class="ko-lbl" style="color:#ffb690">🔥 Constancia</p>
           <p class="kf text-[22px] font-bold mt-1">${m.constancia.actual} <span class="text-xs t-mu">${m.constancia.actual === 1 ? 'semana' : 'semanas'}</span></p>
-          <p class="text-[10px] t-mu mt-0.5">Mejor racha: ${m.constancia.mejor}</p>
+          <p class="text-[11px] t-mu mt-0.5">Mejor racha: ${m.constancia.mejor}</p>
         </div>`;
       const ESTADOS = { PENDIENTE: ['⏳ Pendiente', 'b-nar-s'], APROBADO: ['✅ Aprobado', 'b-lima-s'], RECHAZADO: ['✖ Rechazado', ''] };
       const enviados = (m.enviados || []).length ? `
@@ -2126,7 +2126,7 @@ function calcularComposicionAutomatica() {
           const st = ESTADOS[r.estado] || [r.estado, ''];
           return `<div class="ko-row !py-2.5 justify-between">
             <div class="min-w-0"><p class="text-xs font-bold truncate">${escHtml(r.ejercicio)} · ${kgRec(r.peso)} × ${escHtml(r.reps)}</p>
-            <p class="text-[10px] t-mu">${escHtml(fechaRec(r.fecha))}${r.comentario ? ' · “' + escHtml(r.comentario) + '”' : ''}${r.nota ? ' · Coach: ' + escHtml(r.nota) : ''}</p></div>
+            <p class="text-[11px] t-mu">${escHtml(fechaRec(r.fecha))}${r.comentario ? ' · “' + escHtml(r.comentario) + '”' : ''}${r.nota ? ' · Coach: ' + escHtml(r.nota) : ''}</p></div>
             <span class="ko-pill ${st[1]} shrink-0" ${st[1] ? '' : 'style="background:rgba(255,180,171,.12);color:var(--ko-err)"'}>${st[0]}</span></div>`;
         }).join('')}</div>` : '';
       return `<div class="ko-card">${tituloRec('person', 'Mis récords')}
@@ -2258,9 +2258,9 @@ function calcularComposicionAutomatica() {
           <span class="w-6 text-center text-[15px] font-black ${i < 3 ? 't-cian' : 't-dim'}">${i + 1}.</span>
           ${avatarRec(c, 38)}
           <div class="min-w-0 flex-1"><p class="text-sm font-bold truncate">${escHtml(c.nombre)}${c.yo ? ' <span class="t-lima">(TÚ)</span>' : ''}</p>
-            <p class="text-[11px] t-mu">${c.semanas} ${c.semanas === 1 ? 'semana' : 'semanas'}</p></div>
+            <p class="text-xs t-mu">${c.semanas} ${c.semanas === 1 ? 'semana' : 'semanas'}</p></div>
         </div>`).join('') : '<p class="text-xs t-mu">Aún nadie tiene racha activa. ¡Empieza la tuya subiendo tu progreso!</p>';
-      const boton = lista.length ? `<button onclick="verMiPosicionConstancia()" class="ko-btn2 px-3 py-1.5 text-[11px]">Ver mi posición</button>` : '';
+      const boton = lista.length ? `<button onclick="verMiPosicionConstancia()" class="ko-btn2 px-3 py-1.5 text-xs">Ver mi posición</button>` : '';
       return `<div class="ko-card">${tituloMuro('emoji_events', 'Ranking de constancia', '', 't-cian')}
         ${boton ? `<div class="flex justify-end -mt-1 mb-2">${boton}</div>` : ''}
         <div class="space-y-2">${filas}</div></div>`;
@@ -2289,7 +2289,7 @@ function calcularComposicionAutomatica() {
             ${avatarRec(f, 38)}
             <div class="min-w-0 flex-1">
               <p class="text-[13px] leading-5 t-mu"><strong class="text-[13px]" style="color:var(--ko-tx)">${escHtml(f.nombre)}${f.yo ? ' (tú)' : ''}</strong> ${textoLogro(f)} <span class="t-dim">· ${haceRec(f.ts, f.fechaRevision || f.fecha)}</span></p>
-              ${f.comentario ? `<p class="text-[11px] t-mu italic mt-0.5">“${escHtml(f.comentario)}”</p>` : ''}
+              ${f.comentario ? `<p class="text-xs t-mu italic mt-0.5">“${escHtml(f.comentario)}”</p>` : ''}
               ${f.id ? `<div class="mt-2">${reaccionesRec(f)}</div>` : ''}
             </div>
           </div>
@@ -2309,12 +2309,12 @@ function calcularComposicionAutomatica() {
           <div class="flex items-center justify-between">${icoRec('fitness_center', 't-lima !text-[18px]')}${e.validado ? '<span class="text-base leading-none" title="Validado por tu coach">🏅</span>' : ''}</div>
           <p class="text-[13px] font-semibold mt-2 leading-tight">${escHtml(e.nombre.charAt(0) + e.nombre.slice(1).toLowerCase())}</p>
           <p class="text-[22px] leading-7 font-black mt-0.5">${numRec(e.peso)} <span class="text-sm font-bold">kg</span></p>
-          ${m.pesoCorp ? `<p class="text-[10px] t-mu">${ratioRec(Math.round(e.peso / m.pesoCorp * 100) / 100)} tu peso${e.validado ? '' : ' · de tus series'}</p>` : (e.validado ? '' : '<p class="text-[10px] t-mu">De tus series</p>')}
+          ${m.pesoCorp ? `<p class="text-[11px] t-mu">${ratioRec(Math.round(e.peso / m.pesoCorp * 100) / 100)} tu peso${e.validado ? '' : ' · de tus series'}</p>` : (e.validado ? '' : '<p class="text-[11px] t-mu">De tus series</p>')}
         </div>` : `
         <button onclick="abrirModalRecord(${i})" class="rounded-xl p-3 text-center flex flex-col items-center justify-center min-h-[112px] transition hover:brightness-110" style="background:var(--ko-hi);border:1px solid var(--ko-top)">
           ${icoRec('lock', 't-mu !text-[24px]', true)}
           <p class="text-[13px] font-semibold t-mu mt-1.5 leading-tight">${escHtml(e.nombre.charAt(0) + e.nombre.slice(1).toLowerCase())}</p>
-          <p class="text-[11px] t-cian font-semibold mt-0.5">🔒 Registra marca</p>
+          <p class="text-xs t-cian font-semibold mt-0.5">🔒 Registra marca</p>
         </button>`).join('');
       const ESTADOS = { PENDIENTE: ['⏳ Pendiente', 'b-nar-s'], APROBADO: ['✅ Aprobado', 'b-lima-s'], RECHAZADO: ['✖ Rechazado', ''] };
       const enviados = (m.enviados || []).length ? `
@@ -2323,7 +2323,7 @@ function calcularComposicionAutomatica() {
           const st = ESTADOS[r.estado] || [r.estado, ''];
           return `<div class="ko-row !py-2.5 justify-between">
             <div class="min-w-0"><p class="text-xs font-bold truncate">${escHtml(r.ejercicio)} · ${kgRec(r.peso)} × ${escHtml(r.reps)}</p>
-            <p class="text-[10px] t-mu">${escHtml(fechaRec(r.fecha))}${r.nota ? ' · Coach: ' + escHtml(r.nota) : ''}</p></div>
+            <p class="text-[11px] t-mu">${escHtml(fechaRec(r.fecha))}${r.nota ? ' · Coach: ' + escHtml(r.nota) : ''}</p></div>
             <span class="ko-pill ${st[1]} shrink-0" ${st[1] ? '' : 'style="background:rgba(253,164,175,.12);color:var(--ko-err)"'}>${st[0]}</span></div>`;
         }).join('')}</div>` : '';
       return `<div class="ko-card">${tituloMuro('track_changes', 'Mis récords')}

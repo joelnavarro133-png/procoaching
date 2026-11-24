@@ -11,7 +11,7 @@
   /* ===== RÉCORDS v12 · «Kinetic Obsidian» (solo dentro de .ko) ===== */
   /* v12.1: mismos colores que el resto de la app (fondo azul noche, tarjetas slate con borde, acento esmeralda) */
   .ko { --ko-low:#020617; --ko-c:#0f172a; --ko-hi:#1e293b; --ko-top:#334155; --ko-min:#020617; --ko-borde:#1e293b;
-        --ko-tx:#f1f5f9; --ko-mu:#94a3b8; --ko-dim:#64748b; --ko-lima:#10b981; --ko-lima2:#6ee7b7; --ko-on:#020617;
+        --ko-tx:#f1f5f9; --ko-mu:#94a3b8; --ko-dim:#8a99b0; --ko-lima:#10b981; --ko-lima2:#6ee7b7; --ko-on:#020617;
         --ko-cian:#fbbf24; --ko-nar:#f97316; --ko-err:#fda4af;
         background:transparent; color:var(--ko-tx); font-family:'Inter',system-ui,sans-serif; }
   .ko .kf { font-family:'Inter',system-ui,sans-serif; letter-spacing:-0.01em; }
@@ -34,8 +34,8 @@
   .ko .ko-seg { display:flex; background:var(--ko-c); border:1px solid var(--ko-borde); padding:4px; border-radius:12px; }
   .ko .ko-seg button { flex:1; padding:7px 4px; border-radius:9px; font-size:12px; font-weight:600; color:var(--ko-mu); }
   .ko .ko-seg button.on { background:var(--ko-lima); color:var(--ko-on); font-weight:700; }
-  .ko .ko-lbl { font-size:10px; line-height:12px; letter-spacing:.08em; font-weight:700; text-transform:uppercase; }
-  .ko .ko-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-size:10px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
+  .ko .ko-lbl { font-size:11px; line-height:14px; letter-spacing:.08em; font-weight:700; text-transform:uppercase; }
+  .ko .ko-pill { display:inline-flex; align-items:center; gap:4px; padding:4px 10px; border-radius:999px; font-size:11px; font-weight:800; letter-spacing:.06em; text-transform:uppercase; white-space:nowrap; }
   .ko .ko-av { position:relative; flex-shrink:0; border-radius:999px; overflow:hidden; display:inline-flex; align-items:center; justify-content:center;
         font-family:'Inter',sans-serif; font-weight:700; background:var(--ko-top); color:var(--ko-tx); }
   .ko .ko-av img { position:absolute; inset:0; width:100%; height:100%; object-fit:cover; }
@@ -61,3 +61,20 @@
   .ko .ko-sw.on { background:var(--ko-lima); } .ko .ko-sw.on span { transform:translateX(22px); background:var(--ko-on); }
   /* Si la fuente de íconos no carga (sin internet), se ocultan en vez de mostrar su nombre en texto */
   .ko .ms { visibility:hidden; } html.ms-ok .ko .ms { visibility:visible; }
+
+  /* ===== v13 · Legibilidad, uso con el dedo y accesibilidad ===== */
+  /* Anillo de foco visible (teclado y lectores de pantalla) */
+  a:focus-visible, button:focus-visible, [role="button"]:focus-visible, [role="switch"]:focus-visible, [tabindex]:focus-visible,
+  input:focus-visible, select:focus-visible, textarea:focus-visible {
+    outline: 2px solid #34d399 !important; outline-offset: 2px;
+  }
+  /* Área táctil mínima de 48 px en botones pequeños (no cambia cómo se ven) */
+  .tap:not(.absolute):not(.fixed) { position: relative; }
+  .tap::after { content: ''; position: absolute; left: 50%; top: 50%; width: 48px; height: 48px; transform: translate(-50%, -50%); }
+  /* Teléfonos con muesca o barra de estado superpuesta (Android edge-to-edge) */
+  body { padding-top: env(safe-area-inset-top, 0px); }
+  body::before { content: ''; position: fixed; top: 0; left: 0; right: 0; height: env(safe-area-inset-top, 0px); background: #020617; z-index: 100; pointer-events: none; }
+  .safe-sticky-top { top: env(safe-area-inset-top, 0px) !important; }
+  /* El pie de página no queda oculto detrás de la barra inferior del celular */
+  .pie-app { margin-bottom: calc(4.75rem + env(safe-area-inset-bottom, 0px)); }
+  @media (min-width: 768px) { .pie-app { margin-bottom: 0; } }

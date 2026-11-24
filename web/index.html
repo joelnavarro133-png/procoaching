@@ -7,7 +7,7 @@
   <meta name="theme-color" content="#020617">
   <meta name="app-version" content="__VERSION__">
   <link rel="icon" type="image/png" href="icono.png">
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
   <script>
@@ -48,19 +48,19 @@
         <svg class="w-7 h-7" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
       </div>
       <h2 class="text-3xl font-black text-white tracking-tight">PRO <span class="text-emerald-400">COACHING</span></h2>
-      <p class="text-slate-500 text-xs font-semibold mt-1.5">by BJPROYECTOS</p>
+      <p class="text-slate-400 text-xs font-semibold mt-1.5">by BJPROYECTOS</p>
     </div>
     <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 shadow-2xl space-y-4">
       <div>
-        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Usuario</label>
+        <label for="loginUser" class="block text-xs font-semibold text-slate-400 mb-1.5">Usuario</label>
         <input type="text" id="loginUser" placeholder="Tu usuario" autocomplete="username" autocapitalize="none"
-          class="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:outline-none focus:border-emerald-500 transition text-white placeholder-slate-600 font-semibold text-base">
+          class="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:outline-none focus:border-emerald-500 transition text-white placeholder-slate-500 font-semibold text-base">
       </div>
       <div>
-        <label class="block text-xs font-semibold text-slate-400 mb-1.5">Contraseña</label>
+        <label for="loginPass" class="block text-xs font-semibold text-slate-400 mb-1.5">Contraseña</label>
         <input type="password" id="loginPass" placeholder="••••••••" autocomplete="current-password"
           onkeydown="if(event.key === 'Enter') iniciarSesion()"
-          class="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:outline-none focus:border-emerald-500 transition text-white placeholder-slate-600 font-semibold text-base">
+          class="w-full p-4 bg-slate-950 border border-slate-800 rounded-2xl focus:outline-none focus:border-emerald-500 transition text-white placeholder-slate-500 font-semibold text-base">
       </div>
       <button id="btnLogin" onclick="iniciarSesion()"
         class="w-full bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-slate-950 font-extrabold text-base p-4 rounded-2xl transition mt-2">Ingresar al Sistema</button>
@@ -83,9 +83,9 @@
           <div class="min-w-0">
             <div class="flex items-baseline gap-2 flex-wrap">
               <h1 class="text-sm sm:text-base font-black text-white tracking-tight">PRO COACHING</h1>
-              <span class="text-xs text-slate-500 font-semibold">Panel del Coach</span>
+              <span class="text-xs text-slate-400 font-semibold">Panel del Coach</span>
             </div>
-            <p id="coachWelcome" class="text-[11px] text-slate-400 truncate"></p>
+            <p id="coachWelcome" class="text-xs text-slate-400 truncate"></p>
           </div>
         </div>
 
@@ -138,10 +138,10 @@
           <span class="w-11 h-11 rounded-xl bg-emerald-500 text-slate-950 text-xl flex items-center justify-center shrink-0 shadow-md shadow-emerald-500/20">👥</span>
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white leading-tight">Mis alumnos</span>
-            <span class="block text-[11px] text-slate-400 mt-0.5 truncate">Ver lista y acceder a expedientes</span>
+            <span class="block text-xs text-slate-400 mt-0.5 truncate">Ver lista y acceder a expedientes</span>
           </span>
           <span class="shrink-0 flex items-center gap-1.5">
-            <span id="contadorMisAlumnosMovil" class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-[11px] font-extrabold px-2.5 py-1 rounded-full"></span>
+            <span id="contadorMisAlumnosMovil" class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/40 text-xs font-extrabold px-2.5 py-1 rounded-full"></span>
             <span class="text-emerald-400 text-lg font-black leading-none">›</span>
           </span>
         </button>
@@ -156,9 +156,9 @@
           <div class="flex items-center justify-between px-1 mb-3 shrink-0">
             <h2 class="text-sm font-extrabold text-white">Mis alumnos</h2>
             <div class="flex items-center gap-2">
-              <span id="contadorMisAlumnos" class="text-[11px] font-bold text-slate-500"></span>
-              <button type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', false)"
-                class="sm:hidden w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold">✕</button>
+              <span id="contadorMisAlumnos" class="text-xs font-bold text-slate-400"></span>
+              <button aria-label="Cerrar" type="button" onclick="toggleDrawerAlumnos('drawerAlumnosTab1', false)"
+                class="tap sm:hidden w-8 h-8 rounded-lg bg-slate-900 border border-slate-800 text-slate-300 font-bold">✕</button>
             </div>
           </div>
           <div id="listaMisAlumnosTab1" class="space-y-2.5 overflow-y-auto flex-1 sm:max-h-[72vh] pr-1"></div>
@@ -173,27 +173,27 @@
 
           <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div>
-              <label class="block text-xs text-slate-400 mb-1.5">Nombre completo</label>
+              <label for="regNombre" class="block text-xs text-slate-400 mb-1.5">Nombre completo</label>
               <input type="text" id="regNombre" placeholder="Ej. María Torres"
                 class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
             </div>
             <div>
-              <label class="block text-xs text-slate-400 mb-1.5">Usuario</label>
+              <label for="regUser" class="block text-xs text-slate-400 mb-1.5">Usuario</label>
               <input type="text" id="regUser" placeholder="Ej. maria.torres"
                 class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
             </div>
             <div>
-              <label class="block text-xs text-slate-400 mb-1.5">Contraseña</label>
+              <label for="regPass" class="block text-xs text-slate-400 mb-1.5">Contraseña</label>
               <input type="password" id="regPass" placeholder="••••••••"
                 class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
             </div>
             <div>
-              <label class="block text-xs text-slate-400 mb-1.5">WhatsApp <span class="text-slate-600">(opcional)</span></label>
+              <label for="regWhatsApp" class="block text-xs text-slate-400 mb-1.5">WhatsApp <span class="text-slate-400">(opcional)</span></label>
               <input type="tel" inputmode="tel" id="regWhatsApp" placeholder="987654321"
                 class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white transition">
             </div>
             <div class="md:col-span-2">
-              <label class="block text-xs text-slate-400 mb-1.5">Nivel inicial</label>
+              <label for="regNivel" class="block text-xs text-slate-400 mb-1.5">Nivel inicial</label>
               <select id="regNivel" class="w-full p-3 bg-slate-950 border border-slate-800 focus:border-emerald-500 focus:outline-none rounded-xl text-sm text-white">
                 <option value="NIVEL I: PRINCIPIANTE">NIVEL I: PRINCIPIANTE</option>
                 <option value="NIVEL II: INTERMEDIO">NIVEL II: INTERMEDIO</option>
@@ -232,23 +232,23 @@
 
         <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Datos Generales</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-3 mb-6">
-          <div class="sm:col-span-2"><label class="text-xs text-slate-400">Alumno</label><select id="selectAlumnoMedidas" class="select-alumnos w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></select></div>
-          <div><label class="text-xs text-slate-400">Fecha</label><input type="date" id="evFecha" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Edad</label><input type="number" id="evEdad" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div class="sm:col-span-2"><label for="selectAlumnoMedidas" class="text-xs text-slate-400">Alumno</label><select id="selectAlumnoMedidas" class="select-alumnos w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></select></div>
+          <div><label for="evFecha" class="text-xs text-slate-400">Fecha</label><input type="date" id="evFecha" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evEdad" class="text-xs text-slate-400">Edad</label><input type="number" id="evEdad" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
           <div>
-            <label class="text-xs text-slate-400">Sexo</label>
+            <label for="evSexo" class="text-xs text-slate-400">Sexo</label>
             <select id="evSexo" onchange="actualizarLabelCintura(); calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl">
               <option value="M">Masculino</option>
               <option value="F">Femenino</option>
             </select>
           </div>
-          <div><label class="text-xs text-slate-400">Peso (KG)</label><input type="number" step="0.1" id="evPeso" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Talla (CM)</label><input type="number" step="0.1" id="evTalla" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Envergadura (CM)</label><input type="number" step="0.1" id="evEnvergadura" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evPeso" class="text-xs text-slate-400">Peso (KG)</label><input type="number" step="0.1" id="evPeso" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evTalla" class="text-xs text-slate-400">Talla (CM)</label><input type="number" step="0.1" id="evTalla" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evEnvergadura" class="text-xs text-slate-400">Envergadura (CM)</label><input type="number" step="0.1" id="evEnvergadura" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
         </div>
 
         <div class="flex items-center gap-4 mb-5 bg-slate-950 p-4 border border-slate-800 rounded-xl">
-          <label class="text-sm font-bold text-emerald-400">¿Se cuenta con medidor de grasa corporal (Plicómetro)?</label>
+          <label for="evTienePlicometro" class="text-sm font-bold text-emerald-400">¿Se cuenta con medidor de grasa corporal (Plicómetro)?</label>
           <select id="evTienePlicometro" onchange="togglePlicometro(); calcularComposicionAutomatica()" class="p-2.5 bg-slate-900 border border-slate-700 rounded-xl font-bold text-white">
             <option value="NO">NO</option>
             <option value="SI">SÍ</option>
@@ -258,45 +258,45 @@
         <div id="seccionPliegues" class="hidden">
           <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Pliegues (mm)</h4>
           <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-6 gap-3 mb-6">
-            <div><label class="text-xs text-slate-400">Subescapular</label><input type="number" step="0.1" id="evSubescapular" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-            <div><label class="text-xs text-slate-400">Tricipital</label><input type="number" step="0.1" id="evTricipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-            <div><label class="text-xs text-slate-400">Bicipital</label><input type="number" step="0.1" id="evBicipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-            <div><label class="text-xs text-slate-400">Supracrestal</label><input type="number" step="0.1" id="evSupracrestal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-            <div><label class="text-xs text-slate-400">Suprailíaca</label><input type="number" step="0.1" id="evSuprailiaca" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-            <div><label class="text-xs text-slate-400">Abdominal</label><input type="number" step="0.1" id="evAbdominal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label for="evSubescapular" class="text-xs text-slate-400">Subescapular</label><input type="number" step="0.1" id="evSubescapular" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label for="evTricipital" class="text-xs text-slate-400">Tricipital</label><input type="number" step="0.1" id="evTricipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label for="evBicipital" class="text-xs text-slate-400">Bicipital</label><input type="number" step="0.1" id="evBicipital" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label for="evSupracrestal" class="text-xs text-slate-400">Supracrestal</label><input type="number" step="0.1" id="evSupracrestal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label for="evSuprailiaca" class="text-xs text-slate-400">Suprailíaca</label><input type="number" step="0.1" id="evSuprailiaca" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+            <div><label for="evAbdominal" class="text-xs text-slate-400">Abdominal</label><input type="number" step="0.1" id="evAbdominal" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
           </div>
         </div>
 
         <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Perímetros y Diámetros (CM)</h4>
         <div class="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-3 mb-6">
-          <div><label class="text-xs text-slate-400">Cuello</label><input type="number" step="0.1" id="evCuello" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Hombros</label><input type="number" step="0.1" id="evHombros" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Pecho</label><input type="number" step="0.1" id="evPecho" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400" id="labelCintura">Cintura (Medir en Ombligo)</label><input type="number" step="0.1" id="evCintura" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl border-amber-500/50"></div>
-          <div><label class="text-xs text-slate-400">Cadera</label><input type="number" step="0.1" id="evCadera" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evCuello" class="text-xs text-slate-400">Cuello</label><input type="number" step="0.1" id="evCuello" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evHombros" class="text-xs text-slate-400">Hombros</label><input type="number" step="0.1" id="evHombros" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evPecho" class="text-xs text-slate-400">Pecho</label><input type="number" step="0.1" id="evPecho" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evCintura" class="text-xs text-slate-400" id="labelCintura">Cintura (Medir en Ombligo)</label><input type="number" step="0.1" id="evCintura" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl border-amber-500/50"></div>
+          <div><label for="evCadera" class="text-xs text-slate-400">Cadera</label><input type="number" step="0.1" id="evCadera" oninput="calcularComposicionAutomatica()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
 
-          <div><label class="text-xs text-slate-400">Brazo Relajado</label><input type="number" step="0.1" id="evBrazoRel" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Brazo Flexionado</label><input type="number" step="0.1" id="evBrazoFlex" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Glúteos</label><input type="number" step="0.1" id="evGluteos" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Muslo</label><input type="number" step="0.1" id="evMuslo" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Pantorrilla</label><input type="number" step="0.1" id="evPantorrilla" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evBrazoRel" class="text-xs text-slate-400">Brazo Relajado</label><input type="number" step="0.1" id="evBrazoRel" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evBrazoFlex" class="text-xs text-slate-400">Brazo Flexionado</label><input type="number" step="0.1" id="evBrazoFlex" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evGluteos" class="text-xs text-slate-400">Glúteos</label><input type="number" step="0.1" id="evGluteos" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evMuslo" class="text-xs text-slate-400">Muslo</label><input type="number" step="0.1" id="evMuslo" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evPantorrilla" class="text-xs text-slate-400">Pantorrilla</label><input type="number" step="0.1" id="evPantorrilla" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
 
-          <div><label class="text-xs text-slate-400">Húmero</label><input type="number" step="0.1" id="evHumero" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Muñeca</label><input type="number" step="0.1" id="evMuneca" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Fémur</label><input type="number" step="0.1" id="evFemur" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evHumero" class="text-xs text-slate-400">Húmero</label><input type="number" step="0.1" id="evHumero" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evMuneca" class="text-xs text-slate-400">Muñeca</label><input type="number" step="0.1" id="evMuneca" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evFemur" class="text-xs text-slate-400">Fémur</label><input type="number" step="0.1" id="evFemur" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
         </div>
 
         <div class="bg-emerald-950/40 p-4 border border-emerald-500/50 rounded-xl mb-6 shadow-lg relative">
           <h4 class="text-sm font-extrabold uppercase tracking-wider text-emerald-400 mb-3">Resultados Automáticos (Composición)</h4>
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div><label class="text-xs text-slate-300">IMC</label><input type="text" id="evImc" class="w-full p-3 bg-slate-900 border border-emerald-500/50 rounded-xl text-white font-bold" readonly></div>
-            <div><label class="text-xs text-slate-300">% Grasa Corporal</label><input type="text" id="evGrasa" class="w-full p-3 bg-slate-900 border border-amber-500/50 rounded-xl text-white font-bold" readonly></div>
-            <div><label class="text-xs text-slate-300">Masa Magra (KG)</label><input type="text" id="evMasa" class="w-full p-3 bg-slate-900 border border-sky-500/50 rounded-xl text-white font-bold" readonly></div>
+            <div><label for="evImc" class="text-xs text-slate-300">IMC</label><input type="text" id="evImc" class="w-full p-3 bg-slate-900 border border-emerald-500/50 rounded-xl text-white font-bold" readonly></div>
+            <div><label for="evGrasa" class="text-xs text-slate-300">% Grasa Corporal</label><input type="text" id="evGrasa" class="w-full p-3 bg-slate-900 border border-amber-500/50 rounded-xl text-white font-bold" readonly></div>
+            <div><label for="evMasa" class="text-xs text-slate-300">Masa Magra (KG)</label><input type="text" id="evMasa" class="w-full p-3 bg-slate-900 border border-sky-500/50 rounded-xl text-white font-bold" readonly></div>
           </div>
 
           <div id="alertaMedidasAtipicas" class="hidden mt-4 p-3 bg-rose-950/60 border border-rose-500/50 rounded-xl flex items-start gap-3 transition-all shadow-lg">
             <span class="text-xl leading-none">⚠️</span>
-            <p class="text-[11px] sm:text-xs text-rose-300 font-semibold leading-relaxed">
+            <p class="text-xs sm:text-xs text-rose-300 font-semibold leading-relaxed">
               <strong>Error de cálculo:</strong> Las medidas ingresadas arrojan proporciones atípicas o matemáticamente imposibles para la fórmula. Por favor, verifica y vuelve a tomar las medidas (especialmente cintura y cuello).
             </p>
           </div>
@@ -304,19 +304,19 @@
 
         <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Historial Clínico</h4>
         <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3 mb-6">
-          <div><label class="text-xs text-slate-400">¿Lesión?</label><input type="text" id="evLesion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">¿Enfermedad?</label><input type="text" id="evEnfermedad" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">¿Medicamento?</label><input type="text" id="evMedicamento" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">¿Cirugía previa?</label><input type="text" id="evCirugia" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">¿Limitación?</label><input type="text" id="evLimitacion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
-          <div><label class="text-xs text-slate-400">Observación</label><input type="text" id="evObservacion" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evLesion" class="text-xs text-slate-400">¿Lesión?</label><input type="text" id="evLesion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evEnfermedad" class="text-xs text-slate-400">¿Enfermedad?</label><input type="text" id="evEnfermedad" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evMedicamento" class="text-xs text-slate-400">¿Medicamento?</label><input type="text" id="evMedicamento" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evCirugia" class="text-xs text-slate-400">¿Cirugía previa?</label><input type="text" id="evCirugia" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evLimitacion" class="text-xs text-slate-400">¿Limitación?</label><input type="text" id="evLimitacion" placeholder="No" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
+          <div><label for="evObservacion" class="text-xs text-slate-400">Observación</label><input type="text" id="evObservacion" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl"></div>
         </div>
 
         <h4 class="text-xs font-bold uppercase tracking-wider text-emerald-400 mb-3">Fotografías (Drive)</h4>
         <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6 bg-slate-950 p-4 rounded-xl border border-slate-800">
-          <div><label class="block text-xs font-bold text-slate-300 mb-2">Frente</label><input type="file" id="fotoFrente" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-          <div><label class="block text-xs font-bold text-slate-300 mb-2">Perfil</label><input type="file" id="fotoPerfil" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
-          <div><label class="block text-xs font-bold text-slate-300 mb-2">Espalda</label><input type="file" id="fotoEspalda" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label for="fotoFrente" class="block text-xs font-bold text-slate-300 mb-2">Frente</label><input type="file" id="fotoFrente" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label for="fotoPerfil" class="block text-xs font-bold text-slate-300 mb-2">Perfil</label><input type="file" id="fotoPerfil" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
+          <div><label for="fotoEspalda" class="block text-xs font-bold text-slate-300 mb-2">Espalda</label><input type="file" id="fotoEspalda" accept="image/*" class="w-full text-xs text-slate-400 file:mr-2 file:py-2 file:px-3 file:rounded-lg file:border-0 file:bg-emerald-500 file:text-slate-950 file:font-bold"></div>
         </div>
         <button id="btnGuardarEvaluacion" onclick="procesarYGuardarEvaluacion()" class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold px-8 py-3.5 rounded-xl">Guardar Evaluación y Subir Fotos</button>
       </div>
@@ -325,18 +325,18 @@
       <div id="tabCrearRutina" class="tab-coach hidden space-y-6">
         <div class="bg-slate-900 p-4 sm:p-6 rounded-2xl border border-emerald-500/40 shadow-lg">
           <div class="flex items-center gap-2 mb-1">
-            <span class="bg-emerald-500 text-slate-950 text-[10px] font-black px-2 py-0.5 rounded uppercase">Rápido</span>
+            <span class="bg-emerald-500 text-slate-950 text-[11px] font-black px-2 py-0.5 rounded uppercase">Rápido</span>
             <h3 class="text-base sm:text-lg font-bold text-emerald-400">Opción A: Designar Rutina de Catálogo a un Alumno</h3>
           </div>
           <p class="text-xs text-slate-400 mb-4">Selecciona una plantilla previamente creada y asígnala en un clic a cualquier alumno.</p>
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 items-end">
             <div>
-              <label class="block text-xs text-slate-400 mb-1">1. Seleccionar Plantilla de Rutina</label>
+              <label for="selectPlantillaAsignar" class="block text-xs text-slate-400 mb-1">1. Seleccionar Plantilla de Rutina</label>
               <select id="selectPlantillaAsignar" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-emerald-400 font-bold text-xs"></select>
             </div>
             <div>
-              <label class="block text-xs text-slate-400 mb-1">2. Seleccionar Alumno Destino</label>
+              <label for="selectAlumnoDestinoPlantilla" class="block text-xs text-slate-400 mb-1">2. Seleccionar Alumno Destino</label>
               <select id="selectAlumnoDestinoPlantilla" class="select-alumnos w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs"></select>
             </div>
             <div>
@@ -363,18 +363,18 @@
 
           <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Modalidad de Guardado</label>
+              <label for="modoCreacionRutina" class="block text-xs text-slate-400 mb-1">Modalidad de Guardado</label>
               <select id="modoCreacionRutina" onchange="toggleDestinoCreacionRutina()" class="w-full p-3 bg-slate-950 border border-sky-500/50 rounded-xl text-sky-400 font-bold text-xs">
                 <option value="ALUMNO">👤 Crear directo para un Alumno</option>
                 <option value="PLANTILLA">📋 Guardar como Plantilla (Asignar después)</option>
               </select>
             </div>
             <div id="contenedorSelectAlumnoConstructor">
-              <label class="block text-xs text-slate-400 mb-1">Alumno</label>
+              <label for="selectAlumnoRutina" class="block text-xs text-slate-400 mb-1">Alumno</label>
               <select id="selectAlumnoRutina" class="select-alumnos w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs"></select>
             </div>
             <div>
-              <label class="block text-xs text-slate-400 mb-1">Nombre de la Rutina</label>
+              <label for="nombreRutinaInput" class="block text-xs text-slate-400 mb-1">Nombre de la Rutina</label>
               <input type="text" id="nombreRutinaInput" placeholder="Ej. HIPERTROFIA FASE 1" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs">
             </div>
           </div>
@@ -383,7 +383,7 @@
           <div id="constructorVacio" class="text-center bg-slate-950 border border-dashed border-slate-700 rounded-2xl p-6 mb-4">
             <p class="text-3xl mb-2">🏋️</p>
             <p class="text-sm text-slate-300 font-bold">Aún no hay ejercicios en la rutina</p>
-            <p class="text-xs text-slate-500 mt-1">Toca «Añadir ejercicio» y elígelo de la biblioteca viendo su GIF.</p>
+            <p class="text-xs text-slate-400 mt-1">Toca «Añadir ejercicio» y elígelo de la biblioteca viendo su GIF.</p>
           </div>
           <div class="grid grid-cols-1 sm:grid-cols-[1fr_auto_auto] gap-2 mt-4">
             <button onclick="agregarFilaEjercicio()" class="bg-sky-500/15 hover:bg-sky-500/25 text-sky-300 border border-sky-500/40 px-4 py-3 rounded-xl text-sm font-extrabold">📚 Añadir ejercicio</button>
@@ -405,7 +405,7 @@
         <aside id="panelListaAnalizar" class="flex flex-col space-y-3">
           <div class="flex items-center justify-between px-1">
             <h3 class="text-sm font-extrabold text-white">Analizar alumno</h3>
-            <span id="contadorAnalizarMovil" class="text-[11px] font-bold text-slate-500"></span>
+            <span id="contadorAnalizarMovil" class="text-xs font-bold text-slate-400"></span>
           </div>
           <div id="tarjetasAlumnosCoach" class="space-y-2.5 sm:max-h-[75vh] sm:overflow-y-auto pr-1"></div>
           <select id="selectAlumnoAnalizar" class="select-alumnos hidden"></select>
@@ -417,7 +417,7 @@
           <button type="button" onclick="volverAListaAlumnosMovil()"
             class="sm:hidden w-full bg-slate-900 border border-emerald-500/40 text-emerald-300 font-extrabold text-xs px-4 py-3 rounded-xl flex items-center justify-between active:scale-[0.98] transition">
             <span>← Cambiar alumno</span>
-            <span class="text-[11px] text-slate-400 font-semibold">Ver lista completa</span>
+            <span class="text-xs text-slate-400 font-semibold">Ver lista completa</span>
           </button>
 
           <div id="contenedorComparativaCoach" class="min-h-[260px] min-w-0">
@@ -436,7 +436,7 @@
     <div id="alumnoView" class="hidden flex-grow flex flex-col md:flex-row w-full max-w-7xl mx-auto">
 
       <!-- BARRA SUPERIOR MÓVIL -->
-      <div class="md:hidden flex items-center justify-between bg-slate-950/95 border-b border-slate-900 px-4 py-3 sticky top-0 z-30 backdrop-blur-md">
+      <div class="md:hidden flex items-center justify-between bg-slate-950/95 border-b border-slate-900 px-4 py-3 sticky top-0 safe-sticky-top z-30 backdrop-blur-md">
         <div class="flex items-center gap-2.5 min-w-0">
           <span class="w-8 h-8 rounded-xl bg-emerald-500 text-slate-950 flex items-center justify-center shrink-0">
             <svg class="w-4.5 h-4.5" width="18" height="18" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>
@@ -458,14 +458,14 @@
               <img id="avatarAlumnoSidebar" src="" class="w-10 h-10 rounded-full object-cover border border-emerald-400 shadow">
               <div class="overflow-hidden">
                 <h2 class="text-xs font-extrabold text-white tracking-wide truncate">PRO COACHING</h2>
-                <p class="text-[10px] text-emerald-400 font-semibold uppercase tracking-widest">⚙️ Editar Perfil</p>
+                <p class="text-[11px] text-emerald-400 font-semibold uppercase tracking-widest">⚙️ Editar Perfil</p>
               </div>
             </div>
-            <button onclick="toggleSidebarMovil()" class="md:hidden text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
+            <button aria-label="Cerrar" onclick="toggleSidebarMovil()" class="tap md:hidden text-slate-400 hover:text-white text-lg font-bold px-2">✕</button>
           </div>
 
           <!-- Menú de las 3 Opciones Solicitadas -->
-          <p class="text-[10px] uppercase tracking-widest text-slate-500 font-bold mb-3 px-2">Menú de Opciones</p>
+          <p class="text-[11px] uppercase tracking-widest text-slate-400 font-bold mb-3 px-2">Menú de Opciones</p>
           <nav class="space-y-2">
             <button onclick="navegarAlumno('INICIO')" id="nav-side-INICIO"
               class="nav-btn-side w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-extrabold uppercase tracking-wider transition-all bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20">
@@ -498,7 +498,7 @@
           <button onclick="abrirModalPerfil()" class="w-full bg-slate-950 hover:bg-slate-800 text-emerald-400 border border-slate-800 py-2.5 rounded-xl text-xs font-bold transition">
             ⚙️ Mi Perfil y Contraseña
           </button>
-          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-[11px] text-slate-400">
+          <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 text-xs text-slate-400">
             <span class="block text-emerald-400 font-bold mb-0.5">BJPROYECTOS</span>
             ¿Dudas o problemas? Comunícate con el Administrador.
           </div>
@@ -517,11 +517,11 @@
             <div class="flex items-center gap-3 min-w-0">
               <img id="avatarAlumnoBanner" src="" onclick="navegarAlumno('PERFIL')" class="hidden md:block w-12 h-12 rounded-full object-cover border-2 border-slate-800 cursor-pointer" alt="">
               <div class="min-w-0">
-                <p id="fechaHoyTxt" class="text-xs font-semibold text-slate-500"></p>
+                <p id="fechaHoyTxt" class="text-xs font-semibold text-slate-400"></p>
                 <h1 id="saludoAlumno" class="text-2xl font-extrabold text-white tracking-tight truncate"></h1>
               </div>
             </div>
-            <span id="badgeNivelAlumno" class="shrink-0 max-w-[45%] truncate bg-slate-900 text-slate-300 border border-slate-800 text-[10px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide"></span>
+            <span id="badgeNivelAlumno" class="shrink-0 max-w-[45%] truncate bg-slate-900 text-slate-300 border border-slate-800 text-[11px] font-bold px-2.5 py-1 rounded-full uppercase tracking-wide"></span>
           </div>
 
           <div id="hoyHero"></div>
@@ -536,7 +536,7 @@
 
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <p id="fraseMotivadora" class="text-slate-300 text-sm italic leading-relaxed"></p>
-            <p id="infoCoachAlumno" class="text-[11px] text-slate-500 font-semibold mt-2"></p>
+            <p id="infoCoachAlumno" class="text-xs text-slate-400 font-semibold mt-2"></p>
           </div>
         </section>
 
@@ -545,21 +545,21 @@
           <div class="bg-slate-900 border border-slate-800 rounded-3xl p-6 text-center">
             <img id="avatarAlumnoPerfil" src="" class="w-24 h-24 rounded-full object-cover border-4 border-slate-800 mx-auto" alt="">
             <h2 id="perfilNombre" class="text-xl font-extrabold text-white mt-3"></h2>
-            <p id="perfilUsuario" class="text-sm text-slate-500 font-semibold"></p>
+            <p id="perfilUsuario" class="text-sm text-slate-400 font-semibold"></p>
             <div class="flex flex-wrap justify-center gap-2 mt-3">
-              <span id="perfilNivel" class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-[11px] font-bold px-3 py-1 rounded-full uppercase"></span>
-              <span id="perfilCoach" class="bg-slate-950 text-slate-300 border border-slate-800 text-[11px] font-bold px-3 py-1 rounded-full"></span>
+              <span id="perfilNivel" class="bg-emerald-500/15 text-emerald-300 border border-emerald-500/30 text-xs font-bold px-3 py-1 rounded-full uppercase"></span>
+              <span id="perfilCoach" class="bg-slate-950 text-slate-300 border border-slate-800 text-xs font-bold px-3 py-1 rounded-full"></span>
             </div>
           </div>
           <div class="bg-slate-900 border border-slate-800 rounded-2xl divide-y divide-slate-800 overflow-hidden">
             <button onclick="abrirModalPerfil()" class="w-full flex items-center justify-between px-4 py-4 text-sm font-semibold text-white active:bg-slate-800">
-              <span>Editar perfil y foto</span><span class="text-slate-500">›</span></button>
+              <span>Editar perfil y foto</span><span class="text-slate-400">›</span></button>
             <button onclick="abrirModalPerfil(); cambiarTabPerfil('pass')" class="w-full flex items-center justify-between px-4 py-4 text-sm font-semibold text-white active:bg-slate-800">
-              <span>Cambiar contraseña</span><span class="text-slate-500">›</span></button>
+              <span>Cambiar contraseña</span><span class="text-slate-400">›</span></button>
             <button onclick="abrirModal1RM()" class="w-full flex items-center justify-between px-4 py-4 text-sm font-semibold text-white active:bg-slate-800">
-              <span>Calculadora 1RM</span><span class="text-slate-500">›</span></button>
+              <span>Calculadora 1RM</span><span class="text-slate-400">›</span></button>
           </div>
-          <p class="text-center text-xs text-slate-500">¿Dudas o problemas? Comunícate con el Administrador · <span class="text-emerald-400 font-bold">BJPROYECTOS</span></p>
+          <p class="text-center text-xs text-slate-400">¿Dudas o problemas? Comunícate con el Administrador · <span class="text-emerald-400 font-bold">BJPROYECTOS</span></p>
           <button onclick="cerrarSesion()" class="w-full bg-rose-500/10 text-rose-300 border border-rose-500/30 py-4 rounded-2xl text-sm font-bold active:scale-[0.98] transition">Cerrar sesión</button>
         </section>
 
@@ -567,7 +567,7 @@
         <section id="vista-alumno-ENTRENAMIENTO" class="vista-alumno-sec hidden space-y-5">
           <!-- BOTONES FLOTANTES: cronómetro de descanso y calculadora 1RM -->
           <div class="fixed right-4 bottom-[92px] md:bottom-6 z-30 flex flex-col items-end gap-2.5">
-            <button onclick="abrirModal1RM()" title="Calculadora 1RM" class="w-12 h-12 rounded-full bg-slate-900 border border-slate-700 text-emerald-300 font-black text-[11px] shadow-xl active:scale-95 transition">1RM</button>
+            <button onclick="abrirModal1RM()" title="Calculadora 1RM" class="w-12 h-12 rounded-full bg-slate-900 border border-slate-700 text-emerald-300 font-black text-xs shadow-xl active:scale-95 transition">1RM</button>
             <button onclick="abrirHojaCronometro()" id="fabCrono" class="h-14 min-w-[56px] px-4 rounded-full bg-emerald-500 text-slate-950 font-black shadow-xl shadow-emerald-500/20 active:scale-95 transition flex items-center gap-2">
               <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" viewBox="0 0 24 24"><circle cx="12" cy="13" r="8"/><path d="M12 9v4l2.5 2M9 2h6M12 2v3"/></svg>
               <span id="cronometroFab" class="hidden text-lg tabular-nums"></span>
@@ -581,12 +581,12 @@
               <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mb-4"></div>
               <div class="flex items-center justify-between mb-4">
                 <div>
-                  <p class="text-[11px] text-slate-400 uppercase tracking-wider font-bold">⏱️ Descanso entre series</p>
+                  <p class="text-xs text-slate-400 uppercase tracking-wider font-bold">⏱️ Descanso entre series</p>
                   <div id="cronometroDisplay" class="text-5xl font-black tabular-nums text-emerald-400 leading-none mt-1">00:00</div>
                 </div>
                 <div class="flex items-center gap-2">
                   <button onclick="detenerCronometro()" class="bg-rose-500/10 text-rose-300 border border-rose-500/30 text-xs font-bold px-4 py-3 rounded-xl">Detener</button>
-                  <button onclick="cerrarHojaCronometro()" title="Cerrar" class="w-11 h-11 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+                  <button aria-label="Cerrar" onclick="cerrarHojaCronometro()" title="Cerrar" class="tap w-11 h-11 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
                 </div>
               </div>
               <div class="grid grid-cols-4 gap-2 mb-3">
@@ -616,25 +616,25 @@
 
       <!-- BARRA INFERIOR FIJA PARA CELULARES -->
       <nav class="md:hidden fixed bottom-0 inset-x-0 z-30 bg-slate-950/95 border-t border-slate-900 grid grid-cols-5 px-1 backdrop-blur-md safe-bottom">
-        <button onclick="navegarAlumno('INICIO')" id="nav-bot-INICIO" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-500">
+        <button onclick="navegarAlumno('INICIO')" id="nav-bot-INICIO" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-400">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M3 10.5 12 3l9 7.5"/><path d="M5 9.5V21h14V9.5"/><path d="M9.5 21v-6h5v6"/></svg>
-          <span class="text-[10px] font-bold">Hoy</span>
+          <span class="text-[11px] font-bold">Hoy</span>
         </button>
-        <button onclick="navegarAlumno('ENTRENAMIENTO')" id="nav-bot-ENTRENAMIENTO" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-500">
+        <button onclick="navegarAlumno('ENTRENAMIENTO')" id="nav-bot-ENTRENAMIENTO" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-400">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M6.5 6.5v11M17.5 6.5v11M3.5 9v6M20.5 9v6M6.5 12h11"/></svg>
-          <span class="text-[10px] font-bold">Entrenar</span>
+          <span class="text-[11px] font-bold">Entrenar</span>
         </button>
-        <button onclick="navegarAlumno('HISTORIAL')" id="nav-bot-HISTORIAL" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-500">
+        <button onclick="navegarAlumno('HISTORIAL')" id="nav-bot-HISTORIAL" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-400">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg>
-          <span class="text-[10px] font-bold">Progreso</span>
+          <span class="text-[11px] font-bold">Progreso</span>
         </button>
-        <button onclick="navegarAlumno('RECORDS')" id="nav-bot-RECORDS" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-500">
+        <button onclick="navegarAlumno('RECORDS')" id="nav-bot-RECORDS" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-400">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><path d="M8 21h8M12 17v4M7 4h10v5a5 5 0 0 1-10 0V4z"/><path d="M17 5h3v2a3 3 0 0 1-3 3M7 5H4v2a3 3 0 0 0 3 3"/></svg>
-          <span class="text-[10px] font-bold">Récords</span>
+          <span class="text-[11px] font-bold">Récords</span>
         </button>
-        <button onclick="navegarAlumno('PERFIL')" id="nav-bot-PERFIL" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-500">
+        <button onclick="navegarAlumno('PERFIL')" id="nav-bot-PERFIL" class="nav-btn-bot relative flex flex-col items-center justify-center gap-1 pt-2 pb-1 text-slate-400">
           <svg width="22" height="22" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 21c1.5-4 4.5-6 8-6s6.5 2 8 6"/></svg>
-          <span class="text-[10px] font-bold">Perfil</span>
+          <span class="text-[11px] font-bold">Perfil</span>
         </button>
       </nav>
 
@@ -644,29 +644,29 @@
 
 <!-- Modales.html · Ventanas emergentes globales (fotos, 1RM, perfil, métricas, biblioteca, técnica, check-in). Se incluye desde Index.html -->
 <!-- MODAL FOTO COMPLETA (LIGHTBOX) -->
-  <div id="modalFotoCompleta" class="hidden fixed inset-0 z-[80] bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4 select-none" onclick="if (event.target === this) cerrarModalFotoCompleta()">
+  <div role="dialog" aria-modal="true" id="modalFotoCompleta" class="hidden fixed inset-0 z-[80] bg-slate-950/95 backdrop-blur-md flex flex-col items-center justify-center p-2 sm:p-4 select-none" onclick="if (event.target === this) cerrarModalFotoCompleta()">
     <div class="w-full max-w-2xl flex items-center justify-between px-2 mb-2">
       <span id="galContador" class="text-xs font-bold text-slate-300"></span>
-      <button onclick="cerrarModalFotoCompleta()" class="w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-bold">✕</button>
+      <button aria-label="Cerrar" onclick="cerrarModalFotoCompleta()" class="tap w-10 h-10 rounded-xl bg-slate-900 border border-slate-700 text-slate-300 font-bold">✕</button>
     </div>
     <div id="galZona" class="relative w-full max-w-2xl flex items-center justify-center touch-pan-y">
-      <button onclick="moverGaleria(-1)" id="galPrev" class="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 text-white text-2xl items-center justify-center hover:bg-emerald-500 hover:text-slate-950 transition z-10">‹</button>
+      <button aria-label="Foto anterior" onclick="moverGaleria(-1)" id="galPrev" class="hidden sm:flex absolute left-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 text-white text-2xl items-center justify-center hover:bg-emerald-500 hover:text-slate-950 transition z-10">‹</button>
       <img id="imgFotoCompleta" src="" class="max-w-full max-h-[70vh] object-contain rounded-xl border border-slate-700 transition-transform duration-150">
-      <button onclick="moverGaleria(1)" id="galNext" class="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 text-white text-2xl items-center justify-center hover:bg-emerald-500 hover:text-slate-950 transition z-10">›</button>
+      <button aria-label="Foto siguiente" onclick="moverGaleria(1)" id="galNext" class="hidden sm:flex absolute right-2 top-1/2 -translate-y-1/2 w-12 h-12 rounded-full bg-slate-900/90 border border-slate-700 text-white text-2xl items-center justify-center hover:bg-emerald-500 hover:text-slate-950 transition z-10">›</button>
     </div>
     <div id="galPuntos" class="flex gap-1.5 mt-3"></div>
-    <p id="galAyuda" class="sm:hidden text-[11px] text-slate-500 mt-1">Desliza para ver la siguiente foto</p>
+    <p id="galAyuda" class="sm:hidden text-xs text-slate-400 mt-1">Desliza para ver la siguiente foto</p>
     <div id="txtFotoCompletaInfo" class="mt-3 w-full max-w-lg"></div>
   </div>
 
   <!-- MODAL CALCULADORA 1RM -->
-  <div id="modal1RM" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
+  <div role="dialog" aria-modal="true" id="modal1RM" class="hidden fixed inset-0 z-50 bg-slate-950/80 backdrop-blur-sm flex items-center justify-center p-4">
     <div class="bg-slate-900 border border-slate-800 p-6 rounded-2xl w-full max-w-sm shadow-2xl">
       <h3 class="text-base font-bold text-emerald-400 mb-2">Calculadora de 1RM (Epley)</h3>
       <p class="text-xs text-slate-400 mb-4">Ingresa el peso levantado y las repeticiones ejecutadas:</p>
-      <label class="block text-xs text-slate-400 mb-1">Peso Levantado (kg)</label>
+      <label for="rmPeso" class="block text-xs text-slate-400 mb-1">Peso Levantado (kg)</label>
       <input type="number" id="rmPeso" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl mb-3 text-white">
-      <label class="block text-xs text-slate-400 mb-1">Repeticiones Realizadas</label>
+      <label for="rmReps" class="block text-xs text-slate-400 mb-1">Repeticiones Realizadas</label>
       <input type="number" id="rmReps" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl mb-4 text-white">
       <div id="rmResultadoCont" class="hidden mb-4 p-3 bg-emerald-950/40 border border-emerald-500/30 rounded-xl text-center">
         <span class="text-xs text-slate-400 block">Tu 1RM Estimado es:</span>
@@ -680,11 +680,11 @@
   </div>
 
   <!-- MODAL DE GESTIÓN DE PERFIL Y CONTRASEÑA -->
-  <div id="modalPerfil" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
+  <div role="dialog" aria-modal="true" id="modalPerfil" class="hidden fixed inset-0 z-50 bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4 overflow-y-auto">
     <div class="bg-slate-900 border border-slate-800 p-5 sm:p-6 rounded-2xl w-full max-w-md shadow-2xl my-auto">
       <div class="flex justify-between items-center pb-3 border-b border-slate-800 mb-4">
         <h3 class="text-base sm:text-lg font-extrabold text-emerald-400">⚙️ Configurar Mi Perfil</h3>
-        <button onclick="cerrarModalPerfil()" class="text-slate-400 hover:text-white font-bold px-2">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalPerfil()" class="tap text-slate-400 hover:text-white font-bold px-2">✕</button>
       </div>
 
       <div class="grid grid-cols-2 gap-2 mb-5 bg-slate-950 p-1 rounded-xl border border-slate-800">
@@ -707,16 +707,16 @@
             📷 Seleccionar Nueva Foto
             <input type="file" id="inputFotoPerfil" accept="image/*" class="hidden" onchange="previsualizarAvatar(this)">
           </label>
-          <span class="text-[10px] text-slate-500 mt-1">Se guardará en tu carpeta personal de Drive</span>
+          <span class="text-[11px] text-slate-400 mt-1">Se guardará en tu carpeta personal de Drive</span>
         </div>
 
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Nombre Completo</label>
+          <label for="perfNombre" class="block text-xs text-slate-400 mb-1">Nombre Completo</label>
           <input type="text" id="perfNombre" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white">
         </div>
 
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Usuario de Acceso</label>
+          <label for="perfUsuario" class="block text-xs text-slate-400 mb-1">Usuario de Acceso</label>
           <input type="text" id="perfUsuario" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white">
         </div>
 
@@ -728,15 +728,15 @@
       <!-- SECCIÓN B: CAMBIAR CONTRASEÑA -->
       <div id="formPerfilPass" class="hidden space-y-4">
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Contraseña Actual</label>
+          <label for="passActual" class="block text-xs text-slate-400 mb-1">Contraseña Actual</label>
           <input type="password" id="passActual" placeholder="Ingresa tu clave actual" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white">
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Nueva Contraseña</label>
+          <label for="passNueva" class="block text-xs text-slate-400 mb-1">Nueva Contraseña</label>
           <input type="password" id="passNueva" placeholder="Mínimo 4 caracteres" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white">
         </div>
         <div>
-          <label class="block text-xs text-slate-400 mb-1">Confirmar Nueva Contraseña</label>
+          <label for="passConfirmar" class="block text-xs text-slate-400 mb-1">Confirmar Nueva Contraseña</label>
           <input type="password" id="passConfirmar" placeholder="Repite la nueva contraseña" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white">
         </div>
 
@@ -748,21 +748,21 @@
   </div>
 
         <!-- MODAL TABLAS DE MÉTRICAS (IMC, V-Taper, Grasa) -->
-  <div id="modalTablasMetricas" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4" onclick="if (event.target === this) this.classList.add('hidden')">
+  <div role="dialog" aria-modal="true" id="modalTablasMetricas" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4" onclick="if (event.target === this) this.classList.add('hidden')">
     <div class="bg-[#0b1220] border border-slate-800 rounded-3xl w-full max-w-md shadow-2xl relative overflow-hidden flex flex-col max-h-[90vh]">
       <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mt-3"></div>
 
       <!-- Cabecera -->
       <div class="px-5 pt-4 pb-2 flex items-start justify-between gap-3">
         <div class="min-w-0">
-          <p id="mtTitulo" class="text-[11px] font-bold text-slate-400 uppercase tracking-[0.16em]"></p>
+          <p id="mtTitulo" class="text-xs font-bold text-slate-400 uppercase tracking-[0.16em]"></p>
           <div class="flex items-baseline gap-2.5 mt-1.5 flex-wrap">
             <span id="mtValorActual" class="text-4xl font-black text-white tracking-tight leading-none"></span>
             <span id="mtSubtitulo" class="text-xs font-semibold text-slate-400"></span>
           </div>
         </div>
-        <button onclick="document.getElementById('modalTablasMetricas').classList.add('hidden')"
-          class="shrink-0 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white font-bold transition">✕</button>
+        <button aria-label="Cerrar" onclick="document.getElementById('modalTablasMetricas').classList.add('hidden')"
+          class="tap shrink-0 w-9 h-9 rounded-xl bg-slate-900 border border-slate-800 text-slate-400 hover:text-white font-bold transition">✕</button>
       </div>
 
       <!-- Cuerpo: Caja de rango + Barra segmentada + Desplegable discreto -->
@@ -772,16 +772,16 @@
     </div>
   </div>
         <!-- MODAL COMPOSICIÓN CORPORAL (DONUT CHART) -->
-<div id="modalComposicion" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
+<div role="dialog" aria-modal="true" id="modalComposicion" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-md flex items-center justify-center p-4">
   <div class="bg-[#171f2d] border border-slate-700/50 rounded-[2rem] w-full max-w-sm shadow-[0_20px_50px_rgba(0,0,0,0.5)] relative overflow-hidden flex flex-col max-h-[95vh] overflow-y-auto custom-scrollbar">
     
     <!-- Cabecera -->
     <div class="p-5 flex justify-between items-start relative z-10">
       <div>
         <h3 class="text-xs font-bold text-slate-300 uppercase tracking-widest mb-1">COMPOSICIÓN CORPORAL</h3>
-        <span class="bg-emerald-500/10 text-emerald-400 text-[10px] px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block">Estimación / Calculado</span>
+        <span class="bg-emerald-500/10 text-emerald-400 text-[11px] px-2 py-0.5 rounded-full border border-emerald-500/20 inline-block">Estimación / Calculado</span>
       </div>
-      <button onclick="document.getElementById('modalComposicion').classList.add('hidden')" class="text-slate-400 hover:text-white font-light text-2xl leading-none px-2 -mt-1">✕</button>
+      <button aria-label="Cerrar" onclick="document.getElementById('modalComposicion').classList.add('hidden')" class="tap text-slate-400 hover:text-white font-light text-2xl leading-none px-2 -mt-1">✕</button>
     </div>
 
     <div class="px-6 pb-8 pt-2 flex flex-col items-center relative">
@@ -790,11 +790,11 @@
       <div class="relative flex items-center justify-center w-full max-w-[260px] mx-auto">
         <div class="absolute -top-1 right-0 text-right z-20">
           <span id="mcGrasaPctTop" class="block text-base font-black text-amber-500 leading-tight"></span>
-          <span class="text-[10px] text-slate-300 uppercase tracking-wider">Masa Grasa</span>
+          <span class="text-[11px] text-slate-300 uppercase tracking-wider">Masa Grasa</span>
         </div>
         <div class="absolute -bottom-2 left-0 text-left z-20">
           <span id="mcMagraPctBottom" class="block text-base font-black text-emerald-400 leading-tight"></span>
-          <span class="text-[10px] text-slate-300 uppercase tracking-wider">Masa Magra</span>
+          <span class="text-[11px] text-slate-300 uppercase tracking-wider">Masa Magra</span>
         </div>
 
         <div id="mcDonutChart" class="w-52 h-52 sm:w-60 sm:h-60 rounded-full flex items-center justify-center relative transition-all duration-700 shadow-neon-cyan">
@@ -802,7 +802,7 @@
           <div class="w-[84%] h-[84%] bg-panel rounded-full flex flex-col items-center justify-center relative z-10 overflow-hidden border border-slate-700">
             <div id="mcAvatar" class="h-[88px] sm:h-[104px] flex items-center justify-center"></div>
             <div class="relative z-20 text-center mt-0.5">
-              <span class="text-[9px] text-slate-400 font-black uppercase tracking-[0.25em]">Peso total</span>
+              <span class="text-[11px] text-slate-400 font-black uppercase tracking-[0.25em]">Peso total</span>
               <span id="mcPesoTotal" class="block text-xl sm:text-2xl font-black text-white leading-none"></span>
             </div>
           </div>
@@ -813,7 +813,7 @@
       <div class="w-full flex flex-col items-center mt-10">
         <div class="text-center relative w-full mb-3 flex flex-col items-center">
           <div class="absolute right-0 top-0">
-            <span class="bg-teal-500/10 text-teal-400 text-[9px] uppercase font-bold px-2.5 py-1 rounded-full border border-teal-500/20">EVALUACIÓN ACTUAL</span>
+            <span class="bg-teal-500/10 text-teal-400 text-[11px] uppercase font-bold px-2.5 py-1 rounded-full border border-teal-500/20">EVALUACIÓN ACTUAL</span>
           </div>
           <div class="flex items-end justify-center gap-1.5 mt-5">
             <span id="mcGrasaMain" class="text-6xl font-black text-emerald-400 tracking-tighter leading-none"></span>
@@ -826,7 +826,7 @@
             <div class="w-1 h-4 bg-neon-cyan rounded-full animate-pulse"></div>
           </div>
           <div class="h-2 rounded-full w-full bg-gradient-to-r from-blue-500 via-emerald-400 via-amber-400 to-rose-500 mb-1.5 shadow-inner opacity-90"></div>
-          <div class="flex justify-between text-[10px] text-slate-500 font-medium px-1">
+          <div class="flex justify-between text-[11px] text-slate-400 font-medium px-1">
             <span>Bajo</span><span class="text-emerald-500/70">Ideal</span><span>Mod.</span><span>Alto</span>
           </div>
         </div>
@@ -837,17 +837,17 @@
         <div class="bg-slate-800/30 border border-slate-700/50 p-4 rounded-[1.25rem] relative overflow-hidden flex items-center justify-between shadow-lg">
           <div class="absolute right-[-5%] top-[-20%] text-6xl opacity-[0.03]">💪</div>
           <div>
-            <span class="flex items-center gap-1.5 text-[11px] text-emerald-400 uppercase tracking-widest font-black mb-1"><span class="text-sm">💪</span> MASA MAGRA</span>
+            <span class="flex items-center gap-1.5 text-xs text-emerald-400 uppercase tracking-widest font-black mb-1"><span class="text-sm">💪</span> MASA MAGRA</span>
             <span id="mcMasaMagraKg" class="block text-[28px] leading-none font-black text-white mb-0.5"></span>
-            <span id="mcMagraDesc" class="text-[11px] text-slate-400 font-medium block"></span>
+            <span id="mcMagraDesc" class="text-xs text-slate-400 font-medium block"></span>
           </div>
         </div>
         <div class="bg-slate-800/30 border border-slate-700/50 p-4 rounded-[1.25rem] relative overflow-hidden flex items-center justify-between shadow-lg">
           <div class="absolute right-[-5%] top-[-10%] text-6xl opacity-[0.03] grayscale">⚖️</div>
           <div>
-            <span class="flex items-center gap-1.5 text-[11px] text-amber-500 uppercase tracking-widest font-black mb-1"><span class="text-sm">⚖️</span> MASA GRASA</span>
+            <span class="flex items-center gap-1.5 text-xs text-amber-500 uppercase tracking-widest font-black mb-1"><span class="text-sm">⚖️</span> MASA GRASA</span>
             <span id="mcMasaGrasaKg" class="block text-[28px] leading-none font-black text-white mb-0.5"></span>
-            <span id="mcGrasaDesc" class="text-[11px] text-slate-400 font-medium block"></span>
+            <span id="mcGrasaDesc" class="text-xs text-slate-400 font-medium block"></span>
           </div>
         </div>
       </div>
@@ -857,11 +857,11 @@
       <!-- FIN MODAL COMPOSICIÓN CORPORAL -->
 
       <!-- MODAL GRÁFICO DINÁMICO (DESDE TARJETAS DELTA) -->
-      <div id="modalGraficoDelta" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
+      <div role="dialog" aria-modal="true" id="modalGraficoDelta" class="hidden fixed inset-0 z-50 bg-slate-950/90 backdrop-blur-sm flex items-center justify-center p-4">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-2xl shadow-2xl relative p-5">
           <div class="flex justify-between items-center mb-4">
             <h3 id="tituloGraficoDelta" class="text-base sm:text-lg font-bold text-emerald-400 uppercase tracking-wider"></h3>
-            <button onclick="document.getElementById('modalGraficoDelta').classList.add('hidden')" class="text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
+            <button aria-label="Cerrar" onclick="document.getElementById('modalGraficoDelta').classList.add('hidden')" class="tap text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
           </div>
           <div class="bg-slate-950 p-3 rounded-xl border border-slate-800 h-64 sm:h-80 relative">
             <canvas id="canvasGraficoDelta"></canvas>
@@ -870,9 +870,9 @@
       </div>
 
       <!-- MODAL AYUDA GYM (DICCIONARIO EN CRISTIANO) -->
-      <div id="modalAyudaGym" class="hidden fixed inset-0 z-[60] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4" onclick="document.getElementById('modalAyudaGym').classList.add('hidden')">
+      <div role="dialog" aria-modal="true" id="modalAyudaGym" class="hidden fixed inset-0 z-[60] bg-slate-950/85 backdrop-blur-sm flex items-center justify-center p-4" onclick="document.getElementById('modalAyudaGym').classList.add('hidden')">
         <div class="bg-slate-900 border border-slate-700 rounded-2xl w-full max-w-md shadow-2xl relative p-5 sm:p-6" onclick="event.stopPropagation()">
-          <button onclick="document.getElementById('modalAyudaGym').classList.add('hidden')" class="absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
+          <button aria-label="Cerrar" onclick="document.getElementById('modalAyudaGym').classList.add('hidden')" class="tap absolute top-4 right-4 text-slate-400 hover:text-white font-bold text-xl px-2">✕</button>
           <div id="headerAyudaGym" class="mb-3">
         <!-- El título se inyectará aquí -->
           </div>
@@ -883,14 +883,14 @@
   </div>
 
   <!-- MODAL BIBLIOTECA DE EJERCICIOS (coach) — pantalla completa en celular -->
-  <div id="modalCatalogo" class="hidden fixed inset-0 z-[70] bg-slate-950/95 backdrop-blur-md flex items-stretch sm:items-center justify-center p-0 sm:p-4">
+  <div role="dialog" aria-modal="true" id="modalCatalogo" class="hidden fixed inset-0 z-[70] bg-slate-950/95 backdrop-blur-md flex items-stretch sm:items-center justify-center p-0 sm:p-4">
     <div class="bg-slate-900 border-0 sm:border border-sky-500/30 rounded-none sm:rounded-2xl w-full max-w-4xl h-[100dvh] sm:h-[90vh] flex flex-col shadow-2xl overflow-hidden">
       <div class="flex items-center justify-between gap-3 px-4 pt-4 pb-3 border-b border-slate-800 shrink-0">
         <div class="min-w-0">
           <h3 class="text-sm sm:text-base font-extrabold text-sky-400 uppercase tracking-wider">📚 Biblioteca de Ejercicios</h3>
-          <p class="text-[11px] text-slate-400">Toca un ejercicio para elegirlo · ❓ para ver cómo se hace</p>
+          <p class="text-xs text-slate-400">Toca un ejercicio para elegirlo · ❓ para ver cómo se hace</p>
         </div>
-        <button onclick="cerrarModalCatalogo()" class="shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalCatalogo()" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
       </div>
       <div class="p-3 border-b border-slate-800 bg-slate-950/50 space-y-2 shrink-0">
         <input id="catBuscar" type="search" placeholder="🔍 Buscar en español o inglés: press, curl, remo, squat..." oninput="reiniciarCatalogo()"
@@ -899,7 +899,7 @@
           <select id="catFiltroZona" onchange="reiniciarCatalogo()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200"><option value="">🧍 Todas las zonas</option></select>
           <select id="catFiltroEquipo" onchange="reiniciarCatalogo()" class="w-full p-2.5 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-slate-200"><option value="">🏋️ Todo el equipo</option></select>
         </div>
-        <p id="catContador" class="text-[11px] text-slate-400 font-semibold text-center"></p>
+        <p id="catContador" class="text-xs text-slate-400 font-semibold text-center"></p>
       </div>
       <!-- El scroll va en este contenedor; la cuadrícula ya no se "aplasta" -->
       <div id="scrollCatalogo" class="flex-1 min-h-0 overflow-y-auto p-3 sm:p-4">
@@ -908,19 +908,19 @@
           <button onclick="masCatalogo()" class="bg-slate-800 hover:bg-slate-700 text-sky-300 font-bold text-xs px-5 py-3 rounded-xl border border-slate-700">⬇️ Cargar más ejercicios</button>
         </div>
       </div>
-      <p class="text-[9px] text-slate-600 text-center py-1.5 border-t border-slate-800 shrink-0">Dataset: hasaneyldrm/exercises-dataset · Medios © Gym Visual</p>
+      <p class="text-[11px] text-slate-400 text-center py-1.5 border-t border-slate-800 shrink-0">Dataset: hasaneyldrm/exercises-dataset · Medios © Gym Visual</p>
     </div>
   </div>
 
   <!-- MODAL CÓMO SE HACE (GIF + nombre ES/EN + instrucciones en español) -->
-  <div id="modalEjercicio" class="hidden fixed inset-0 z-[75] bg-slate-950/95 backdrop-blur-md flex items-stretch sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) cerrarModalEjercicio()">
+  <div role="dialog" aria-modal="true" id="modalEjercicio" class="hidden fixed inset-0 z-[75] bg-slate-950/95 backdrop-blur-md flex items-stretch sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) cerrarModalEjercicio()">
     <div class="bg-slate-900 border-0 sm:border border-sky-500/30 rounded-none sm:rounded-2xl w-full max-w-lg h-[100dvh] sm:h-auto sm:max-h-[92vh] overflow-y-auto shadow-2xl">
       <div class="flex items-start justify-between gap-3 p-4 border-b border-slate-800 sticky top-0 bg-slate-900 z-10">
         <div class="min-w-0">
           <h3 id="ejNombre" class="text-base font-black text-white uppercase tracking-wide leading-tight"></h3>
           <p id="ejNombreEn" class="text-xs text-sky-300/90 italic font-semibold mt-0.5"></p>
         </div>
-        <button onclick="cerrarModalEjercicio()" class="shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalEjercicio()" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
       </div>
       <div class="p-4 space-y-4">
         <div class="w-full max-w-[376px] mx-auto bg-white rounded-2xl overflow-hidden border border-slate-700 p-2" style="aspect-ratio:1/1">
@@ -928,7 +928,7 @@
         </div>
         <div id="ejChips" class="flex flex-wrap gap-2"></div>
         <div id="ejEditarEs" class="hidden bg-slate-950 border border-slate-800 rounded-xl p-3">
-          <label class="block text-[11px] text-slate-400 font-bold mb-1.5">✏️ Corregir nombre en español (se guarda en la biblioteca)</label>
+          <label for="ejInputEs" class="block text-xs text-slate-400 font-bold mb-1.5">✏️ Corregir nombre en español (se guarda en la biblioteca)</label>
           <div class="flex gap-2">
             <input id="ejInputEs" type="text" maxlength="80" class="flex-1 min-w-0 p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white uppercase">
             <button id="btnGuardarNombreEs" onclick="guardarNombreEs()" class="shrink-0 px-4 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs">Guardar</button>
@@ -938,7 +938,7 @@
           <h4 class="text-xs font-extrabold uppercase tracking-wider text-emerald-400 mb-2">📝 Cómo se hace</h4>
           <div id="ejInstr"></div>
         </div>
-        <p class="text-[9px] text-slate-600 text-center pb-4">Medios e instrucciones: dataset hasaneyldrm/exercises-dataset · © Gym Visual</p>
+        <p class="text-[11px] text-slate-400 text-center pb-4">Medios e instrucciones: dataset hasaneyldrm/exercises-dataset · © Gym Visual</p>
       </div>
     </div>
   </div>
@@ -953,27 +953,27 @@
           <h3 class="text-base font-extrabold text-white">📋 Check-in de la semana</h3>
           <p id="ckSemanaTxt" class="text-xs text-slate-400">Cuéntale a tu coach cómo te fue. Toma un minuto.</p>
         </div>
-        <button onclick="cerrarHojaCheckin()" title="Cerrar" class="shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarHojaCheckin()" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold hover:bg-rose-500 hover:text-white transition">✕</button>
       </div>
       <div class="space-y-4">
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Peso de hoy (kg)</label>
+          <label for="ckPeso" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Peso de hoy (kg)</label>
           <input id="ckPeso" type="number" inputmode="decimal" step="0.1" placeholder="Ej. 78.5" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">¿Cómo estuvo tu energía?</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">¿Cómo estuvo tu energía?</label>
           <div id="ckEnergia" class="grid grid-cols-5 gap-1.5"></div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">¿Cómo dormiste?</label>
+          <label class="block text-xs font-bold text-slate-400 uppercase mb-1.5">¿Cómo dormiste?</label>
           <div id="ckSueno" class="grid grid-cols-5 gap-1.5"></div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">¿Dolor o molestia? (opcional)</label>
+          <label for="ckMolestias" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">¿Dolor o molestia? (opcional)</label>
           <input id="ckMolestias" type="text" maxlength="200" placeholder="Ej. molestia en el hombro derecho" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Nota para tu coach</label>
+          <label for="ckNota" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Nota para tu coach</label>
           <textarea id="ckNota" rows="3" maxlength="500" placeholder="¿Qué te costó? ¿Qué quieres cambiar?" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm resize-none"></textarea>
         </div>
         <button id="btnEnviarCheckin" onclick="enviarCheckin()" class="w-full bg-emerald-500 text-slate-950 font-extrabold py-4 rounded-2xl active:scale-[0.98] transition">Enviar a mi coach</button>
@@ -982,7 +982,7 @@
   </div>
  
 <!-- MODAL REGISTRAR RÉCORD (alumno, v11) -->
-  <div id="modalRecord" class="hidden fixed inset-0 z-[66]" onclick="if (event.target === this) cerrarModalRecord()">
+  <div role="dialog" aria-modal="true" id="modalRecord" class="hidden fixed inset-0 z-[66]" onclick="if (event.target === this) cerrarModalRecord()">
     <div class="absolute inset-0 bg-slate-950/70 backdrop-blur-sm pointer-events-none"></div>
     <div class="absolute bottom-0 inset-x-0 sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:bottom-6 sm:w-full sm:max-w-md bg-slate-900 border-t sm:border border-slate-800 rounded-t-3xl sm:rounded-3xl p-5 safe-bottom shadow-2xl">
       <div class="w-10 h-1 rounded-full bg-slate-700 mx-auto mb-4 sm:hidden"></div>
@@ -991,29 +991,29 @@
           <h3 class="text-base font-extrabold text-white">🏆 Registrar récord</h3>
           <p class="text-xs text-slate-400">Tu coach lo revisará antes de publicarlo.</p>
         </div>
-        <button onclick="cerrarModalRecord()" title="Cerrar" class="shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarModalRecord()" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold">✕</button>
       </div>
       <div class="space-y-3">
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Ejercicio</label>
+          <label for="recEjercicio" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Ejercicio</label>
           <select id="recEjercicio" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm font-bold"></select>
         </div>
         <div class="grid grid-cols-2 gap-3">
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Peso (kg)</label>
+            <label for="recPeso" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Peso (kg)</label>
             <input id="recPeso" type="number" inputmode="decimal" step="0.5" min="0" placeholder="Ej. 80" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold">
           </div>
           <div>
-            <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Repeticiones</label>
+            <label for="recReps" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Repeticiones</label>
             <input id="recReps" type="number" inputmode="numeric" min="1" max="100" value="1" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white font-bold">
           </div>
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Fecha</label>
+          <label for="recFecha" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Fecha</label>
           <input id="recFecha" type="date" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white">
         </div>
         <div>
-          <label class="block text-[11px] font-bold text-slate-400 uppercase mb-1.5">Comentario del logro <span class="normal-case font-semibold text-slate-500">(opcional)</span></label>
+          <label for="recComentario" class="block text-xs font-bold text-slate-400 uppercase mb-1.5">Comentario del logro <span class="normal-case font-semibold text-slate-400">(opcional)</span></label>
           <textarea id="recComentario" rows="2" maxlength="140" placeholder="Ej. Bloqueo limpio, sin correas" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-white text-sm resize-none"></textarea>
         </div>
         <button id="btnEnviarRecord" onclick="enviarRecord()" class="w-full bg-emerald-500 text-slate-950 font-extrabold py-4 rounded-2xl active:scale-[0.98] transition">Enviar a mi coach</button>
@@ -1022,14 +1022,14 @@
   </div>
 
   <!-- MODAL ACTIVIDAD DE HOY (coach, v11) -->
-  <div id="modalActividadHoy" class="hidden fixed inset-0 z-[66] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) this.classList.add('hidden')">
+  <div role="dialog" aria-modal="true" id="modalActividadHoy" class="hidden fixed inset-0 z-[66] bg-slate-950/80 backdrop-blur-sm flex items-end sm:items-center justify-center p-0 sm:p-4" onclick="if (event.target === this) this.classList.add('hidden')">
     <div class="bg-slate-900 border border-slate-800 w-full sm:max-w-md rounded-t-3xl sm:rounded-3xl p-5 max-h-[85vh] overflow-y-auto safe-bottom">
       <div class="flex items-start justify-between gap-3 mb-4">
         <div class="min-w-0">
           <h3 class="text-base font-extrabold text-white">📅 Actividad de hoy</h3>
           <p class="text-xs text-slate-400">Se actualiza sola cada minuto.</p>
         </div>
-        <button onclick="document.getElementById('modalActividadHoy').classList.add('hidden')" title="Cerrar" class="shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold">✕</button>
+        <button aria-label="Cerrar" onclick="document.getElementById('modalActividadHoy').classList.add('hidden')" title="Cerrar" class="tap shrink-0 w-10 h-10 rounded-xl bg-slate-950 border border-slate-700 text-slate-300 font-bold">✕</button>
       </div>
       <div id="listaActividadHoy" class="space-y-2"></div>
     </div>
@@ -1038,8 +1038,8 @@
 <!-- FIN DE MODALES GLOBALES -->
 
   <!-- FOOTER GLOBAL -->
-  <footer class="w-full border-t border-slate-900 bg-slate-950/90 py-4 px-4 mt-8 mb-14 md:mb-0">
-    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left text-xs text-slate-500">
+  <footer class="pie-app w-full border-t border-slate-900 bg-slate-950/90 py-4 px-4 mt-8">
+    <div class="max-w-6xl mx-auto flex flex-col sm:flex-row justify-between items-center gap-2 text-center sm:text-left text-xs text-slate-400">
       <div><span>🛠️ ¿Inconvenientes o dudas? <strong class="text-slate-300">Comunícate con el Administrador</strong>.</span></div>
       <div class="flex items-center gap-1.5"><span>Plataforma creada por</span><span class="bg-emerald-500/10 text-emerald-400 border border-emerald-500/30 font-extrabold px-2.5 py-0.5 rounded-md tracking-wider">BJPROYECTOS</span></div>
     </div>
@@ -1053,14 +1053,14 @@
           <h3 class="text-base font-extrabold text-white">📑 Duplicar rutina</h3>
           <p id="dupOrigen" class="text-xs text-slate-400 mt-0.5"></p>
         </div>
-        <button onclick="cerrarDuplicar()" class="shrink-0 w-9 h-9 rounded-xl bg-slate-950 border border-slate-700 text-slate-400 font-bold">✕</button>
+        <button aria-label="Cerrar" onclick="cerrarDuplicar()" class="tap shrink-0 w-9 h-9 rounded-xl bg-slate-950 border border-slate-700 text-slate-400 font-bold">✕</button>
       </div>
-      <label class="block text-xs text-slate-400 mb-1">Copiarla a</label>
+      <label for="dupDestino" class="block text-xs text-slate-400 mb-1">Copiarla a</label>
       <select id="dupDestino" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white mb-3"></select>
-      <label class="block text-xs text-slate-400 mb-1">Nombre de la copia</label>
+      <label for="dupNombre" class="block text-xs text-slate-400 mb-1">Nombre de la copia</label>
       <input type="text" id="dupNombre" class="w-full p-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white mb-4">
       <button id="btnDuplicar" onclick="ejecutarDuplicarRutina()" class="w-full bg-emerald-500 text-slate-950 font-extrabold text-sm py-3.5 rounded-xl active:scale-[0.98] transition">Duplicar</button>
-      <p class="text-[11px] text-slate-500 mt-3">La copia es independiente: editarla no afecta a la rutina original.</p>
+      <p class="text-xs text-slate-400 mt-3">La copia es independiente: editarla no afecta a la rutina original.</p>
     </div>
   </div>
 

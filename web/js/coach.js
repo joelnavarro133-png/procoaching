@@ -20,7 +20,9 @@
         btn.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-semibold transition bg-slate-900 text-slate-300 border border-slate-800 hover:bg-slate-800';
       });
       if (tabId === 'tabRecordsCoach') cargarRecords('contenedorRecordsCoach');
+      document.querySelectorAll('.btn-tab-coach').forEach(b => b.removeAttribute('aria-current'));
       const btnActivo = document.getElementById('btnTab-' + tabId);
+      if (btnActivo) btnActivo.setAttribute('aria-current', 'page');
       if (btnActivo) {
         btnActivo.className = 'btn-tab-coach whitespace-nowrap px-3.5 py-2 rounded-xl text-xs font-extrabold transition bg-emerald-500 text-slate-950 shadow-lg shadow-emerald-500/20';
       }
@@ -152,7 +154,7 @@
         ['ASCENDING SET','ASCENDING SET (subir peso)'],['PIRAMIDE COMPLETA','PIRÁMIDE COMPLETA (5 series)']];
       const tipoPrev = v('.r-tipo', 'NORMAL');
       const inp = 'w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm text-center font-bold text-white';
-      const lbl = 'block text-[10px] text-slate-400 font-bold uppercase tracking-wide mb-1';
+      const lbl = 'block text-[11px] text-slate-400 font-bold uppercase tracking-wide mb-1';
       const card = document.createElement('div');
       card.className = 'fila-rutina bg-slate-950 border border-slate-800 rounded-2xl p-3 sm:p-4 shadow-md';
       card.innerHTML = `
@@ -166,7 +168,7 @@
           <div class="r-media shrink-0 w-24 h-24 sm:w-28 sm:h-28 rounded-xl bg-slate-900 border border-slate-700 overflow-hidden flex items-center justify-center text-3xl">🏋️</div>
           <div class="flex-1 min-w-0 space-y-2">
             <textarea rows="2" placeholder="NOMBRE DEL EJERCICIO" class="r-ejer w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-sm font-extrabold text-white uppercase resize-none leading-snug"></textarea>
-            <p class="r-en hidden text-[11px] text-sky-300/90 italic font-semibold leading-tight"></p>
+            <p class="r-en hidden text-xs text-sky-300/90 italic font-semibold leading-tight"></p>
             <input type="text" placeholder="MÚSCULO (ej. PECHO)" class="r-musc w-full p-2.5 bg-slate-900 border border-slate-700 rounded-xl text-xs font-bold text-emerald-300 uppercase">
           </div>
         </div>
@@ -570,17 +572,17 @@
       const telDestino = paraCoach ? a.whatsapp : ((estadoGlobal.coachInfo || {}).whatsapp || '');
       const enlace = hecho ? `
         <div class="mt-3 bg-slate-950 border border-emerald-500/30 rounded-xl p-3">
-          <p class="text-[11px] text-slate-400 mb-2">Listo: <span class="text-emerald-400 font-bold">${escHtml(hecho.nombre)}</span></p>
+          <p class="text-xs text-slate-400 mb-2">Listo: <span class="text-emerald-400 font-bold">${escHtml(hecho.nombre)}</span></p>
           <div class="flex flex-wrap gap-2">
             <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 min-w-[130px] text-center bg-slate-900 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">📥 Descargar PDF</button>
             ${telDestino ? `<button onclick="enviarReportePorWhatsApp('${escHtml(idAlumno)}', ${paraCoach ? 'true' : 'false'})" class="flex-1 min-w-[130px] bg-emerald-500 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl active:scale-[0.98] transition">💬 Enviar ${escHtml(destino)}</button>` : ''}
           </div>
-          <p class="text-[10px] text-slate-500 mt-2">🔒 El reporte es privado: no se comparte por enlace. Se envía como archivo adjunto.</p>
+          <p class="text-[11px] text-slate-400 mt-2">🔒 El reporte es privado: no se comparte por enlace. Se envía como archivo adjunto.</p>
         </div>` : '';
       return `
         <div id="bloqueReportePDF-${escHtml(idAlumno)}" class="bg-slate-900/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
           <h3 class="text-sm font-extrabold text-white mb-1">📄 Reporte PDF de progreso</h3>
-          <p class="text-[11px] text-slate-400 mb-3">Incluye medidas y composición corporal, progreso de cargas, adherencia, check-ins y las fotos de antes y después.</p>
+          <p class="text-xs text-slate-400 mb-3">Incluye medidas y composición corporal, progreso de cargas, adherencia, check-ins y las fotos de antes y después.</p>
           <button id="btnReporte-${escHtml(idAlumno)}" onclick="generarReportePDFCliente('${escHtml(idAlumno)}', ${paraCoach ? 'true' : 'false'})"
             class="w-full sm:w-auto bg-emerald-500 text-slate-950 font-extrabold text-xs px-5 py-3 rounded-xl active:scale-[0.98] transition">
             ${hecho ? '🔄 Volver a generar' : '📄 Generar reporte PDF'}
@@ -623,7 +625,7 @@
         <div class="bg-slate-900 border border-emerald-500/40 rounded-2xl p-3.5 flex flex-wrap items-center justify-between gap-3">
           <div class="min-w-0">
             <p class="text-xs font-extrabold text-emerald-400 truncate">📄 ${escHtml(hecho.nombre)}</p>
-            <p class="text-[10px] text-slate-500">🔒 Privado en Drive · Se comparte como archivo adjunto</p>
+            <p class="text-[11px] text-slate-400">🔒 Privado en Drive · Se comparte como archivo adjunto</p>
           </div>
           <div class="flex gap-2 w-full sm:w-auto">
             <button onclick="descargarReporte('${escHtml(idAlumno)}')" class="flex-1 sm:flex-none bg-slate-950 border border-slate-700 text-slate-200 font-bold text-xs px-4 py-2.5 rounded-xl">📥 Descargar</button>
@@ -668,12 +670,12 @@
              <button onclick="enviarWhatsApp('${escHtml(idAlumno)}','recordatorio')" class="flex-1 min-w-[150px] bg-slate-950 border border-emerald-500/40 text-emerald-300 font-bold text-xs px-4 py-3 rounded-xl active:scale-[0.98] transition">⏰ Recordar entrenamiento</button>
              <button onclick="abrirWhatsApp('${escHtml(a.whatsapp)}','')" class="shrink-0 bg-slate-950 border border-slate-700 text-slate-300 font-bold text-xs px-4 py-3 rounded-xl">💬 Escribir</button>
            </div>
-           <p class="text-[10px] text-slate-500 mt-2">Número: +${escHtml(tel)} · <button onclick="pedirWhatsApp('${escHtml(idAlumno)}')" class="underline text-slate-400">cambiar</button></p>`
+           <p class="text-[11px] text-slate-400 mt-2">Número: +${escHtml(tel)} · <button onclick="pedirWhatsApp('${escHtml(idAlumno)}')" class="underline text-slate-400">cambiar</button></p>`
         : `<div class="flex flex-wrap items-center gap-2">
              <input type="tel" inputmode="tel" id="inpWa-${escHtml(idAlumno)}" placeholder="987654321" class="flex-1 min-w-[160px] p-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white">
              <button onclick="guardarWhatsApp('${escHtml(idAlumno)}')" class="bg-emerald-500 text-slate-950 font-bold text-xs px-4 py-2.5 rounded-xl">Guardar</button>
            </div>
-           <p class="text-[10px] text-slate-500 mt-2">Este alumno aún no tiene WhatsApp registrado.</p>`;
+           <p class="text-[11px] text-slate-400 mt-2">Este alumno aún no tiene WhatsApp registrado.</p>`;
       return `
         <div id="bloqueWhatsAppCoach" class="bg-slate-900/60 p-4 sm:p-5 rounded-2xl border border-slate-800">
           <h3 class="text-sm font-extrabold text-white mb-3">💬 Enviar por WhatsApp</h3>
@@ -737,10 +739,10 @@
           ${avatar}
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white truncate">${escHtml(a.nombre)}</span>
-            <span class="block text-[11px] font-semibold truncate mt-0.5 ${activo ? 'text-emerald-300' : 'text-slate-400'}">${escHtml(a.nivel || 'Sin nivel')}</span>
-            ${textoActividad(a.id) ? `<span class="block text-[10px] font-semibold truncate mt-0.5 ${(actividadCoach[a.id] || {}).enLinea ? 'text-emerald-400' : 'text-slate-500'}">${escHtml(textoActividad(a.id))}${(actividadCoach[a.id] || {}).entrenoHoy ? ' · ✅ entrenó hoy' : ''}</span>` : ''}
+            <span class="block text-xs font-semibold truncate mt-0.5 ${activo ? 'text-emerald-300' : 'text-slate-400'}">${escHtml(a.nivel || 'Sin nivel')}</span>
+            ${textoActividad(a.id) ? `<span class="block text-[11px] font-semibold truncate mt-0.5 ${(actividadCoach[a.id] || {}).enLinea ? 'text-emerald-400' : 'text-slate-400'}">${escHtml(textoActividad(a.id))}${(actividadCoach[a.id] || {}).entrenoHoy ? ' · ✅ entrenó hoy' : ''}</span>` : ''}
           </span>
-          <span class="${activo ? 'text-emerald-400' : 'text-slate-600'} font-bold text-sm shrink-0">›</span>
+          <span class="${activo ? 'text-emerald-400' : 'text-slate-400'} font-bold text-sm shrink-0">›</span>
         </button>`;
     }
 
@@ -753,7 +755,7 @@
         const el = document.getElementById(id); if (el) el.textContent = txtCnt;
       });
       if (!lista.length) {
-        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-500">Aún no tienes alumnos registrados.</div>';
+        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">Aún no tienes alumnos registrados.</div>';
         return;
       }
       cont.innerHTML = lista.map(a => htmlTarjetaAlumnoCoach(a, {
@@ -785,7 +787,7 @@
       if (!cont) return;
       const lista = estadoGlobal.alumnos || [];
       if (!lista.length) {
-        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-500">Aún no tienes alumnos registrados.</div>';
+        cont.innerHTML = '<div class="p-4 rounded-2xl bg-slate-900/60 border border-slate-800 text-xs text-slate-400">Aún no tienes alumnos registrados.</div>';
         return;
       }
       cont.innerHTML = lista.map(a => htmlTarjetaAlumnoCoach(a, {
@@ -863,19 +865,19 @@
           <div id="tarjetaCheckinDestacado" class="bg-slate-900/90 border border-slate-800 rounded-2xl p-4 sm:p-5">
             <div class="flex items-center justify-between gap-2">
               <p class="text-sm font-extrabold text-white">Check-in semanal</p>
-              <span class="text-[11px] font-bold text-slate-500 bg-slate-950 border border-slate-800 px-2.5 py-0.5 rounded-full">Sin envíos</span>
+              <span class="text-xs font-bold text-slate-400 bg-slate-950 border border-slate-800 px-2.5 py-0.5 rounded-full">Sin envíos</span>
             </div>
-            <p class="text-xs text-slate-500 mt-2">Este alumno aún no ha enviado su primer check-in semanal.</p>
+            <p class="text-xs text-slate-400 mt-2">Este alumno aún no ha enviado su primer check-in semanal.</p>
           </div>`;
       }
       const c = lista[0];
       const badge = c.respuesta
-        ? '<span class="text-[11px] font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">Respondido</span>'
-        : '<span class="text-[11px] font-bold text-amber-300 bg-amber-500/15 border border-amber-500/40 px-3 py-1 rounded-full">Pendiente</span>';
+        ? '<span class="text-xs font-bold text-emerald-300 bg-emerald-500/10 border border-emerald-500/30 px-3 py-1 rounded-full">Respondido</span>'
+        : '<span class="text-xs font-bold text-amber-300 bg-amber-500/15 border border-amber-500/40 px-3 py-1 rounded-full">Pendiente</span>';
       return `
         <div id="tarjetaCheckinDestacado" class="bg-slate-900/90 border ${c.respuesta ? 'border-slate-800' : 'border-amber-500/40'} rounded-2xl p-4 sm:p-5 space-y-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
-            <p class="text-sm font-extrabold text-white">Check-in · ${escHtml(c.semanaISO)} <span class="text-xs font-normal text-slate-500">(${escHtml(c.fecha)})</span></p>
+            <p class="text-sm font-extrabold text-white">Check-in · ${escHtml(c.semanaISO)} <span class="text-xs font-normal text-slate-400">(${escHtml(c.fecha)})</span></p>
             ${badge}
           </div>
           <div class="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-300">
@@ -950,8 +952,8 @@
 
           const kpiCard = (etiqueta, valor, positivo) => `
             <div class="bg-slate-950 border border-slate-800/90 rounded-xl p-3">
-              <span class="block text-[10px] text-slate-400 font-semibold">${etiqueta}</span>
-              <span class="block text-lg sm:text-xl font-black mt-0.5 ${valor === '—' ? 'text-slate-500' : (positivo ? 'text-emerald-400' : 'text-rose-400')}">${escHtml(valor)}</span>
+              <span class="block text-[11px] text-slate-400 font-semibold">${etiqueta}</span>
+              <span class="block text-lg sm:text-xl font-black mt-0.5 ${valor === '—' ? 'text-slate-400' : (positivo ? 'text-emerald-400' : 'text-rose-400')}">${escHtml(valor)}</span>
             </div>`;
 
           cont.innerHTML = `
@@ -1038,20 +1040,20 @@
       const tarjetas = lista.length ? lista.map(c => `
         <div class="bg-slate-950 border ${c.respuesta ? 'border-slate-800' : 'border-amber-500/40'} rounded-xl p-3">
           <div class="flex items-center justify-between gap-2 flex-wrap">
-            <span class="text-xs font-extrabold text-white">${escHtml(c.semanaISO)} <span class="text-slate-500 font-semibold">· ${escHtml(c.fecha)}</span></span>
+            <span class="text-xs font-extrabold text-white">${escHtml(c.semanaISO)} <span class="text-slate-400 font-semibold">· ${escHtml(c.fecha)}</span></span>
             <span class="text-xs text-slate-300">${c.peso ? '⚖️ ' + escHtml(c.peso) + ' kg · ' : ''}Energía ${CARAS[(parseInt(c.energia) || 3) - 1]} · Sueño ${CARAS[(parseInt(c.sueno) || 3) - 1]}</span>
           </div>
           ${c.molestias ? `<p class="text-xs text-rose-300 mt-2">⚠️ ${escHtml(c.molestias)}</p>` : ''}
-          ${c.nota ? `<p class="text-sm text-slate-200 mt-2 italic">“${escHtml(c.nota)}”</p>` : '<p class="text-xs text-slate-500 mt-2">Sin nota.</p>'}
+          ${c.nota ? `<p class="text-sm text-slate-200 mt-2 italic">“${escHtml(c.nota)}”</p>` : '<p class="text-xs text-slate-400 mt-2">Sin nota.</p>'}
           ${c.respuesta
-            ? `<div class="mt-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2.5"><p class="text-[10px] font-bold text-emerald-300 uppercase">Tu respuesta · ${escHtml(c.fechaRespuesta)}</p><p class="text-sm text-white mt-0.5">${escHtml(c.respuesta)}</p></div>`
+            ? `<div class="mt-2 bg-emerald-500/10 border border-emerald-500/30 rounded-lg p-2.5"><p class="text-[11px] font-bold text-emerald-300 uppercase">Tu respuesta · ${escHtml(c.fechaRespuesta)}</p><p class="text-sm text-white mt-0.5">${escHtml(c.respuesta)}</p></div>`
             : `<div class="mt-2 flex gap-2"><input type="text" maxlength="500" placeholder="Responder al alumno..." class="flex-1 min-w-0 p-2.5 bg-slate-900 border border-slate-700 rounded-lg text-sm text-white" id="resp-${escHtml(c.semanaISO)}">
                <button onclick="responderCheckinCoach('${escHtml(c.semanaISO)}')" class="shrink-0 px-3 bg-emerald-500 text-slate-950 font-bold rounded-lg text-xs">Enviar</button></div>`}
-        </div>`).join('') : '<p class="text-sm text-slate-500">Este alumno aún no ha enviado check-ins.</p>';
+        </div>`).join('') : '<p class="text-sm text-slate-400">Este alumno aún no ha enviado check-ins.</p>';
       const pendientes = lista.filter(c => !c.respuesta).length;
       return `
         <div id="bloqueCheckinsCoach" class="bg-slate-900/60 p-4 sm:p-6 rounded-2xl border border-slate-800">
-          <h3 class="text-sm font-extrabold text-white mb-3">📋 Historial de Check-ins ${pendientes ? `<span class="ml-2 text-[10px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">${pendientes} sin responder</span>` : ''}</h3>
+          <h3 class="text-sm font-extrabold text-white mb-3">📋 Historial de Check-ins ${pendientes ? `<span class="ml-2 text-[11px] bg-amber-500/20 text-amber-300 border border-amber-500/40 px-2 py-0.5 rounded-full">${pendientes} sin responder</span>` : ''}</h3>
           <div class="space-y-3 max-h-[420px] overflow-y-auto pr-1">${tarjetas}</div>
         </div>`;
     }
@@ -1124,7 +1126,7 @@
           <span class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xl flex items-center justify-center shrink-0">🏋️</span>
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-extrabold text-white">Hoy entrenaron ${entrenaron} de ${lista.length}</span>
-            <span class="block text-[11px] text-slate-400 mt-0.5">${enLinea ? `🟢 ${enLinea} en línea ahora` : 'Nadie en línea ahora'} · toca para ver el detalle</span>
+            <span class="block text-xs text-slate-400 mt-0.5">${enLinea ? `🟢 ${enLinea} en línea ahora` : 'Nadie en línea ahora'} · toca para ver el detalle</span>
           </span>
           <span class="text-emerald-400 text-lg font-black">›</span>
         </button>`;
@@ -1146,10 +1148,10 @@
           <span class="w-2.5 h-2.5 rounded-full shrink-0 ${a.enLinea ? 'bg-emerald-400' : 'bg-slate-600'}"></span>
           <span class="min-w-0 flex-1">
             <span class="block text-sm font-bold text-white truncate">${escHtml(nombre(a.id))}</span>
-            <span class="block text-[11px] text-slate-400">${escHtml(textoActividad(a.id))}</span>
+            <span class="block text-xs text-slate-400">${escHtml(textoActividad(a.id))}</span>
           </span>
-          <span class="shrink-0 text-[11px] font-bold ${a.entrenoHoy ? 'text-emerald-300' : 'text-slate-500'}">${a.entrenoHoy ? `✅ ${a.ejerciciosHoy} ej. · ${a.seriesHoy} series` : 'No entrenó hoy'}</span>
-        </button>`).join('') || '<p class="text-xs text-slate-500">Aún no tienes alumnos.</p>';
+          <span class="shrink-0 text-xs font-bold ${a.entrenoHoy ? 'text-emerald-300' : 'text-slate-400'}">${a.entrenoHoy ? `✅ ${a.ejerciciosHoy} ej. · ${a.seriesHoy} series` : 'No entrenó hoy'}</span>
+        </button>`).join('') || '<p class="text-xs text-slate-400">Aún no tienes alumnos.</p>';
     }
 
     // ==================== RÉCORDS DEL COACH (v11) ====================
@@ -1185,11 +1187,11 @@
       const chips = lista.map((e, i) => `
         <span class="inline-flex items-center gap-1 ko-hi text-xs font-bold pl-3 pr-1 py-1 rounded-full">
           ${escHtml(e.nombre)}
-          <button onclick="quitarEjercicioRanking(${i})" class="w-6 h-6 rounded-full t-err flex items-center justify-center" title="Quitar">${icoRec('close', '!text-[16px]')}</button>
+          <button onclick="quitarEjercicioRanking(${i})" aria-label="Quitar" class="tap w-6 h-6 rounded-full t-err flex items-center justify-center" title="Quitar">${icoRec('close', '!text-[16px]')}</button>
         </span>`).join('');
       const cambiado = JSON.stringify(lista) !== JSON.stringify((recordsData.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre })));
       return `<div class="ko-card">${tituloRec('fitness_center', 'Ejercicios del ranking')}
-        <p class="text-[11px] t-mu mb-3">Elige hasta 12. Los pesos que tus alumnos registran en estos ejercicios cuentan para el ranking.</p>
+        <p class="text-xs t-mu mb-3">Elige hasta 12. Los pesos que tus alumnos registran en estos ejercicios cuentan para el ranking.</p>
         <div class="flex flex-wrap gap-2 mb-3">${chips || '<span class="text-xs t-dim">Todavía no elegiste ejercicios.</span>'}</div>
         <div class="flex flex-wrap gap-2">
           <button onclick="agregarEjercicioRanking()" ${lista.length >= 12 ? 'disabled' : ''} class="ko-btn2 flex-1 min-w-[150px] text-xs py-3 disabled:opacity-40">📚 Añadir de la biblioteca</button>
@@ -1220,7 +1222,7 @@
       const chips = lista.map((c, i) => `
         <span class="inline-flex items-center gap-1 ko-hi text-xs font-bold pl-3 pr-1 py-1 rounded-full">
           ${icoRec('shield', 't-cian !text-[15px]', true)} ${escHtml(c.nombre)} · ${numRec(c.kg)} kg
-          <button onclick="quitarClub(${i})" class="w-6 h-6 rounded-full t-err flex items-center justify-center" title="Quitar">${icoRec('close', '!text-[16px]')}</button>
+          <button onclick="quitarClub(${i})" aria-label="Quitar" class="tap w-6 h-6 rounded-full t-err flex items-center justify-center" title="Quitar">${icoRec('close', '!text-[16px]')}</button>
         </span>`).join('');
       const cambiado = JSON.stringify(lista) !== JSON.stringify((d.clubes || []).map(c => ({ idEjercicio: c.idEjercicio, nombre: c.ejercicio, kg: c.kg })));
       const form = ejs.length ? `
@@ -1232,7 +1234,7 @@
           <button onclick="agregarClub()" ${lista.length >= 10 ? 'disabled' : ''} class="ko-btn2 h-[40px] px-3 text-xs">${icoRec('add', '!text-[18px]')}</button>
         </div>` : '<p class="text-xs t-dim">Primero elige los ejercicios del ranking.</p>';
       return `<div class="ko-card">${tituloRec('workspace_premium', 'Editar clubes de honor')}
-        <p class="text-[11px] t-mu mb-3">Hasta 10 metas. Solo cuentan los récords que tú apruebas. Ej.: Press banca 100 kg.</p>
+        <p class="text-xs t-mu mb-3">Hasta 10 metas. Solo cuentan los récords que tú apruebas. Ej.: Press banca 100 kg.</p>
         <div class="flex flex-wrap gap-2 mb-3">${chips || '<span class="text-xs t-dim">Todavía no creaste clubes.</span>'}</div>
         ${form}
         <button onclick="guardarClubesCoach()" id="btnGuardarClubes" ${cambiado ? '' : 'disabled'} class="ko-btn w-full text-xs py-3 mt-3">💾 Guardar clubes</button>

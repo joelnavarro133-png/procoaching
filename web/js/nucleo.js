@@ -239,7 +239,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
   ).join('');
 
   const etiquetasHTML = segmentos.map((s, i) =>
-    `<span class="flex-1 text-center text-[10px] font-bold truncate ${i === idxActivo ? 'text-white' : 'text-slate-500'}">${s.corto}</span>`
+    `<span class="flex-1 text-center text-[11px] font-bold truncate ${i === idxActivo ? 'text-white' : 'text-slate-400'}">${s.corto}</span>`
   ).join('');
 
   const detalleRangosHTML = datos.tabla.map((t, i) => {
@@ -249,15 +249,15 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
       <div class="p-3 rounded-xl border ${esAct ? 'bg-slate-900 border-slate-600' : 'bg-slate-950/70 border-slate-800/80'}">
         <div class="flex items-center justify-between gap-2">
           <span class="text-xs font-extrabold text-white">${t.rangoTxt}</span>
-          <span class="text-[10px] font-black uppercase px-2 py-0.5 rounded-md" style="background-color:${h}22;color:${h};border:1px solid ${h}55;">${t.nombre}</span>
+          <span class="text-[11px] font-black uppercase px-2 py-0.5 rounded-md" style="background-color:${h}22;color:${h};border:1px solid ${h}55;">${t.nombre}</span>
         </div>
-        <p class="text-[11px] text-slate-400 mt-1.5 leading-snug">${t.desc}</p>
+        <p class="text-xs text-slate-400 mt-1.5 leading-snug">${t.desc}</p>
       </div>`;
   }).join('');
 
   mtContenedor.innerHTML = `
     <div class="rounded-2xl p-4 border" style="background-color:${hexActivo}14;border-color:${hexActivo}55;">
-      <p class="text-[10px] font-black uppercase tracking-[0.16em]" style="color:${hexActivo};">TU RANGO ACTUAL</p>
+      <p class="text-[11px] font-black uppercase tracking-[0.16em]" style="color:${hexActivo};">TU RANGO ACTUAL</p>
       <p class="text-2xl font-black text-white mt-1 flex items-center gap-2">${datos.class} <span>${emoji}</span></p>
       <p class="text-xs text-slate-300 mt-1.5 leading-relaxed">${datos.desc}</p>
     </div>
@@ -276,7 +276,7 @@ function abrirModalMetrica(tipo, valor, sexo, edad) {
     <details class="bg-slate-950/60 border border-slate-800 rounded-2xl">
       <summary class="cursor-pointer select-none px-4 py-3 text-xs font-bold text-slate-300 flex items-center justify-between">
         <span>Ver descripción de cada rango</span>
-        <span class="text-slate-500 text-[10px] uppercase">Desplegar ▾</span>
+        <span class="text-slate-400 text-[11px] uppercase">Desplegar ▾</span>
       </summary>
       <div class="px-3 pb-3 space-y-2">
         ${detalleRangosHTML}
@@ -628,10 +628,10 @@ function GS() {
     function chipTecnica(r) {
       if (!r || !r.idEjercicio) return '';
       const en = r.nombreEn && normBusq(r.nombreEn) !== normBusq(r.ejercicio)
-        ? `<p class="text-[11px] text-sky-300/90 italic font-semibold mt-0.5">🇬🇧 ${escHtml(r.nombreEn)}</p>` : '';
+        ? `<p class="text-xs text-sky-300/90 italic font-semibold mt-0.5">🇬🇧 ${escHtml(r.nombreEn)}</p>` : '';
       const ayuda = !r.media ? `<button data-id="${escHtml(r.idEjercicio)}" data-nombre="${escHtml(r.ejercicio)}" data-media=""
         onclick="abrirModalEjercicio(this.dataset.id, this.dataset.nombre, this.dataset.media)"
-        class="mt-1.5 inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-300 border border-sky-500/30">❓ Cómo se hace</button>` : '';
+        class="mt-1.5 inline-flex items-center gap-1 text-[11px] font-bold px-2 py-0.5 rounded-md bg-sky-500/10 text-sky-300 border border-sky-500/30">❓ Cómo se hace</button>` : '';
       return en + ayuda;
     }
     function miniEj() { return ''; }        // reemplazado por gifEj (se mantiene por compatibilidad)
@@ -740,9 +740,9 @@ function GS() {
               class="absolute top-1.5 right-1.5 w-8 h-8 bg-slate-950/90 border border-sky-500/60 text-sky-300 rounded-full text-sm font-black" title="Cómo se hace">❓</button>
           </div>
           <div class="p-2">
-            <p class="text-[11px] font-extrabold text-white leading-tight uppercase">${escHtml(nombreEsDe(e))}</p>
-            <p class="text-[10px] text-sky-300/90 italic leading-tight mt-0.5">🇬🇧 ${escHtml(e.nombre)}</p>
-            <p class="text-[9px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">${escHtml(trCat(GRUPOS_ES, e.grupo))} · ${escHtml(trCat(EQUIPOS_ES, e.equipo))}</p>
+            <p class="text-xs font-extrabold text-white leading-tight uppercase">${escHtml(nombreEsDe(e))}</p>
+            <p class="text-[11px] text-sky-300/90 italic leading-tight mt-0.5">🇬🇧 ${escHtml(e.nombre)}</p>
+            <p class="text-[11px] text-slate-400 font-semibold mt-1 uppercase tracking-wide">${escHtml(trCat(GRUPOS_ES, e.grupo))} · ${escHtml(trCat(EQUIPOS_ES, e.equipo))}</p>
           </div>
         </div>`).join('');
     }
@@ -750,6 +750,12 @@ function GS() {
     function elegirEjercicioCatalogo(id) {
       const e = estadoGlobal.catalogo.find(x => x.id === id);
       if (!e) { cerrarModalCatalogo(); return; }
+      if (typeof filaCatalogoDestino === 'function') {   // modo «elegir»: por ejemplo, ejercicios del ranking
+        const alElegir = filaCatalogoDestino;
+        cerrarModalCatalogo();
+        alElegir(e);
+        return;
+      }
       const card = filaCatalogoDestino || crearTarjetaConstructor();
       llenarTarjetaConEjercicio(card, e);
       mostrarToast('✅ ' + nombreEsDe(e) + ' agregado');
@@ -795,7 +801,7 @@ function GS() {
           document.getElementById('ejInputEs').value = (d.nombreEs || '').toUpperCase();
           document.getElementById('ejEditarEs').classList.remove('hidden');
         }
-        const chip = (txt, cls) => `<span class="text-[10px] font-bold uppercase px-2 py-1 rounded-md border ${cls}">${escHtml(txt)}</span>`;
+        const chip = (txt, cls) => `<span class="text-[11px] font-bold uppercase px-2 py-1 rounded-md border ${cls}">${escHtml(txt)}</span>`;
         document.getElementById('ejChips').innerHTML =
           chip('🎯 ' + trCat(GRUPOS_ES, d.grupo), 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30') +
           chip('📍 ' + trCat(ZONAS_ES, d.zona), 'bg-purple-500/10 text-purple-300 border-purple-500/30') +
@@ -898,6 +904,7 @@ function GS() {
       const val = String(v === null || v === undefined ? '' : v).slice(0, 40);
       if (val === '' || val === 'false') delete p.datos[k]; else p.datos[k] = val;
       p.dirty = true;
+      if (/_ok$/.test(k) && typeof registrarMarcaHoy === 'function') registrarMarcaHoy(k, val === 'true');
       LS.set(claveStorageProg(p), JSON.stringify({ dirty: true, ts: new Date().toISOString(), datos: p.datos }));
       actualizarEstadoSubida();
       if (!document.getElementById('vista-alumno-INICIO').classList.contains('hidden')) renderPanelHoy();
@@ -947,7 +954,7 @@ function GS() {
         <div class="flex flex-wrap items-center justify-between gap-3 bg-slate-900 border border-slate-800 rounded-xl p-3">
           <div>
             <p class="text-xs font-extrabold text-white">Semana ${p.numero} · ${escHtml(p.rango)}</p>
-            <p class="text-[11px] ${clase}">${estado} · ${n} registro${n === 1 ? '' : 's'}</p>
+            <p class="text-xs ${clase}">${estado} · ${n} registro${n === 1 ? '' : 's'}</p>
           </div>
           ${boton}
         </div>`;
@@ -1075,7 +1082,7 @@ function GS() {
           <div id="zonaReporteAlumno"></div>
           <details class="bg-slate-950 border border-slate-800 rounded-xl">
             <summary class="p-3 text-xs font-bold text-slate-300 cursor-pointer">Semanas subidas (${semanas.length})</summary>
-            <ul class="px-3 pb-3 text-[11px] text-slate-400 space-y-1">
+            <ul class="px-3 pb-3 text-xs text-slate-400 space-y-1">
               ${desc.map(s => `<li class="flex justify-between gap-2"><span class="text-emerald-400 font-bold">Semana ${s.numero} · ${escHtml(s.rango)}</span><span>${s.registros.length} registros · ${escHtml(fmtTs(s.ts))}</span></li>`).join('')}
             </ul>
           </details>
@@ -1110,8 +1117,8 @@ function GS() {
       const filas = claves.map(k => {
         const oA = gA[k], oB = gB[k], o = oA || oB;
         const nA = valorNumerico(oA), nB = valorNumerico(oB);
-        const pill = 'text-[10px] font-black px-2 py-0.5 rounded-full border whitespace-nowrap';
-        let cambio = `<span class="${pill} bg-slate-800/60 text-slate-500 border-slate-700">—</span>`;
+        const pill = 'text-[11px] font-black px-2 py-0.5 rounded-full border whitespace-nowrap';
+        let cambio = `<span class="${pill} bg-slate-800/60 text-slate-400 border-slate-700">—</span>`;
         if (nA !== null && nB !== null) {
           const d = Math.round((nB - nA) * 100) / 100;
           const pct = nA > 0 ? Math.round((nB - nA) / nA * 100) : null;
@@ -1123,26 +1130,26 @@ function GS() {
         } else if (oB && !oA) cambio = `<span class="${pill} bg-sky-500/15 text-sky-400 border-sky-500/40">nuevo</span>`;
         else if (oA && !oB) cambio = `<span class="${pill} bg-amber-500/15 text-amber-400 border-amber-500/40">sin registro</span>`;
         const tick = hecho => hecho
-          ? '<span class="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[9px] font-black flex items-center justify-center shrink-0">✓</span>'
+          ? '<span class="w-4 h-4 rounded-full bg-emerald-500 text-slate-950 text-[11px] font-black flex items-center justify-center shrink-0">✓</span>'
           : '<span class="w-4 h-4 rounded-full border border-slate-700 shrink-0"></span>';
         const lado = (x, etiqueta, acento) => `
           <div class="flex-1 min-w-0 bg-slate-950 border ${acento} rounded-xl p-2.5">
             <div class="flex items-center justify-between gap-1.5 mb-1.5">
-              <p class="text-[9px] font-bold text-slate-500 uppercase tracking-wider truncate">${escHtml(etiqueta)}</p>
+              <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider truncate">${escHtml(etiqueta)}</p>
               ${tick(ejercicioHecho(x))}
             </div>
-            <p class="text-base font-black leading-none ${x ? 'text-white' : 'text-slate-600'}">${escHtml(textoPeso(x))}</p>
+            <p class="text-base font-black leading-none ${x ? 'text-white' : 'text-slate-400'}">${escHtml(textoPeso(x))}</p>
           </div>`;
         return `
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5">
             <div class="flex items-center justify-between gap-2 mb-2">
-              <span class="text-[10px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-md shrink-0">${escHtml(nombreDia(o.dia))}</span>
+              <span class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider bg-emerald-500/10 border border-emerald-500/30 px-2 py-0.5 rounded-md shrink-0">${escHtml(nombreDia(o.dia))}</span>
               ${cambio}
             </div>
             <p class="text-sm font-extrabold text-white uppercase leading-tight mb-3">${escHtml(nombreEjercicio(o.base))}</p>
             <div class="flex items-stretch gap-2">
               ${lado(oA, etA, 'border-slate-800')}
-              <span class="self-center text-slate-600 text-sm font-black shrink-0">→</span>
+              <span class="self-center text-slate-400 text-sm font-black shrink-0">→</span>
               ${lado(oB, etB, 'border-emerald-500/30')}
             </div>
           </div>`;
@@ -1154,17 +1161,17 @@ function GS() {
       };
       const rA = resumen(gA), rB = resumen(gB);
       const media = pcts.length ? (pcts.reduce((a, b) => a + b, 0) / pcts.length) : null;
-      const card = (t, v, sub, c) => `<div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><span class="block text-[10px] uppercase tracking-wider text-slate-500 font-bold">${t}</span><span class="block text-xl font-black ${c}">${v}</span><span class="block text-[11px] text-slate-400">${sub}</span></div>`;
+      const card = (t, v, sub, c) => `<div class="bg-slate-950 border border-slate-800 rounded-xl p-3"><span class="block text-[11px] uppercase tracking-wider text-slate-400 font-bold">${t}</span><span class="block text-xl font-black ${c}">${v}</span><span class="block text-xs text-slate-400">${sub}</span></div>`;
       document.getElementById('resumenSemanas').innerHTML =
         card('Semana A · completados', rA.ok + '/' + rA.total, sA ? escHtml(sA.rango) : '', 'text-white') +
         card('Semana B · completados', rB.ok + '/' + rB.total, sB ? escHtml(sB.rango) : '', 'text-white') +
-        card('Cambio medio de carga', media === null ? '—' : (media > 0 ? '+' : '') + media.toFixed(1) + '%', 'solo ejercicios con peso en ambas semanas', media === null ? 'text-slate-500' : media >= 0 ? 'text-emerald-400' : 'text-rose-400');
+        card('Cambio medio de carga', media === null ? '—' : (media > 0 ? '+' : '') + media.toFixed(1) + '%', 'solo ejercicios con peso en ambas semanas', media === null ? 'text-slate-400' : media >= 0 ? 'text-emerald-400' : 'text-rose-400');
 
-      const aviso = eA.value === eB.value ? '<p class="text-[11px] text-amber-400 mb-2">Elegiste la misma semana en A y B; selecciona dos distintas para ver cambios.</p>' : '';
-      const leyenda = claves.length ? `<p class="text-[11px] text-slate-500 mb-3">${escHtml(etA)} (${sA ? escHtml(sA.rango) : ''}) → ${escHtml(etB)} (${sB ? escHtml(sB.rango) : ''})</p>` : '';
+      const aviso = eA.value === eB.value ? '<p class="text-xs text-amber-400 mb-2">Elegiste la misma semana en A y B; selecciona dos distintas para ver cambios.</p>' : '';
+      const leyenda = claves.length ? `<p class="text-xs text-slate-400 mb-3">${escHtml(etA)} (${sA ? escHtml(sA.rango) : ''}) → ${escHtml(etB)} (${sB ? escHtml(sB.rango) : ''})</p>` : '';
       document.getElementById('tablaSemanas').innerHTML = aviso + leyenda + (claves.length
         ? `<div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3">${filas}</div>`
-        : '<p class="text-slate-500 text-xs p-3">No hay registros para el filtro elegido.</p>');
+        : '<p class="text-slate-400 text-xs p-3">No hay registros para el filtro elegido.</p>');
     }
 
     function comprimirImagen(file, maxWidth = 1000, quality = 0.8) {
@@ -1387,10 +1394,11 @@ function GS() {
       const target = document.getElementById(`vista-alumno-${vista}`);
       if (target) target.classList.remove('hidden');
 
-      const TITULOS = { INICIO: 'Hoy', ENTRENAMIENTO: 'Entrenar', HISTORIAL: 'Progreso', PERFIL: 'Perfil' };
+      const TITULOS = { INICIO: 'Hoy', ENTRENAMIENTO: 'Entrenar', HISTORIAL: 'Progreso', RECORDS: 'Récords', PERFIL: 'Perfil' };
       document.getElementById('tituloSeccionMovil').textContent = TITULOS[vista] || vista;
       if (vista === 'INICIO') { renderPanelHoy(); renderCardCheckin(); }
       if (vista === 'PERFIL') renderPerfilAlumno();
+      if (vista === 'RECORDS') cargarRecords('contenedorRecordsAlumno');
 
       document.querySelectorAll('.nav-btn-side').forEach(btn => {
         btn.className = 'nav-btn-side w-full flex items-center gap-3 px-4 py-3.5 rounded-xl text-xs font-bold uppercase tracking-wider transition-all text-slate-300 hover:bg-slate-800';
@@ -1401,12 +1409,14 @@ function GS() {
       }
 
       document.querySelectorAll('.nav-btn-bot').forEach(btn => {
-        btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-500');
+        btn.classList.remove('text-emerald-400'); btn.classList.add('text-slate-400');
         const marca = btn.querySelector('.marca-activa'); if (marca) marca.remove();
       });
+      document.querySelectorAll('.nav-btn-side, .nav-btn-bot').forEach(b => b.removeAttribute('aria-current'));
+      [document.getElementById(`nav-side-${vista}`), document.getElementById(`nav-bot-${vista}`)].forEach(b => { if (b) b.setAttribute('aria-current', 'page'); });
       const activeBot = document.getElementById(`nav-bot-${vista}`);
       if (activeBot) {
-        activeBot.classList.remove('text-slate-500'); activeBot.classList.add('text-emerald-400');
+        activeBot.classList.remove('text-slate-400'); activeBot.classList.add('text-emerald-400');
         activeBot.insertAdjacentHTML('afterbegin', '<span class="marca-activa absolute top-0 left-1/2 -translate-x-1/2 w-8 h-0.5 rounded-full bg-emerald-400"></span>');
       }
 
@@ -1472,9 +1482,9 @@ function GS() {
         const textoBtn = pct >= 100 ? '✓ Entrenamiento completado' : est.hechos > 0 ? `Continuar entrenamiento · ${est.hechos}/${est.total}` : 'Empezar entrenamiento';
         hero.innerHTML = `
           <div class="bg-gradient-to-br from-emerald-500/20 via-slate-900 to-slate-900 border border-emerald-500/30 rounded-3xl p-5">
-            <p class="text-[11px] font-bold text-emerald-300 uppercase tracking-wider">Entrenamiento de hoy · ${escHtml(hoy)}</p>
+            <p class="text-xs font-bold text-emerald-300 uppercase tracking-wider">Entrenamiento de hoy · ${escHtml(hoy)}</p>
             <h3 class="text-xl font-extrabold text-white mt-1 leading-tight">${escHtml(ejHoy[0].nombreRutina || 'Tu rutina')}</h3>
-            <div class="flex flex-wrap gap-1.5 mt-2.5">${musculos.map(m => `<span class="text-[10px] font-bold px-2 py-0.5 rounded-md bg-slate-950/70 text-slate-300 border border-slate-800">${escHtml(m)}</span>`).join('')}</div>
+            <div class="flex flex-wrap gap-1.5 mt-2.5">${musculos.map(m => `<span class="text-[11px] font-bold px-2 py-0.5 rounded-md bg-slate-950/70 text-slate-300 border border-slate-800">${escHtml(m)}</span>`).join('')}</div>
             <div class="flex items-center justify-between gap-3 mt-4">
               <div class="flex items-center">${minis}</div>
               <p class="text-xs text-slate-400 font-semibold text-right">${ejHoy.length} ejercicios<br>~${minutos} min</p>
@@ -1493,7 +1503,7 @@ function GS() {
         }
         hero.innerHTML = `
           <div class="bg-slate-900 border border-slate-800 rounded-3xl p-5">
-            <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wider">Hoy · ${escHtml(hoy)}</p>
+            <p class="text-xs font-bold text-slate-400 uppercase tracking-wider">Hoy · ${escHtml(hoy)}</p>
             <h3 class="text-xl font-extrabold text-white mt-1">${rutina.length ? 'Día de descanso' : 'Aún no tienes rutina'}</h3>
             <p class="text-sm text-slate-400 mt-1.5">${rutina.length
               ? 'Recupera, hidrátate y duerme bien.' + (prox ? ` Tu próximo entrenamiento es el <b class="text-white">${escHtml(prox.toLowerCase())}</b>.` : '')
@@ -1508,18 +1518,18 @@ function GS() {
         const esHoy = normalizarDia(d) === normalizarDia(hoy);
         let marca;
         if (e.total && e.hechos >= e.total) marca = '<span class="w-8 h-8 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center text-sm font-black">✓</span>';
-        else if (e.actividad) marca = '<span class="w-8 h-8 rounded-full border-2 border-emerald-400 text-emerald-300 flex items-center justify-center text-[10px] font-black">' + (e.total ? Math.round(e.hechos / e.total * 100) + '%' : '•') + '</span>';
+        else if (e.actividad) marca = '<span class="w-8 h-8 rounded-full border-2 border-emerald-400 text-emerald-300 flex items-center justify-center text-[11px] font-black">' + (e.total ? Math.round(e.hechos / e.total * 100) + '%' : '•') + '</span>';
         else if (e.total) marca = '<span class="w-8 h-8 rounded-full bg-slate-950 border border-slate-700 flex items-center justify-center"><span class="w-1.5 h-1.5 rounded-full bg-slate-400"></span></span>';
         else marca = '<span class="w-8 h-8 rounded-full flex items-center justify-center text-slate-700 text-xs">—</span>';
         return `<button onclick="navegarAlumno('ENTRENAMIENTO'); seleccionarDiaRutina('${d}')" class="flex flex-col items-center gap-1.5">
-          <span class="text-[11px] font-bold ${esHoy ? 'text-emerald-400' : 'text-slate-500'}">${DIAS_CORTOS[i]}</span>${marca}
+          <span class="text-xs font-bold ${esHoy ? 'text-emerald-400' : 'text-slate-400'}">${DIAS_CORTOS[i]}</span>${marca}
           <span class="w-1 h-1 rounded-full ${esHoy ? 'bg-emerald-400' : 'bg-transparent'}"></span></button>`;
       }).join('');
       document.getElementById('hoySemana').innerHTML = `
         <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
           <div class="flex items-center justify-between mb-3">
             <h2 class="text-sm font-extrabold text-white">Esta semana</h2>
-            <span class="text-[11px] text-slate-500 font-semibold">${escHtml(sem.rango)}</span>
+            <span class="text-xs text-slate-400 font-semibold">${escHtml(sem.rango)}</span>
           </div>
           <div class="grid grid-cols-7">${celdas}</div>
         </div>`;
@@ -1530,11 +1540,11 @@ function GS() {
       const racha = rachaSemanas();
       const ult = (estadoGlobal.progresoActual || []).slice(-1)[0];
       const tile = (valor, etiqueta) => `<div class="bg-slate-900 border border-slate-800 rounded-2xl p-3 text-center">
-          <p class="text-xl font-black text-white leading-none">${valor}</p><p class="text-[10px] text-slate-500 font-bold uppercase tracking-wide mt-1.5">${etiqueta}</p></div>`;
+          <p class="text-xl font-black text-white leading-none">${valor}</p><p class="text-[11px] text-slate-400 font-bold uppercase tracking-wide mt-1.5">${etiqueta}</p></div>`;
       document.getElementById('hoyStats').innerHTML =
         tile(racha ? '🔥 ' + racha : '0', racha === 1 ? 'Semana seguida' : 'Semanas seguidas') +
-        tile(`${entrenados}<span class="text-slate-500 text-sm">/${programados}</span>`, 'Días esta semana') +
-        tile(ult && ult.peso !== '' ? `${ult.peso}<span class="text-slate-500 text-sm"> kg</span>` : '—', 'Peso actual');
+        tile(`${entrenados}<span class="text-slate-400 text-sm">/${programados}</span>`, 'Días esta semana') +
+        tile(ult && ult.peso !== '' ? `${ult.peso}<span class="text-slate-400 text-sm"> kg</span>` : '—', 'Peso actual');
     }
 
     // ==================== CHECK-IN SEMANAL ====================
@@ -1549,12 +1559,12 @@ function GS() {
           <div class="bg-slate-900 border border-slate-800 rounded-2xl p-4">
             <div class="flex items-center justify-between gap-3">
               <div class="min-w-0">
-                <p class="text-[11px] font-bold text-emerald-400 uppercase tracking-wider">✓ Check-in enviado</p>
+                <p class="text-xs font-bold text-emerald-400 uppercase tracking-wider">✓ Check-in enviado</p>
                 <p class="text-xs text-slate-400 mt-0.5">${escHtml(deEstaSemana.fecha)} · Energía ${CARAS[(parseInt(deEstaSemana.energia) || 3) - 1]} · Sueño ${CARAS[(parseInt(deEstaSemana.sueno) || 3) - 1]}${deEstaSemana.peso ? ' · ' + escHtml(deEstaSemana.peso) + ' kg' : ''}</p>
               </div>
               <button onclick="abrirHojaCheckin()" class="shrink-0 text-xs font-bold text-slate-300 bg-slate-950 border border-slate-800 px-3 py-2 rounded-xl">Editar</button>
             </div>
-            ${deEstaSemana.respuesta ? `<div class="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3"><p class="text-[10px] font-bold text-emerald-300 uppercase">Respuesta de tu coach</p><p class="text-sm text-white mt-1">${escHtml(deEstaSemana.respuesta)}</p></div>` : '<p class="text-[11px] text-slate-500 mt-2">Tu coach aún no responde.</p>'}
+            ${deEstaSemana.respuesta ? `<div class="mt-3 bg-emerald-500/10 border border-emerald-500/30 rounded-xl p-3"><p class="text-[11px] font-bold text-emerald-300 uppercase">Respuesta de tu coach</p><p class="text-sm text-white mt-1">${escHtml(deEstaSemana.respuesta)}</p></div>` : '<p class="text-xs text-slate-400 mt-2">Tu coach aún no responde.</p>'}
           </div>`;
       } else {
         cont.innerHTML = `
