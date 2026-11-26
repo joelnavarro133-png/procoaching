@@ -7,6 +7,13 @@
       "sourceType": "github",
       "skillPath": "skills/security-audit/SKILL.md",
       "computedHash": "8513eb3b2c39b8d05ef4f47b32ef4d18280b93a5efb91d8df6272f7435034af5"
+    },
+    "ub-mode": {
+      "source": "unclebob/ub-mode",
+      "commit": "3da62bf3fcfd2034de41f30d920d2739e566171f",
+      "sourceType": "github",
+      "skillPath": "SKILL.md",
+      "computedHash": "e0ab965e4367a86ece58520732a16d1a9bd4d5dcca3f49aabd440c7a01d300f0"
     }
   }
 }
