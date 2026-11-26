@@ -1282,20 +1282,35 @@
       if (!selA || !selD) return;
       selA.selectedIndex = 0;
       selD.selectedIndex = selD.options.length - 1;
-      actualizarComparacionFotos();
+      actualizarComparacionFotos(true);
+      // v20: apenas se abre la ficha, se traen de una vez la primera y la última evaluación en todos sus ángulos
+      const prog = estadoGlobal.progresoActual || [];
+      if (prog.length) {
+        const ids = [];
+        [prog[0], prog[prog.length - 1]].forEach(r => ANGULOS_FOTO.forEach(a => { const id = extraerIdDriveCliente(r && r[a]); if (id) ids.push(id); }));
+        setTimeout(() => precargarFotosEvaluacion(ids), 300);
+      }
     }
 
-    function actualizarComparacionFotos() {
+    function actualizarComparacionFotos(inicial) {
       if (estadoGlobal.progresoActual.length === 0) return;
       const angulo = document.getElementById('selAnguloFoto').value;
       const regA = estadoGlobal.progresoActual[document.getElementById('selFotoAntes').value];
       const regD = estadoGlobal.progresoActual[document.getElementById('selFotoDespues').value];
 
-      const renderCard = (reg) => {
-        const url = urlFotoConCache(reg[angulo]);
-        const imgHtml = url
-          ? `<img src="${escHtml(url)}" referrerpolicy="no-referrer" onerror="cargarFotoSegura(this, false)" class="max-h-80 sm:max-h-96 w-full rounded-lg object-contain mb-3 border border-slate-700 transition-transform hover:scale-[1.02]" title="Clic para ampliar">`
-          : `<div class="h-56 flex items-center justify-center text-slate-400 text-xs">Sin foto en ${escHtml(angulo)}</div>`;
+      // v20: la foto se pinta al instante si ya está en memoria o en el teléfono; si no, un recuadro «Cargando foto…»
+      // (antes se veía el ícono de imagen rota hasta que llegaba del servidor)
+      const pendientes = [];
+      const renderCard = (reg, lado) => {
+        const id = extraerIdDriveCliente(reg[angulo]);
+        const lista = id ? cacheFotosDrive[id] : '';
+        const clases = 'max-h-80 sm:max-h-96 w-full rounded-lg object-contain mb-3 border border-slate-700 transition-transform hover:scale-[1.02]';
+        let imgHtml;
+        if (lista) imgHtml = `<img src="${escHtml(lista)}" alt="Foto ${escHtml((NOMBRE_ANGULO[angulo] || '').toLowerCase())} del ${escHtml(reg.fecha)}" class="${clases}" title="Clic para ampliar">`;
+        else if (id) {
+          pendientes.push([id, lado]);
+          imgHtml = `<div data-foto-carga="${lado}" class="w-full h-72 sm:h-80 mb-3 rounded-lg border border-slate-800 bg-slate-900 flex flex-col items-center justify-center gap-2 text-slate-400 text-xs animate-pulse motion-reduce:animate-none" role="status">${ico('images', 'w-8 h-8 text-slate-600')}Cargando foto…</div>`;
+        } else imgHtml = `<div class="h-56 flex items-center justify-center text-slate-400 text-xs">Sin foto de ${escHtml((NOMBRE_ANGULO[angulo] || angulo).toLowerCase())}</div>`;
         return `${imgHtml}
           <div class="text-xs text-slate-300 bg-slate-900 p-3 rounded-lg border border-slate-800 w-full text-left">
             <div class="border-b border-slate-700 pb-1.5 mb-1.5"><span class="font-bold text-emerald-400">${escHtml(reg.fecha)}</span> | Peso: ${escHtml(reg.peso || '-')}kg | Cintura: ${escHtml(reg.cintura || '-')}cm</div>
@@ -1303,8 +1318,23 @@
             <span class="text-slate-400 italic">${escHtml(reg.observacion || 'Sin observaciones en esta fecha.')}</span>
           </div>`;
       };
-      document.getElementById('cardFotoAntes').innerHTML = renderCard(regA);
-      document.getElementById('cardFotoDespues').innerHTML = renderCard(regD);
+      document.getElementById('cardFotoAntes').innerHTML = renderCard(regA, 'Antes');
+      document.getElementById('cardFotoDespues').innerHTML = renderCard(regD, 'Despues');
+      pendientes.forEach(([id, lado]) => pedirFotoEvaluacion(id).then(uri => {
+        const caja = document.querySelector(`#cardFoto${lado} [data-foto-carga]`);
+        if (!caja) return;
+        if (uri) {
+          const img = document.createElement('img');
+          img.src = uri; img.alt = 'Foto de la evaluación'; img.title = 'Clic para ampliar';
+          img.className = 'max-h-80 sm:max-h-96 w-full rounded-lg object-contain mb-3 border border-slate-700 transition-transform hover:scale-[1.02]';
+          caja.replaceWith(img);
+        } else {
+          caja.classList.remove('animate-pulse');
+          caja.innerHTML = 'No se pudo cargar la foto. Revisa tu conexión.';
+        }
+      }));
+      // y, sin apuro, las de las otras fechas en este ángulo (para cambiar de fecha sin esperar)
+      if (!inicial) precargarFotosEvaluacion((estadoGlobal.progresoActual || []).map(r => extraerIdDriveCliente(r[angulo])).filter(Boolean));
     }
 
     function abrirModalFotoCompleta(elementoContenedor) {
@@ -1449,12 +1479,62 @@
         });
         return;
       }
-      // Fotos de evaluación: solo en memoria mientras la app está abierta (datos sensibles, no se guardan en el teléfono)
-      if (cacheFotosDrive[id]) { img.src = cacheFotosDrive[id]; return; }
-      GS()
-        .withFailureHandler(() => {})
-        .withSuccessHandler(res => { if (res && res.success && res.dataUri) { cacheFotosDrive[id] = res.dataUri; img.src = res.dataUri; } })
-        .obtenerFotoBase64(id);
+      // Fotos de evaluación: memoria → teléfono → servidor (en lote)
+      pedirFotoEvaluacion(id).then(uri => { if (uri) img.src = uri; });
+    }
+
+    // ==================== v20 · FOTOS DE EVALUACIÓN SIN ESPERA ====================
+    // Se guardan en el teléfono (Cache Storage, como las de perfil) y se borran al cerrar sesión.
+    // Un archivo nuevo en Drive siempre tiene otro ID, así que nunca se muestra una foto vieja.
+    const ANGULOS_FOTO = ['urlFrente', 'urlPerfil', 'urlEspalda'];
+    const MAX_FOTOS_EVAL_GUARDADAS = 150;
+    const MAX_FOTOS_POR_LOTE = 8;
+    const pendEval = {};
+    let colaEval = [], relojEval = null;
+    function pedirFotoEvaluacion(id) {
+      if (!id) return Promise.resolve(null);
+      if (cacheFotosDrive[id]) return Promise.resolve(cacheFotosDrive[id]);
+      if (pendEval[id]) return pendEval[id];
+      const p = (async () => {
+        const g = await CajaLocal.leer(CAJA_FOTOS_EVAL, 'eval/' + id);
+        if (g) { cacheFotosDrive[id] = g; return g; }
+        return new Promise(res => {
+          colaEval.push([id, res]);
+          if (!relojEval) relojEval = setTimeout(vaciarColaEval, 40);   // junta los pedidos de las dos tarjetas
+        });
+      })();
+      pendEval[id] = p;
+      p.then(() => { delete pendEval[id]; });
+      return p;
+    }
+    function vaciarColaEval() {
+      relojEval = null;
+      const lote = colaEval.splice(0, MAX_FOTOS_POR_LOTE);
+      if (colaEval.length) relojEval = setTimeout(vaciarColaEval, 0);
+      if (!lote.length) return;
+      const resolver = fotos => lote.forEach(([id, res]) => {
+        const uri = fotos && fotos[id];
+        if (uri) {
+          cacheFotosDrive[id] = uri;
+          CajaLocal.guardar(CAJA_FOTOS_EVAL, 'eval/' + id, uri).then(() => CajaLocal.podar(CAJA_FOTOS_EVAL, MAX_FOTOS_EVAL_GUARDADAS));
+        }
+        res(uri || null);
+      });
+      GS().withFailureHandler(() => unaPorUna(lote)).withSuccessHandler(r => {
+        if (r && r.success && r.fotos) resolver(r.fotos);
+        else unaPorUna(lote);                 // servidor sin obtenerFotosLote (Apps Script anterior): una por una
+      }).obtenerFotosLote(lote.map(x => x[0]));
+      function unaPorUna(items) {
+        items.forEach(([id, res]) => GS().withFailureHandler(() => res(null)).withSuccessHandler(r => {
+          if (r && r.success && r.dataUri) { cacheFotosDrive[id] = r.dataUri; CajaLocal.guardar(CAJA_FOTOS_EVAL, 'eval/' + id, r.dataUri); res(r.dataUri); }
+          else res(null);
+        }).obtenerFotoBase64(id));
+      }
+    }
+    /** Trae en segundo plano las que falten (no repite las que ya están en memoria o en camino). */
+    function precargarFotosEvaluacion(ids) {
+      try { if (navigator.connection && navigator.connection.saveData) return; } catch (e) {}   // «ahorro de datos» activo
+      [...new Set(ids || [])].slice(0, 24).forEach(id => { if (!cacheFotosDrive[id] && !pendEval[id]) pedirFotoEvaluacion(id); });
     }
 
     // ==================== v18 · FOTOS DE PERFIL GUARDADAS EN EL TELÉFONO ====================

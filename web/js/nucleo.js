@@ -438,6 +438,7 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
     const CAJA_FOTOS = 'procoaching-fotos-v1';     // miniaturas de fotos de PERFIL (no las de evaluación)
     const CAJA_VISTAS = 'procoaching-vistas-v1';   // últimas respuestas del panel del coach y del muro de récords
     const CAJA_GIFS = 'procoaching-gifs-v1';       // GIFs/imágenes de ejercicios (públicos, no son datos personales)
+    const CAJA_FOTOS_EVAL = 'procoaching-fotos-eval-v1';   // v20: fotos de evaluación (se borran al cerrar sesión)
     const CajaLocal = {
       _url: k => new URL('__local/' + encodeURIComponent(k), location.href).href,
       async leer(caja, clave) {
@@ -470,7 +471,7 @@ function abrirModalComposicion(pesoVal, grasaPct, sexo) {
         } catch (e) {}
       },
       async borrar(caja) { try { if (window.caches) await caches.delete(caja); } catch (e) {} },
-      borrarDatosUsuario() { this.borrar(CAJA_FOTOS); this.borrar(CAJA_VISTAS); }
+      borrarDatosUsuario() { this.borrar(CAJA_FOTOS); this.borrar(CAJA_VISTAS); this.borrar(CAJA_FOTOS_EVAL); }
     };
 
     // Fecha local (YYYY-MM-DD) SIN desfase de zona horaria (toISOString usa UTC y adelanta el día)
@@ -965,10 +966,10 @@ function GS() {
         if (!media && d.media) gif.src = urlGif(d.media);
         if (!nombre) document.getElementById('ejNombre').innerText = (d.nombreEs || d.nombre).toUpperCase();
         document.getElementById('ejNombreEn').textContent = 'EN · ' + d.nombre;
-        if (esCoach()) {
-          document.getElementById('ejInputEs').value = (d.nombreEs || '').toUpperCase();
-          document.getElementById('ejEditarEs').classList.remove('hidden');
-        }
+        // v20: solo el coach administrador (COACH_ADMIN_ID) puede renombrar: lo ven los alumnos de todos los coaches
+        const puedeRenombrar = esCoach() && !!(estadoGlobal.user && estadoGlobal.user.adminCatalogo);
+        if (puedeRenombrar) document.getElementById('ejInputEs').value = (d.nombreEs || '').toUpperCase();
+        document.getElementById('ejEditarEs').classList.toggle('hidden', !puedeRenombrar);
         const chip = (txt, cls, icono) => `<span class="inline-flex items-center gap-1 text-[11px] font-bold uppercase px-2 py-1 rounded-md border ${cls}">${icono ? ico(icono, 'w-3.5 h-3.5') : ''}${escHtml(txt)}</span>`;
         document.getElementById('ejChips').innerHTML =
           chip(trCat(GRUPOS_ES, d.grupo), 'bg-emerald-500/10 text-emerald-300 border-emerald-500/30', 'target') +
