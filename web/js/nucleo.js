@@ -1036,10 +1036,11 @@ function GS() {
       // B12: lo local solo gana si es MÁS NUEVO que lo ya subido desde otro dispositivo
       const localGana = hayLocal && (!srv.ts || !local.ts || String(local.ts) > String(srv.ts));
       estadoGlobal.progLocal = {
-        semanaISO: sem.semanaISO, numero: sem.numero, rango: sem.rango,
+        semanaISO: sem.semanaISO, numero: sem.numero, rango: sem.rango, fechaRef: fechaLocalISO(),
         datos: localGana ? Object.assign({}, srv.datos, local.datos) : Object.assign({}, srv.datos),
         dirty: localGana, enviado: srv.ts, soloLectura: false, subiendo: false
       };
+      if (localGana) programarSubidaAuto(8000);   // v19: quedó algo sin subir la última vez
     }
 
     function inicializarProgresoCoach() {
@@ -1054,7 +1055,10 @@ function GS() {
     function asegurarSemanaLocal() {
       const p = estadoGlobal.progLocal;
       if (!p || p.soloLectura || !estadoGlobal.user) return p;
-      if (infoSemana(fechaLocalISO()).semanaISO !== p.semanaISO) inicializarProgresoLocal();   // cambió la semana con la app abierta
+      if (infoSemana(fechaLocalISO()).semanaISO !== p.semanaISO) {   // cambió la semana con la app abierta
+        if (p.dirty) enviarProgreso(p, true);                          // v19: lo pendiente de la semana anterior se sube igual
+        inicializarProgresoLocal();
+      }
       return estadoGlobal.progLocal;
     }
 
@@ -1073,7 +1077,16 @@ function GS() {
       if (val === '' || val === 'false') delete p.datos[k]; else p.datos[k] = val;
       p.dirty = true;
       if (/_ok$/.test(k) && typeof registrarMarcaHoy === 'function') registrarMarcaHoy(k, val === 'true');
+      // v19: al marcar algo, queda la fecha en que se entrenó ese día de la rutina (la ve el coach)
+      if (val === 'true' && /::(ok|s\d+_ok|ok_d\d+)$/.test(k)) {
+        const hoy = fechaLocalISO();
+        p.datos[k.slice(0, k.indexOf('|')) + '|_SESION::fecha'] = hoy;
+        const claveUlt = 'proc_ultimo_entreno_' + estadoGlobal.user.id, antes = LS.get(claveUlt);
+        LS.set(claveUlt, hoy);
+        if (antes !== hoy && typeof window.programarRecordatorioEntreno === 'function') window.programarRecordatorioEntreno(hoy);   // una vez por día
+      }
       LS.set(claveStorageProg(p), JSON.stringify({ dirty: true, ts: new Date().toISOString(), datos: p.datos }));
+      programarSubidaAuto();
       actualizarEstadoSubida();
       if (!document.getElementById('vista-alumno-INICIO').classList.contains('hidden')) renderPanelHoy();
     }
@@ -1109,13 +1122,14 @@ function GS() {
       const n = Object.keys(p.datos).length;
       let estado, clase;
       if (p.soloLectura) { estado = p.enviado ? 'Última subida del alumno: ' + fmt(p.enviado) : 'El alumno aún no subió esta semana'; clase = 'text-slate-400'; }
-      else if (p.dirty) { estado = '' + ico('triangle-alert', 'w-4 h-4') + ' Tienes cambios sin subir'; clase = 'text-amber-400'; }
+      else if (p.subiendo) { estado = ico('upload', 'w-4 h-4') + ' Enviando a tu coach…'; clase = 'text-slate-300'; }
+      else if (p.dirty) { estado = ico('clock', 'w-4 h-4') + ' Se enviará sola a tu coach en unos segundos'; clase = 'text-amber-300'; }   // v19: subida automática
       else if (p.enviado) { estado = '' + ico('circle-check', 'w-4 h-4') + ' Subido el ' + fmt(p.enviado); clase = 'text-emerald-400'; }
       else { estado = 'Aún no subes esta semana'; clase = 'text-slate-400'; }
       // El botón aparece solo si hay al menos UN ejercicio con todas sus series completas y algo sin subir
       const completos = p.soloLectura ? 0 : ejerciciosCompletosSemana();
       const puedeSubir = !p.soloLectura && (p.subiendo || (p.dirty && completos > 0));
-      if (!p.soloLectura && p.dirty && completos === 0) { estado = 'Completa al menos un ejercicio (todas sus series ✓) para subir tu semana'; clase = 'text-slate-400'; }
+
       const boton = !puedeSubir ? '' :
         `<button id="btnSubirSemana" onclick="subirProgresoSemanal()" ${p.subiendo ? 'disabled' : ''} class="w-full sm:w-auto bg-emerald-500 hover:bg-emerald-600 disabled:opacity-50 text-slate-950 font-extrabold text-xs px-4 py-2.5 rounded-xl transition">${p.subiendo ? 'Subiendo...' : '' + ico('upload', 'w-4 h-4') + ' Subir progreso semanal'}</button>`;
       el.innerHTML = `
@@ -1131,28 +1145,62 @@ function GS() {
     function subirProgresoSemanal() {
       const p = asegurarSemanaLocal();
       if (!p || p.soloLectura || p.subiendo) return;
+      if (!Object.keys(p.datos).length) return avisar('Aún no registraste pesos ni marcaste ejercicios esta semana.', 'atencion');
+      if (!ejerciciosCompletosSemana()) return avisar('Completa al menos un ejercicio (todas sus series ✓) antes de subir tu semana.', 'atencion');
+      enviarProgreso(p, false);
+    }
+
+    // ==================== v19 · SUBIDA AUTOMÁTICA DEL PROGRESO ====================
+    // El coach ve lo que entrenó el alumno sin que tenga que tocar «Subir»: se sube solo, en silencio,
+    // 45 s después del último cambio, al terminar el modo guiado y al salir de la app.
+    // Si no hay internet, queda pendiente y se intenta en la siguiente ocasión.
+    let relojSubidaAuto = null;
+    function programarSubidaAuto(ms) {
+      const p = estadoGlobal.progLocal;
+      if (!p || p.soloLectura || !estadoGlobal.user || estadoGlobal.user.rol !== 'ALUMNO') return;
+      clearTimeout(relojSubidaAuto);
+      relojSubidaAuto = setTimeout(() => subirProgresoAuto(), ms === undefined ? 45000 : ms);
+    }
+    function subirProgresoAuto() {
+      clearTimeout(relojSubidaAuto);
+      const p = estadoGlobal.progLocal;
+      if (!p || p.soloLectura || !p.dirty || p.subiendo || !estadoGlobal.user) return;
+      if (typeof navigator !== 'undefined' && navigator.onLine === false) return;
+      enviarProgreso(p, true);
+    }
+    document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'hidden') subirProgresoAuto(); });
+    window.addEventListener('pagehide', () => subirProgresoAuto());
+
+    function enviarProgreso(p, silencioso) {
       const registros = Object.keys(p.datos).map(k => {
         const i = k.indexOf('|');
         return { dia: k.slice(0, i), clave: k.slice(i + 1), valor: p.datos[k] };
       });
-      if (!registros.length) return avisar('Aún no registraste pesos ni marcaste ejercicios esta semana.', 'atencion');
-      if (!ejerciciosCompletosSemana()) return avisar('Completa al menos un ejercicio (todas sus series ✓) antes de subir tu semana.', 'atencion');
+      if (!registros.length) return;
+      const firma = JSON.stringify(p.datos);
       p.subiendo = true;
       actualizarEstadoSubida();
-      GS().withSuccessHandler(res => {
+      GS().withFailureHandler(() => {
+        p.subiendo = false; actualizarEstadoSubida();
+        if (!silencioso) avisar('No se pudo subir el progreso. Revisa tu conexión.', 'error');
+      }).withSuccessHandler(res => {
         p.subiendo = false;
-        if (!res || !res.success) { actualizarEstadoSubida(); return avisar((res && res.error) || 'No se pudo subir el progreso.', 'error'); }
-        p.dirty = false;
+        if (!res || !res.success) { actualizarEstadoSubida(); if (!silencioso) avisar((res && res.error) || 'No se pudo subir el progreso.', 'error'); return; }
+        // Si marcó algo mientras se subía, sigue pendiente (se sube en la próxima vuelta)
+        p.dirty = JSON.stringify(p.datos) !== firma;
         p.enviado = res.semana.ts;
-        LS.set(claveStorageProg(p), JSON.stringify({ dirty: false, datos: p.datos }));
-        const lista = (estadoGlobal.semanas || []).filter(s => s.semanaISO !== res.semana.semanaISO);
-        lista.push(res.semana);
-        lista.sort((a, b) => (a.semanaISO < b.semanaISO ? -1 : 1));
-        estadoGlobal.semanas = lista;
-        actualizarEstadoSubida();
-        renderComparadorSemanas();
-        mostrarToast('✅ ' + res.mensaje);
-      }).guardarProgresoSemanal({ idAlumno: estadoGlobal.user.id, fechaRef: fechaLocalISO(), registros });
+        if (estadoGlobal.user) LS.set(claveStorageProg(p), JSON.stringify({ dirty: p.dirty, ts: new Date().toISOString(), datos: p.datos }));
+        if (p.dirty) programarSubidaAuto();
+        if (estadoGlobal.progLocal === p) {
+          const lista = (estadoGlobal.semanas || []).filter(s => s.semanaISO !== res.semana.semanaISO);
+          lista.push(res.semana);
+          lista.sort((a, b) => (a.semanaISO < b.semanaISO ? -1 : 1));
+          estadoGlobal.semanas = lista;
+          actualizarEstadoSubida();
+          renderComparadorSemanas();
+        }
+        if (!silencioso) mostrarToast('✅ ' + res.mensaje);
+      }).guardarProgresoSemanal({ idAlumno: estadoGlobal.user.id, fechaRef: p.fechaRef || fechaLocalISO(), registros });
     }
 
     // ==================== COMPARATIVA SEMANA vs SEMANA ====================
@@ -1171,6 +1219,7 @@ function GS() {
         const i = r.clave.indexOf('::');
         if (i < 0) return;
         const base = r.clave.slice(0, i), campo = r.clave.slice(i + 2), k = r.dia + '|' + base;
+        if (base.charAt(0) === '_') return;   // v19: datos de la sesión (fecha, duración), no es un ejercicio
         const o = m[k] || (m[k] = { dia: r.dia, base, carga: '', ok: false, cargas: {}, series: {}, seriesOk: {} });
         if (campo === 'carga') o.carga = r.valor;
         else if (campo === 'ok') o.ok = r.valor === 'true';

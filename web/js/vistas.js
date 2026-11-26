@@ -9,7 +9,12 @@
       const vistaActual = vistaVisible ? vistaVisible.id.replace('vista-alumno-', '') : 'INICIO';
       document.getElementById('alumnoView').classList.remove('hidden');
       if (!refresco || !senalIntervalo) iniciarSenalActividad();
-      if (!refresco) { precargarMediosRutina(rutina); precargarRecords(); }
+      if (!refresco) {
+        precargarMediosRutina(rutina); precargarRecords();
+        // v19: recordatorio de «3 días sin entrenar» (solo app Android; no vuelve a pedir permiso al abrir)
+        const ultEnt = LS.get('proc_ultimo_entreno_' + estadoGlobal.user.id) || fechaLocalISO();
+        if (typeof window.programarRecordatorioEntreno === 'function') window.programarRecordatorioEntreno(ultEnt, true);
+      }
       
       const nombreLimpio = (user.nombre || '').toUpperCase();
       const primerNombre = (user.nombre || '').trim().split(/\s+/)[0] || '';
@@ -1665,6 +1670,7 @@
       LS.del(CLAVE_TOKEN);
       LS.del(CLAVE_CACHE_SESION);          // los datos guardados en el teléfono se borran al salir
       CajaLocal.borrarDatosUsuario();       // v18: fotos de perfil y vistas guardadas
+      if (typeof window.cancelarRecordatorioEntreno === 'function') window.cancelarRecordatorioEntreno();   // v19
       Object.keys(cacheMiniaturas).forEach(k => delete cacheMiniaturas[k]);
       Object.keys(cacheFotosDrive).forEach(k => delete cacheFotosDrive[k]);
       if (typeof panelCoach !== 'undefined') panelCoach = null;
@@ -2703,7 +2709,14 @@ function calcularComposicionAutomatica() {
       if (hermanos.every(x => leerProg(x.kOk) === 'true')) escribirProg(p.kMain, 'true');
       try { if (navigator.vibrate) navigator.vibrate(30); } catch (e) {}
       const sig = siguientePendiente(guiado.i);
-      if (sig < 0) { guiado.vista = 'fin'; renderGuiado(); return; }
+      if (sig < 0) {
+        guiado.vista = 'fin';
+        // v19: duración de la sesión (la ve el coach) y envío inmediato del progreso
+        const minutos = Math.max(1, Math.round((Date.now() - guiado.inicio) / 60000));
+        escribirProg(guiado.diaNorm + '|_SESION::min', String(minutos));
+        if (typeof subirProgresoAuto === 'function') setTimeout(subirProgresoAuto, 300);
+        renderGuiado(); return;
+      }
       if (p.descanso > 0) {
         guiado.siguiente = sig; guiado.descansoTotal = p.descanso; guiado.vista = 'descanso';
         iniciarCronometro(p.descanso);
@@ -2718,6 +2731,17 @@ function calcularComposicionAutomatica() {
       iniciarCronometro(resta);
     }
 
+    /** v19 · Qué hacer con el peso en esta fase (misma lógica que la vista normal de la rutina). */
+    function indicacionPeso(p) {
+      if (p.tipo !== 'fase') return null;
+      if (p.n === 1) return { texto: 'Peso inicial', sub: 'Empieza con el peso de la primera fase', icono: 'dumbbell', clase: 'bg-slate-800 text-slate-200 border-slate-700' };
+      const baja = { texto: 'Baja el peso', sub: 'Sigue sin descansar', icono: 'trending-down', clase: 'bg-rose-500/15 text-rose-300 border-rose-500/40' };
+      const sube = { texto: 'Sube el peso', sub: 'Sigue sin descansar', icono: 'trending-up', clase: 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40' };
+      if (p.especial === 'DROPSET') return baja;
+      if (p.especial === 'ASCENDING') return sube;
+      if (p.especial === 'PIRAMIDE') return p.n <= 3 ? sube : baja;   // fases 2-3 suben, 4-5 bajan
+      return null;
+    }
     function detallePaso(p) {
       const r = p.it.data;
       const tempo = `${r.excentrica || 0}-${r.pausaExcentrica || 0}-${r.concentrica || 0}-${r.pausaConcentrica || 0}`;
@@ -2751,12 +2775,13 @@ function calcularComposicionAutomatica() {
 
       if (g.vista === 'fin') {
         const hechas = g.pasos.filter(pasoHecho).length;
-        const pend = estadoGlobal.progLocal && estadoGlobal.progLocal.dirty && !estadoGlobal.progLocal.soloLectura;
+        const pend = false;   // v19: el progreso se envía solo al coach
         cont.innerHTML = cabecera + `
           <div class="flex-1 flex flex-col items-center justify-center text-center gap-4 py-8">
             <span class="w-24 h-24 rounded-full bg-emerald-500 text-slate-950 flex items-center justify-center">${ico('check', 'w-12 h-12')}</span>
             <h2 class="text-2xl font-black text-white">¡Entrenamiento completado!</h2>
             <p class="text-sm text-slate-400">${hechas} de ${g.pasos.length} series · ${mmss((Date.now() - g.inicio) / 1000)} de entrenamiento</p>
+            <p class="text-xs text-emerald-300 inline-flex items-center gap-1.5">${ico('send', 'w-4 h-4')} Tu coach recibe tu progreso automáticamente</p>
             ${pend ? `<button type="button" onclick="cerrarModoGuiado(); subirProgresoSemanal()" class="w-full min-h-[52px] rounded-2xl bg-emerald-500 text-slate-950 font-extrabold">Subir mi semana a mi coach</button>` : ''}
             <button type="button" onclick="cerrarModoGuiado()" class="w-full min-h-[52px] rounded-2xl ${pend ? 'bg-slate-900 border border-slate-700 text-white' : 'bg-emerald-500 text-slate-950'} font-extrabold">Volver a mi rutina</button>
           </div>`;
@@ -2797,7 +2822,10 @@ function calcularComposicionAutomatica() {
       const pasada = valorSemanaPasada(g.diaNorm, txtClave(p.kPeso)) || '';
       const sugerido = kgActual || anterior || pasada;
       const sig = siguientePendiente(g.i);
-      const textoBoton = p.descanso > 0 && sig >= 0 ? `Serie hecha · descansar ${p.descanso} s` : sig < 0 ? 'Serie hecha · terminar' : 'Serie hecha · siguiente';
+      const indSig = sig >= 0 && guiado.pasos[sig].it === p.it ? indicacionPeso(guiado.pasos[sig]) : null;
+      const textoBoton = p.descanso > 0 && sig >= 0 ? `Serie hecha · descansar ${p.descanso} s`
+        : sig < 0 ? 'Serie hecha · terminar'
+        : indSig ? `Hecha · ${indSig.texto.toLowerCase()}` : 'Serie hecha · siguiente';
       cont.innerHTML = cabecera + `
         <div class="flex-1 flex flex-col gap-3.5">
           ${r.media ? `<button type="button" onclick="abrirModalEjercicio('${escHtml(r.idEjercicio || '')}', '${escHtml(String(r.ejercicio || '').replace(/'/g, ''))}', '${escHtml(r.media)}')" class="relative w-full h-56 rounded-3xl bg-white overflow-hidden" aria-label="Ver la técnica de ${escHtml(r.ejercicio)}">
@@ -2806,6 +2834,8 @@ function calcularComposicionAutomatica() {
           <div>
             ${etiqueta ? `<span class="inline-block mb-1 text-[11px] font-black uppercase px-2 py-0.5 rounded-md bg-amber-500/15 text-amber-300 border border-amber-500/30">${escHtml(etiqueta)}</span>` : ''}
             <h2 class="text-2xl font-black text-white leading-tight">${escHtml(r.ejercicio)}</h2>
+            ${(() => { const ind = indicacionPeso(p); return ind ? `<div class="mt-2 flex items-center gap-3 border rounded-2xl px-3 py-2.5 ${ind.clase}" role="note">
+              ${ico(ind.icono, 'w-7 h-7 shrink-0')}<div><p class="text-base font-black leading-tight">${ind.texto}</p><p class="text-xs opacity-80">${ind.sub}</p></div></div>` : ''; })()}
             <p class="text-sm text-slate-400 mt-0.5">${p.tipo === 'fase' ? 'Fase' : 'Serie'} ${p.n} de ${p.total} · <b class="text-white">${escHtml(String(p.reps || '-'))} reps</b> · tempo <span class="font-mono text-amber-300">${tempo}</span>${p.descanso ? ' · descanso ' + p.descanso + ' s' : ''}</p>
           </div>
           <div class="flex gap-2 overflow-x-auto no-scrollbar">${chips}</div>

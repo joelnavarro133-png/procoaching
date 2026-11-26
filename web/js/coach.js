@@ -922,6 +922,7 @@
 
     function cargarProgresoParaCoach(idDirecto) {
       detenerVivoCoach();
+      editandoAlerta = false;
       const idAlumno = idDirecto || document.getElementById('selectAlumnoAnalizar').value;
       if (!idAlumno) return;
       alumnoCoachActivo = idAlumno;
@@ -946,6 +947,7 @@
           estadoGlobal.historialRutinas = res.historialRutinas || [];
           estadoGlobal.semanas = res.semanas || [];
           estadoGlobal.checkinsCoach = { idAlumno, lista: res.checkins || [] };
+          estadoGlobal.notasCoach = Object.assign({ idAlumno }, res.notasCoach || {});
           inicializarProgresoCoach();
           estadoGlobal.diaSeleccionado = obtenerDiaActualSemana();
 
@@ -1001,13 +1003,7 @@
 
               <div id="expResumen" class="subtab-exp space-y-4">
                 <div id="vivoCoach" aria-live="polite"></div>
-                <div class="grid grid-cols-2 sm:grid-cols-4 gap-2.5">
-                  ${kpiCard('Adherencia', kpi.adherencia, true)}
-                  ${kpiCard('Masa magra', kpi.masaTxt, kpi.masaPos)}
-                  ${kpiCard('% Grasa', kpi.grasaTxt, kpi.grasaPos)}
-                  ${kpiCard('Carga total', kpi.cargaTxt, kpi.cargaPos)}
-                </div>
-                ${construirTarjetaCheckinReciente(res.checkins || [])}
+                <div id="resumenFicha">${htmlResumenFicha(idAlumno)}</div>
               </div>
 
               <div id="expRutina" class="subtab-exp hidden">
@@ -1078,7 +1074,16 @@
     function iniciarActividadCoach() {
       cargarActividadCoach();
       clearInterval(actividadTimer);
-      actividadTimer = setInterval(() => { if (!document.hidden && esCoach()) cargarActividadCoach(); }, 60000);
+      // v19: cada 30 s con el inicio a la vista («Entrenando ahora»); cada 60 s en el resto
+      let ultimaAct = Date.now();
+      actividadTimer = setInterval(() => {
+        if (document.hidden || !esCoach()) return;
+        const tabHoy = document.getElementById('tabHoyCoach');
+        const enInicio = tabHoy && !tabHoy.classList.contains('hidden');
+        if (!enInicio && Date.now() - ultimaAct < 59000) return;
+        ultimaAct = Date.now();
+        cargarActividadCoach();
+      }, SEG_REFRESCO_INICIO * 1000);
     }
     function detenerActividadCoach() { clearInterval(actividadTimer); actividadTimer = null; actividadCoach = {}; }
     function cargarActividadCoach() {
@@ -1086,7 +1091,11 @@
         if (!res || !res.success) return;
         actividadCoach = {}; actividadHoy = res.hoy;
         (res.actividad || []).forEach(a => { actividadCoach[a.id] = a; });
-        renderResumenActividadCoach();
+        if (Array.isArray(res.vivos) && panelCoach) {
+          aplicarVivosEquipo(res.vivos);
+          const tabHoy = document.getElementById('tabHoyCoach');
+          if (tabHoy && !tabHoy.classList.contains('hidden')) renderHoyCoach();
+        }
         renderListaMisAlumnosTab1();
         renderTarjetasAlumnos();
         const modal = document.getElementById('modalActividadHoy');
@@ -1110,24 +1119,6 @@
       if (!a) return '';
       if (a.enLinea) return '● En línea · ' + (a.origen === 'app' ? 'app' : 'web');
       return haceCuanto(a.ultimaConexion) + (a.ultimaConexion && a.origen ? ' · ' + a.origen : '');
-    }
-
-    function renderResumenActividadCoach() {
-      const cont = document.getElementById('resumenActividadCoach');
-      if (!cont) return;
-      const lista = Object.values(actividadCoach);
-      if (!lista.length) { cont.innerHTML = ''; return; }
-      const entrenaron = lista.filter(a => a.entrenoHoy).length;
-      const enLinea = lista.filter(a => a.enLinea).length;
-      cont.innerHTML = `
-        <button type="button" onclick="abrirActividadHoy()" class="w-full text-left bg-slate-900/90 border border-slate-800 hover:border-emerald-500/40 rounded-2xl p-3.5 flex items-center gap-3 active:scale-[0.99] transition">
-          <span class="w-11 h-11 rounded-xl bg-emerald-500/15 border border-emerald-500/30 text-xl flex items-center justify-center shrink-0">${ico('dumbbell', 'w-6 h-6')}</span>
-          <span class="min-w-0 flex-1">
-            <span class="block text-sm font-extrabold text-white">Hoy entrenaron ${entrenaron} de ${lista.length}</span>
-            <span class="block text-xs text-slate-400 mt-0.5">${enLinea ? `<span class="inline-block w-2 h-2 rounded-full bg-emerald-400 mr-1 align-middle"></span>${enLinea} en línea ahora` : 'Nadie en línea ahora'} · toca para ver el detalle</span>
-          </span>
-          <span class="text-emerald-400 text-lg font-black">›</span>
-        </button>`;
     }
 
     function abrirActividadHoy() {
@@ -1371,6 +1362,113 @@
     }
     function abrirFichaAlumno(id) { cambiarTabCoach('tabComparativaCoach'); cargarProgresoParaCoach(id); }
 
+    // ==================== v19 · INICIO DEL COACH ====================
+    // Qué hacer hoy en 5 segundos: quién entrena ahora, a quién le toca hoy, cómo va la semana del equipo
+    // y qué pendientes atender, con la alerta física y la última nota de cada alumno a la vista.
+    const SEG_REFRESCO_INICIO = 30;
+    const tituloEj = t => String(t || '').trim().toLowerCase().replace(/(^|\s)\S/g, c => c.toUpperCase());
+    const PUNTO_VIVO = (on) => on
+      ? '<span class="relative flex w-2.5 h-2.5 shrink-0"><span class="absolute inline-flex h-full w-full rounded-full bg-rose-500 opacity-60 animate-ping motion-reduce:animate-none"></span><span class="relative inline-flex w-2.5 h-2.5 rounded-full bg-rose-500"></span></span>'
+      : '<span class="w-2.5 h-2.5 rounded-full bg-slate-600 shrink-0"></span>';
+    function etiquetasNotaCoach(id) {
+      const n = panelCoach && panelCoach.notas && panelCoach.notas[id];
+      if (!n) return '';
+      const t = [];
+      if (n.alerta) t.push(`<span class="inline-flex items-center gap-1 max-w-full bg-amber-500/10 text-amber-300 border border-amber-500/30 text-[11px] font-extrabold px-2 py-0.5 rounded-full"><span class="shrink-0">${ico('triangle-alert', 'w-3 h-3')}</span><span class="truncate">${escHtml(n.alerta)}</span></span>`);
+      if (n.nota) t.push(`<span class="inline-flex items-center gap-1 max-w-full bg-slate-800 text-slate-300 text-[11px] font-bold px-2 py-0.5 rounded-full" title="Tu última nota"><span class="shrink-0">${ico('notebook-pen', 'w-3 h-3')}</span><span class="truncate">${escHtml(n.nota)}</span></span>`);
+      return `<span class="flex flex-wrap gap-1.5 mt-1.5">${t.join('')}</span>`;
+    }
+    const vivosAhora = () => {     // el panel guardado en el teléfono puede ser de antes: se exige una marca reciente
+      const lim = ((panelCoach && panelCoach.reglas && panelCoach.reglas.minEntrenandoAhora) || 20) * 60000;
+      return ((panelCoach && panelCoach.vivos) || []).filter(v => v.ahora && !(Date.now() - Date.parse(v.t) > lim));
+    };
+    /** Lo que llega cada 30 s (obtenerActividadAlumnos) actualiza «Entrenando ahora» y el estado de «Hoy les toca». */
+    function aplicarVivosEquipo(vivos) {
+      if (!panelCoach || !Array.isArray(vivos)) return;
+      panelCoach.vivos = vivos;
+      const r = panelCoach.resumen;
+      (panelCoach.sesionesHoy || []).forEach(x => {
+        const v = vivos.find(y => y.id === x.idAlumno && y.dia === panelCoach.diaHoy);
+        if (!v || x.estado === 'COMPLETO') return;
+        const pct = v.total ? Math.round(v.hechas / v.total * 100) : 0;
+        if (v.completo) { x.estado = 'COMPLETO'; x.pct = 100; }
+        else if (v.hechas > 0) { x.estado = 'EN_CURSO'; x.pct = Math.max(x.pct || 0, pct); }
+      });
+      r.entrenandoAhora = vivos.filter(v => v.ahora).length;
+      r.sesionesHoyCompletas = (panelCoach.sesionesHoy || []).filter(x => x.estado === 'COMPLETO').length;
+    }
+    function htmlVivoInicio() {
+      const lista = vivosAhora();
+      const filas = lista.map(v => {
+        const pct = v.total ? Math.round(v.hechas / v.total * 100) : 0;
+        const a = v.actual;
+        const detalle = a ? (a.siguiente ? `Siguiente: ${escHtml(tituloEj(a.nombre))}` : `${escHtml(tituloEj(a.nombre))} · serie ${Math.min(a.serie, a.series)} de ${a.series}`) : 'Marcando su rutina';
+        return `
+          <button type="button" onclick="abrirFichaAlumno('${escHtml(v.id)}')" class="w-full text-left mt-3 first:mt-0 rounded-xl hover:bg-slate-800/50 p-1 -m-1">
+            <span class="flex items-center gap-2.5">
+              ${avatarAlumnoCoach(v.id, 'w-9 h-9', 'text-xs')}
+              <span class="flex-1 min-w-0">
+                <span class="block text-sm font-extrabold text-white truncate">${escHtml(nombreCortoCoach(v.nombre))}${v.grupos && v.grupos.length ? ' · ' + escHtml(tituloEj(v.grupos.join(' y '))) : ''}</span>
+                <span class="block text-xs text-amber-300 break-words">${detalle}</span>
+              </span>
+              <span class="text-right shrink-0"><span class="block text-sm font-black text-emerald-400">${v.ejHechos}/${v.ejTotal || '–'}</span><span class="block text-[11px] text-slate-400">${escHtml(haceCuanto(v.t))}</span></span>
+            </span>
+            <span class="block h-1.5 rounded-full bg-slate-800 overflow-hidden mt-2" role="progressbar" aria-valuemin="0" aria-valuemax="100" aria-valuenow="${pct}" aria-label="Avance de ${escHtml(nombreCortoCoach(v.nombre))}"><span class="block h-full bg-emerald-500 rounded-full" style="width:${pct}%"></span></span>
+          </button>`;
+      }).join('');
+      return `
+        <section id="hoyVivo" class="order-1 bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloHoyVivo">
+          <div class="flex items-center justify-between gap-2 mb-1">
+            <h3 id="tituloHoyVivo" class="text-sm font-black text-white flex items-center gap-2">${PUNTO_VIVO(lista.length)} Entrenando ahora</h3>
+            <span class="text-[11px] text-slate-400">se actualiza cada ${SEG_REFRESCO_INICIO} s</span>
+          </div>
+          ${filas ? `<div class="pt-2">${filas}</div>` : '<p class="text-xs text-slate-400 pt-1">Nadie está entrenando en este momento. Cuando un alumno marque una serie, lo verás aquí.</p>'}
+        </section>`;
+    }
+    function htmlHoyLesToca() {
+      const ses = (panelCoach && panelCoach.sesionesHoy) || [];
+      const est = {
+        COMPLETO: x => `<span class="inline-flex items-center gap-1 text-xs font-extrabold text-emerald-400">${ico('circle-check', 'w-3.5 h-3.5')}Completo${x.minutos ? ' · ' + x.minutos + ' min' : ''}</span>`,
+        EN_CURSO: x => `<span class="inline-flex items-center gap-1 text-xs font-extrabold text-amber-300">${ico('timer', 'w-3.5 h-3.5')}En curso · ${x.pct}%</span>`,
+        PENDIENTE: () => `<span class="inline-flex items-center gap-1 text-xs font-extrabold text-slate-400">${ico('clock', 'w-3.5 h-3.5')}Pendiente</span>`
+      };
+      const filas = ses.map((x, i) => `
+        <li><button type="button" onclick="abrirFichaAlumno('${escHtml(x.idAlumno)}')" class="w-full flex items-center gap-2.5 py-2 min-h-[44px] text-left ${i ? 'border-t border-slate-800' : ''}">
+          ${avatarAlumnoCoach(x.idAlumno, 'w-8 h-8', 'text-[11px]')}
+          <span class="flex-1 min-w-0"><span class="block text-sm font-bold text-white truncate">${escHtml(nombreCortoCoach(x.nombre))}</span>${x.grupos && x.grupos.length ? `<span class="block text-[11px] text-slate-400 truncate">${escHtml(tituloEj(x.grupos.join(' · ')))}</span>` : ''}</span>
+          ${(est[x.estado] || est.PENDIENTE)(x)}
+        </button></li>`).join('');
+      return `
+        <section id="hoyLesToca" class="order-3 bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloHoyLesToca">
+          <h3 id="tituloHoyLesToca" class="text-sm font-black text-white flex items-center gap-2 mb-1">${ico('calendar-check', 'w-4 h-4 text-emerald-400')} Hoy les toca</h3>
+          ${filas ? `<ul>${filas}</ul>` : '<p class="text-xs text-slate-400">Ningún alumno tiene sesión programada para hoy en su rutina.</p>'}
+        </section>`;
+    }
+    function htmlProximasEvaluaciones() {
+      const l = (panelCoach && panelCoach.proximasEvaluaciones) || [];
+      const filas = l.slice(0, 6).map((x, i) => `
+        <li><button type="button" onclick="abrirEvaluacionPara('${escHtml(x.idAlumno)}')" class="w-full flex items-center gap-2.5 py-2 min-h-[44px] text-left ${i ? 'border-t border-slate-800' : ''}">
+          ${avatarAlumnoCoach(x.idAlumno, 'w-8 h-8', 'text-[11px]')}
+          <span class="flex-1 min-w-0 text-sm font-bold text-white truncate">${escHtml(nombreCortoCoach(x.nombre))}</span>
+          <span class="inline-flex items-center gap-1 text-xs font-extrabold ${x.faltan <= 3 ? 'text-amber-300' : 'text-slate-400'}">${ico('clock', 'w-3.5 h-3.5')}${x.faltan === 1 ? 'mañana' : 'en ' + x.faltan + ' días'}</span>
+        </button></li>`).join('');
+      return `
+        <section class="order-4 bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloProxEval">
+          <h3 id="tituloProxEval" class="text-sm font-black text-white flex items-center gap-2 mb-1">${ico('clipboard-pen', 'w-4 h-4 text-emerald-400')} Próximas evaluaciones</h3>
+          ${filas ? `<ul>${filas}</ul>` : '<p class="text-xs text-slate-400">Ninguna vence en las próximas 2 semanas.</p>'}
+        </section>`;
+    }
+    function htmlAlertasEquipo() {
+      const notas = (panelCoach && panelCoach.notas) || {};
+      const ids = Object.keys(notas).filter(id => notas[id].alerta && alumnoPorId(id));
+      const tags = ids.map(id => `<button type="button" onclick="abrirFichaAlumno('${escHtml(id)}')" class="inline-flex items-center gap-1.5 max-w-full min-h-[32px] bg-amber-500/10 text-amber-300 border border-amber-500/30 text-xs font-extrabold px-2.5 py-1 rounded-full hover:bg-amber-500/20"><span class="shrink-0">${ico('triangle-alert', 'w-3.5 h-3.5')}</span><span class="truncate">${escHtml(primerNombreDe((alumnoPorId(id) || {}).nombre))} · ${escHtml(notas[id].alerta)}</span></button>`).join('');
+      return `
+        <section class="order-5 bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloAlertasEq">
+          <h3 id="tituloAlertasEq" class="text-sm font-black text-white flex items-center gap-2 mb-2">${ico('bandage', 'w-4 h-4 text-emerald-400')} Alertas físicas activas</h3>
+          ${tags ? `<div class="flex flex-wrap gap-1.5">${tags}</div>` : '<p class="text-xs text-slate-400">Ningún alumno tiene alertas. Se agregan desde el Resumen de su ficha.</p>'}
+        </section>`;
+    }
+
     function renderHoyCoach() {
       const cont = document.getElementById('contenedorHoyCoach');
       if (!cont) return;
@@ -1380,59 +1478,90 @@
       const primero = primerNombreDe(nombre);
       let fecha = '';
       try { fecha = new Date().toLocaleDateString('es-PE', { weekday: 'long', day: 'numeric', month: 'long' }); fecha = fecha.charAt(0).toUpperCase() + fecha.slice(1); } catch (e) {}
-      const kpi = (valor, etiqueta, sub, color, onclick) => `
-        <button type="button" ${onclick ? `onclick="${onclick}"` : 'tabindex="-1"'} class="text-left bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 ${onclick ? 'hover:border-emerald-500/40 active:scale-[0.99] transition' : 'cursor-default'}">
-          <span class="block text-xs text-slate-400 font-semibold">${etiqueta}</span>
-          <span class="block text-2xl sm:text-3xl font-black mt-0.5 ${color}">${valor}</span>
+      const kpi = (etiqueta, valor, sub, color, onclick, vivo) => `
+        <button type="button" ${onclick ? `onclick="${onclick}"` : 'tabindex="-1"'} class="text-left bg-slate-900 border border-slate-800 rounded-2xl p-3.5 sm:p-4 min-w-0 ${onclick ? 'hover:border-emerald-500/40 active:scale-[0.99] transition' : 'cursor-default'}">
+          <span class="flex items-center gap-2 text-xs text-slate-400 font-bold">${vivo !== undefined ? PUNTO_VIVO(vivo) : ''}${etiqueta}</span>
+          <span class="block text-2xl sm:text-3xl font-black mt-1 leading-tight ${color}">${valor}</span>
           <span class="block text-xs text-slate-400 mt-0.5">${sub}</span>
         </button>`;
+      const chico = t => `<span class="text-base font-bold text-slate-400">${t}</span>`;
+
+      // KPIs
+      const ahora = vivosAhora();
+      const v0 = ahora[0];
+      const subVivo = v0 ? `${escHtml(primerNombreDe(v0.nombre))}${v0.grupos && v0.grupos[0] ? ' · ' + escHtml(tituloEj(v0.grupos[0])) : ''} ${v0.ejHechos} de ${v0.ejTotal}${ahora.length > 1 ? ` · +${ahora.length - 1}` : ''}` : 'Nadie en este momento';
+      const nSes = r.sesionesHoy || 0, nSesOk = r.sesionesHoyCompletas || 0;
+      const semH = r.semanaHechas || 0, semP = r.semanaProgramadas || 0, semPct = semP ? Math.round(semH / semP * 100) : 0;
+      const nCh = pend.filter(p => p.tipo === 'CHECKIN').length, nRec = pend.filter(p => p.tipo === 'RECORD').length, nOtros = pend.length - nCh - nRec;
+      const partes = [];
+      if (nCh) partes.push(nCh + (nCh === 1 ? ' check-in' : ' check-ins'));
+      if (nRec) partes.push(nRec + (nRec === 1 ? ' récord' : ' récords'));
+      if (nOtros) partes.push(partes.length ? nOtros + ' más' : nOtros + (nOtros === 1 ? ' alumno por atender' : ' alumnos por atender'));
+      const kpis = `
+        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
+          ${kpi('Entrenando ahora', ahora.length, subVivo, ahora.length ? 'text-emerald-400' : 'text-white', "irASeccionHoy('hoyVivo')", ahora.length)}
+          ${kpi('Sesiones de hoy', nSes ? `${nSesOk} ${chico('de ' + nSes)}` : '0', nSes ? 'completas de las programadas' : 'Nadie tiene sesión hoy', 'text-white', "irASeccionHoy('hoyLesToca')")}
+          ${kpi('Adherencia del equipo', semP ? `${semH} ${chico('/ ' + semP)}` : '—', semP ? `sesiones esta semana · ${semPct}%` : 'Sin rutinas con días de la semana', semP && semPct >= 80 ? 'text-emerald-400' : 'text-white', '')}
+          ${kpi('Pendientes', pend.length, pend.length ? partes.join(' · ') : 'Todo al día', pend.length ? 'text-amber-300' : 'text-white', "irASeccionHoy('hoyAtencion')")}
+        </div>`;
+
+      // Qué hacer hoy
       const visibles = hoyVerTodos ? pend : pend.slice(0, 6);
       const filas = visibles.length ? visibles.map((p, i) => {
         const e = ESTILO_PENDIENTE[p.tipo];
+        const tono = p.tipo === 'EVALUACION' && p.dias === null ? 'bg-amber-500/15 text-amber-300' : e.tono;
+        const colorDet = /^(SIN_ENTRENAR|EVALUACION)$/.test(p.tipo) && p.dias !== null ? 'text-rose-300' : 'text-slate-300';
         return `
-          <li class="flex items-center gap-3 py-3 ${i ? 'border-t border-slate-800' : ''}">
-            <span class="w-10 h-10 rounded-xl ${e.tono} flex items-center justify-center shrink-0">${ico(e.ico, 'w-5 h-5')}</span>
+          <li class="flex items-start gap-3 py-3 ${i ? 'border-t border-slate-800' : ''}">
+            <span class="w-10 h-10 rounded-xl ${tono} flex items-center justify-center shrink-0">${ico(e.ico, 'w-5 h-5')}</span>
             <button type="button" onclick="abrirFichaAlumno('${escHtml(p.idAlumno)}')" class="flex-1 min-w-0 text-left min-h-[44px]">
-              <span class="block text-sm font-bold text-white truncate">${escHtml(nombreCortoCoach(p.nombre))}</span>
-              <span class="block text-xs text-slate-400 truncate">${escHtml(p.detalle)}</span>
+              <span class="block text-sm font-extrabold text-white truncate">${escHtml(nombreCortoCoach(p.nombre))}</span>
+              <span class="block text-xs ${colorDet} truncate">${escHtml(p.detalle)}</span>
+              ${etiquetasNotaCoach(p.idAlumno)}
             </button>
             <button type="button" onclick="accionPendiente(${pend.indexOf(p)})" class="shrink-0 min-h-[44px] px-3 rounded-xl text-sm font-extrabold text-emerald-300 hover:bg-emerald-500/10">${e.accion}</button>
           </li>`;
       }).join('') : `<li class="py-6 text-center"><span class="inline-flex w-12 h-12 rounded-full bg-emerald-500/15 text-emerald-300 items-center justify-center mb-2">${ico('circle-check', 'w-6 h-6')}</span><span class="block text-sm font-bold text-white">Todo al día</span><span class="block text-xs text-slate-400">No hay check-ins, récords, evaluaciones ni alumnos inactivos pendientes.</span></li>`;
       const verTodos = pend.length > 6 ? `<button type="button" onclick="hoyVerTodos = !hoyVerTodos; renderHoyCoach()" class="w-full min-h-[44px] mt-1 text-sm font-bold text-emerald-300 rounded-xl hover:bg-slate-800/60">${hoyVerTodos ? 'Ver menos' : `Ver todos (${pend.length})`}</button>` : '';
+      const atencion = `
+        <section id="hoyAtencion" class="order-2 lg:order-none bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloAtencion">
+          <div class="flex items-center justify-between gap-2">
+            <h3 id="tituloAtencion" class="text-base font-black text-white flex items-center gap-2">${ico('list-checks', 'w-5 h-5 text-emerald-400')} Qué hacer hoy</h3>
+            ${pend.length ? `<span class="bg-amber-500/15 text-amber-300 text-xs font-extrabold px-2.5 py-1 rounded-full">${pend.length} pendiente${pend.length === 1 ? '' : 's'}</span>` : ''}
+          </div>
+          <p class="text-xs text-slate-400 mt-0.5 mb-1">Ordenado por urgencia · con la alerta física y tu última nota de cada alumno</p>
+          <ul>${filas}</ul>${verTodos}
+          <p class="text-[11px] text-slate-500 mt-2">Evaluación vencida: ${panelCoach.reglas.diasEvaluacion} días o más desde la última. Sin entrenar: ${panelCoach.reglas.diasSinEntrenar} días o más sin registrar series.</p>
+        </section>`;
+
+      const nAhora = ahora.length;
       cont.innerHTML = `
         <div class="hidden md:flex items-end justify-between gap-3 flex-wrap">
-          <div><h2 class="text-2xl font-black text-white">Hola, ${escHtml(primero)}</h2><p class="text-sm text-slate-400">${escHtml(fecha)} · ${r.totalAlumnos} ${r.totalAlumnos === 1 ? 'alumno' : 'alumnos'}</p></div>
+          <div><h2 class="text-2xl font-black text-white">Hola, ${escHtml(primero)}</h2><p class="text-sm text-slate-400">${escHtml(fecha)} · ${r.totalAlumnos} ${r.totalAlumnos === 1 ? 'alumno' : 'alumnos'}${nAhora ? ` · ${nAhora} entrenando ahora` : ''}</p></div>
           <div class="flex gap-2 flex-wrap">
             <button type="button" onclick="abrirEvaluacionPara('')" class="min-h-[44px] px-4 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold inline-flex items-center gap-2">${ico('clipboard-pen', 'w-4 h-4')} Nueva evaluación</button>
             <button type="button" onclick="cambiarTabCoach('tabNuevoAlumno')" class="min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold inline-flex items-center gap-2">${ico('user-plus', 'w-4 h-4')} Nuevo alumno</button>
           </div>
         </div>
         <p class="md:hidden text-sm text-slate-400 -mt-1">Hola, <strong class="text-white">${escHtml(primero)}</strong> · ${escHtml(fecha)}</p>
-        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3">
-          ${kpi(`${r.entrenaronHoy} de ${r.totalAlumnos}`, 'Entrenaron hoy', r.enLinea ? `${r.enLinea} en línea ahora` : 'Nadie en línea ahora', 'text-emerald-400', 'abrirActividadHoy()')}
-          ${kpi(`${r.entrenaronSemana} de ${r.totalAlumnos}`, 'Entrenaron esta semana', 'Últimos 7 días', 'text-white', '')}
-          ${kpi(r.checkinsPendientes, 'Check-ins sin responder', r.checkinsPendientes ? 'Toca para responder' : 'Todo respondido', r.checkinsPendientes ? 'text-amber-300' : 'text-white', "cambiarTabCoach('tabMensajesCoach')")}
-          ${kpi(r.recordsPendientes, 'Récords por aprobar', r.recordsPendientes ? 'Toca para revisar' : 'Nada por revisar', r.recordsPendientes ? 'text-amber-300' : 'text-white', "cambiarTabCoach('tabRecordsCoach')")}
-        </div>
-        <div class="grid grid-cols-1 lg:grid-cols-[minmax(0,2fr)_minmax(0,1fr)] gap-4 items-start">
-          <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tituloAtencion">
-            <div class="flex items-center justify-between gap-2 mb-1">
-              <h3 id="tituloAtencion" class="text-base font-extrabold text-white flex items-center gap-2">${ico('list-checks', 'w-5 h-5 text-emerald-400')} Requiere tu atención</h3>
-              ${pend.length ? `<span class="bg-amber-500/15 text-amber-300 text-xs font-extrabold px-2.5 py-1 rounded-full">${pend.length} pendiente${pend.length === 1 ? '' : 's'}</span>` : ''}
-            </div>
-            <ul>${filas}</ul>${verTodos}
-          </section>
-          <div class="space-y-3">
-            <div id="resumenActividadCoach"></div>
-            <div class="grid grid-cols-2 gap-3 md:hidden">
+        ${kpis}
+        <div class="flex flex-col gap-3 lg:grid lg:grid-cols-[minmax(0,1.55fr)_minmax(0,1fr)] lg:gap-4 lg:items-start">
+          ${atencion}
+          <div class="contents lg:flex lg:flex-col lg:gap-3">
+            ${htmlVivoInicio()}
+            ${htmlHoyLesToca()}
+            ${htmlProximasEvaluaciones()}
+            ${htmlAlertasEquipo()}
+            <div class="order-6 grid grid-cols-2 gap-3 md:hidden">
               <button type="button" onclick="cambiarTabCoach('tabNuevoAlumno')" class="min-h-[48px] px-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold inline-flex items-center justify-center gap-2">${ico('user-plus', 'w-4 h-4')} Nuevo alumno</button>
               <button type="button" onclick="abrirEvaluacionPara('')" class="min-h-[48px] px-3 rounded-xl bg-slate-800 border border-slate-700 text-slate-100 text-sm font-extrabold inline-flex items-center justify-center gap-2">${ico('clipboard-pen', 'w-4 h-4')} Evaluar</button>
             </div>
-            <p class="text-xs text-slate-400 px-1">Evaluación vencida: ${panelCoach.reglas.diasEvaluacion} días o más desde la última. Sin entrenar: ${panelCoach.reglas.diasSinEntrenar} días o más sin registrar series.</p>
           </div>
         </div>`;
-      renderResumenActividadCoach();
+    }
+    function irASeccionHoy(id) {
+      const el = document.getElementById(id); if (!el) return;
+      el.scrollIntoView({ behavior: modoScroll(), block: 'start' });
     }
 
     function irAMensajeCoach(idAlumno, semana) {
@@ -1701,4 +1830,291 @@
           <ul class="mt-2">${filas || '<li class="text-xs text-slate-400 py-2">Marcó series de un ejercicio que ya no está en su rutina.</li>'}</ul>
           <p class="text-[11px] text-slate-500 mt-1">Se actualiza solo cada ${SEG_VIVO_COACH} s mientras tienes abierta esta ficha.</p>
         </div>`;
+    }
+
+    // ==================== v19 · RESUMEN DE LA FICHA (propuesta del entrenador) ====================
+    // En 5 segundos: si entrenó, si levantó más, cómo salió su última evaluación, cuándo toca la siguiente
+    // y qué decirle hoy. Todo se calcula con lo que la app ya guarda; la alerta y la bitácora son del coach.
+    const DIAS_ENTRE_EVALUACIONES = 28, DIAS_AVISO_ENTRENO = 4, DIAS_ALERTA_ENTRENO = 7;
+    const DIA_MS = 86400000;
+    const fechaUTC = iso => { const m = /^(\d{4})-(\d{2})-(\d{2})/.exec(String(iso || '')); return m ? Date.UTC(+m[1], +m[2] - 1, +m[3]) : NaN; };
+    const diasDesdeFecha = iso => { const t = fechaUTC(iso); return isNaN(t) ? null : Math.round((fechaUTC(fechaLocalISO()) - t) / DIA_MS); };
+    const MESES_CORTOS = ['ene', 'feb', 'mar', 'abr', 'may', 'jun', 'jul', 'ago', 'sep', 'oct', 'nov', 'dic'];
+    const fechaLarga = iso => { const t = fechaUTC(iso); if (isNaN(t)) return ''; const d = new Date(t); return d.getUTCDate() + ' ' + MESES_CORTOS[d.getUTCMonth()] + ' ' + d.getUTCFullYear(); };
+    const haceDias = n => n === 0 ? 'hoy' : n === 1 ? 'ayer' : 'hace ' + n + ' días';
+    function lunesSemanaISO(semISO) {
+      const m = /^(\d{4})-W(\d{2})$/.exec(String(semISO || '')); if (!m) return NaN;
+      const ene4 = Date.UTC(+m[1], 0, 4), dow = (new Date(ene4).getUTCDay() + 6) % 7;
+      return ene4 - dow * DIA_MS + (+m[2] - 1) * 7 * DIA_MS;
+    }
+    const num1 = v => { const n = parseFloat(String(v === undefined || v === null ? '' : v).replace(',', '.')); return isNaN(n) ? null : n; };
+    const conSigno = (n, dec = 1) => (n > 0 ? '+' : n < 0 ? '−' : '±') + Math.abs(n).toFixed(dec);
+    const PLIEGUES = ['subescapular', 'tricipital', 'bicipital', 'supracrestal', 'suprailiaca', 'abdominal'];
+
+    /** Datos del resumen (separados del dibujo para poder probarlos). */
+    function datosResumenFicha(idAlumno) {
+      const rutina = estadoGlobal.rutinaActual || [], semanas = (estadoGlobal.semanas || []).slice().sort((a, b) => a.semanaISO < b.semanaISO ? -1 : 1);
+      const hoyISO = fechaLocalISO(), semAct = infoSemana(hoyISO).semanaISO;
+      const diasProg = DIAS_SEMANA.filter(d => rutina.some(r => normalizarDia(r.dia) === normalizarDia(d)));
+      const ejsDia = d => rutina.filter(r => normalizarDia(r.dia) === normalizarDia(d));
+      const avanceDia = (g, d) => {      // series hechas / programadas de un día de la rutina en una semana
+        const ejs = ejsDia(d), bases = basesEjerciciosDia(ejs);
+        let hechas = 0, total = 0, ejHechos = 0;
+        ejs.forEach((r, i) => {
+          const n = Math.max(1, cuantasSeries(r)), o = g[normalizarDia(d) + '|' + bases[i]];
+          total += n;
+          if (ejercicioHecho(o)) { hechas += n; ejHechos++; }
+          else if (o) hechas += Math.min(n, Object.keys(o.seriesOk || {}).length);
+        });
+        return { hechas, total, ejHechos, ejTotal: ejs.length, completo: ejs.length > 0 && ejHechos === ejs.length };
+      };
+
+      // 1) Adherencia: días de la rutina COMPLETOS esta semana / días programados
+      const semActual = semanas.find(x => x.semanaISO === semAct);
+      const gAct = agruparSemana(semActual);
+      const completas = diasProg.filter(d => avanceDia(gAct, d).completo).length;
+      const ordenHoy = (new Date(fechaUTC(hoyISO)).getUTCDay() + 6) % 7;
+      const hastaHoy = diasProg.filter(d => DIAS_SEMANA.findIndex(x => normalizarDia(x) === normalizarDia(d)) <= ordenHoy).length;
+      const adherencia = { hechas: completas, programadas: diasProg.length, hastaHoy,
+        pct: diasProg.length ? Math.round(completas / diasProg.length * 100) : 0 };
+
+      // 2) y 3) Evaluaciones
+      const evals = (estadoGlobal.progresoActual || []).filter(e => e && (num1(e.peso) || num1(e.grasaCorporal) || num1(e.cintura)))
+        .slice().sort((a, b) => String(a.fecha) < String(b.fecha) ? -1 : 1);
+      const ult = evals[evals.length - 1] || null, ant = evals[evals.length - 2] || null;
+      const magraDe = e => { if (!e) return null; const m = num1(e.masaCorporal); if (m) return m; const p = num1(e.peso), g = num1(e.grasaCorporal); return p && g !== null ? p * (1 - g / 100) : null; };
+      const tienePliegues = e => !!e && PLIEGUES.some(k => (num1(e[k]) || 0) > 0);
+      let composicion = null;
+      if (ult && tienePliegues(ult) && num1(ult.grasaCorporal) !== null) {
+        const previa = evals.slice(0, -1).reverse().find(e => tienePliegues(e) && num1(e.grasaCorporal) !== null);
+        composicion = { tipo: 'GRASA', valor: num1(ult.grasaCorporal), delta: previa ? num1(ult.grasaCorporal) - num1(previa.grasaCorporal) : null };
+      } else if (ult && num1(ult.cintura)) {
+        const previa = evals.slice(0, -1).reverse().find(e => num1(e.cintura));
+        composicion = { tipo: 'CINTURA', valor: num1(ult.cintura), delta: previa ? num1(ult.cintura) - num1(previa.cintura) : null };
+      }
+      const peso = ult && num1(ult.peso) ? { valor: num1(ult.peso), magra: magraDe(ult), deltaMagra: ant && magraDe(ant) !== null && magraDe(ult) !== null ? magraDe(ult) - magraDe(ant) : null } : null;
+      const diasEval = ult ? diasDesdeFecha(ult.fecha) : null;
+      const evaluacion = ult ? { fecha: ult.fecha, dias: diasEval, faltan: diasEval === null ? null : DIAS_ENTRE_EVALUACIONES - diasEval } : null;
+
+      // 4) Fuerza: mejor peso por ejercicio en las últimas 4 semanas vs. las 4 anteriores, y récords del mes
+      const hoyT = fechaUTC(hoyISO), inicioMes = Date.UTC(new Date(hoyT).getUTCFullYear(), new Date(hoyT).getUTCMonth(), 1);
+      const porEj = {};
+      semanas.forEach(sm => {
+        const t = lunesSemanaISO(sm.semanaISO), g = agruparSemana(sm);
+        Object.keys(g).forEach(k => {
+          const v = valorNumerico(g[k]); if (!v) return;
+          const b = g[k].base.replace(/~\d+$/, '');
+          (porEj[b] = porEj[b] || []).push({ t, v });
+        });
+      });
+      const cambios = [];
+      let prsMes = 0;
+      Object.keys(porEj).forEach(b => {
+        const l = porEj[b];
+        const max = f => l.filter(f).reduce((m, x) => Math.max(m, x.v), 0);
+        const reciente = max(x => x.t > hoyT - 28 * DIA_MS), previo = max(x => x.t <= hoyT - 28 * DIA_MS && x.t > hoyT - 56 * DIA_MS);
+        if (reciente && previo) cambios.push((reciente / previo - 1) * 100);
+        const mes = max(x => x.t + 6 * DIA_MS >= inicioMes), antes = max(x => x.t + 6 * DIA_MS < inicioMes);
+        if (mes && antes && mes > antes) prsMes++;
+      });
+      const fuerza = { pct: cambios.length ? cambios.reduce((a, b) => a + b, 0) / cambios.length : null, ejercicios: cambios.length, prsMes };
+
+      // Último entrenamiento: fecha guardada por la app al marcar (v19) o la última actividad registrada
+      let ultima = null;
+      semanas.slice(-3).forEach(sm => {
+        const g = agruparSemana(sm);
+        (sm.registros || []).forEach(r => {
+          if (r.clave !== '_SESION::fecha' || !r.valor) return;
+          if (!ultima || r.valor > ultima.fecha) {
+            const min = (sm.registros || []).find(x => x.clave === '_SESION::min' && normalizarDia(x.dia) === normalizarDia(r.dia));
+            ultima = Object.assign({ fecha: r.valor, dia: r.dia, minutos: min ? num1(min.valor) : null }, avanceDia(g, r.dia));
+          }
+        });
+      });
+      const act = (panelCoach && panelCoach.estado && panelCoach.estado[idAlumno]) || {};
+      if (act.ultimoEntreno && (!ultima || act.ultimoEntreno > ultima.fecha)) ultima = { fecha: act.ultimoEntreno };
+      if (ultima) {
+        ultima.dias = diasDesdeFecha(ultima.fecha);
+        if (ultima.dia) ultima.grupos = Array.from(new Set(ejsDia(ultima.dia).map(r => String(r.musculo || '').trim()).filter(Boolean))).slice(0, 3);
+      }
+
+      // Check-in de esta semana
+      const checkins = (estadoGlobal.checkinsCoach && estadoGlobal.checkinsCoach.lista) || [];
+      const checkin = checkins.find(c => c.semanaISO === semAct) || null;
+
+      // Sugerencias para la alerta física
+      const malo = t => !t || /^(no|ninguna?|nada|sin\b.*|-|n\/a)$/i.test(String(t).trim());
+      const sugerencias = [];
+      if (ult) ['lesion', 'limitacion'].forEach(k => { if (!malo(ult[k])) sugerencias.push(String(ult[k]).trim()); });
+      const ultCk = checkins[0];
+      if (ultCk && !malo(ultCk.molestias)) sugerencias.push(String(ultCk.molestias).trim());
+
+      return { adherencia, peso, composicion, fuerza, ultima, evaluacion, checkin, ultCheckin: ultCk || null,
+        sugerencias: Array.from(new Set(sugerencias)).slice(0, 3), notas: estadoGlobal.notasCoach || {} };
+    }
+
+    function htmlResumenFicha(idAlumno) {
+      const d = datosResumenFicha(idAlumno), id = escHtml(idAlumno);
+      const tarjeta = (etiqueta, valor, sub, tono) => `
+        <div class="bg-slate-900 border border-slate-800 rounded-2xl p-3.5 min-w-0">
+          <p class="text-[11px] font-bold text-slate-400 uppercase tracking-wide leading-tight">${etiqueta}</p>
+          <p class="text-xl sm:text-2xl font-black mt-1 ${valor === '—' ? 'text-slate-500' : 'text-white'} truncate">${valor}</p>
+          <p class="text-xs mt-0.5 ${tono === 'bien' ? 'text-emerald-300' : tono === 'mal' ? 'text-rose-300' : tono === 'ojo' ? 'text-amber-300' : 'text-slate-400'}">${sub}</p>
+        </div>`;
+      const a = d.adherencia;
+      const kAdh = a.programadas
+        ? tarjeta('Adherencia semanal', `${a.hechas} / ${a.programadas} <span class="text-sm font-bold text-slate-400">sesiones</span>`,
+            `${a.pct}% esta semana${a.hechas < a.hastaHoy ? ` · le faltan ${a.hastaHoy - a.hechas} hasta hoy` : ''}`, a.hechas >= a.hastaHoy ? 'bien' : 'ojo')
+        : tarjeta('Adherencia semanal', '—', 'Sin rutina asignada');
+      const p = d.peso;
+      const kPeso = p ? tarjeta('Peso y masa magra', `${p.valor.toFixed(1)} kg`,
+            p.deltaMagra !== null ? `Magra: ${conSigno(p.deltaMagra)} kg vs. eval. anterior` : (p.magra ? `Magra: ${p.magra.toFixed(1)} kg` : 'Primera evaluación'),
+            p.deltaMagra === null ? '' : p.deltaMagra >= 0 ? 'bien' : 'mal')
+        : tarjeta('Peso y masa magra', '—', 'Sin evaluaciones');
+      const c = d.composicion;
+      const kComp = !c ? tarjeta('% Grasa corporal', '—', 'Sin pliegues ni cintura')
+        : c.tipo === 'GRASA'
+          ? tarjeta('% Grasa corporal', `${c.valor.toFixed(1)}%`, c.delta === null ? 'Primera medición' : `${conSigno(c.delta)}% vs. eval. anterior`, c.delta === null ? '' : c.delta <= 0 ? 'bien' : 'mal')
+          : tarjeta('Cintura <span class="normal-case font-semibold">(sin plicómetro)</span>', `${c.valor.toFixed(1)} cm`, c.delta === null ? 'Primera medición' : `${conSigno(c.delta)} cm vs. eval. anterior`, c.delta === null ? '' : c.delta <= 0 ? 'bien' : 'mal');
+      const f = d.fuerza;
+      const prs = f.prsMes ? `${f.prsMes} ${f.prsMes === 1 ? 'nuevo récord' : 'nuevos récords'} este mes` : '';
+      const kFza = f.pct !== null
+        ? tarjeta('Progresión de fuerza', `${conSigno(f.pct)}%`, `en cargas (4 sem.)${prs ? ' · ' + prs : ''}`, f.pct >= 0 ? 'bien' : 'mal')
+        : f.prsMes ? tarjeta('Progresión de fuerza', `${f.prsMes} PR${f.prsMes === 1 ? '' : 's'}`, 'nuevos este mes', 'bien')
+        : tarjeta('Progresión de fuerza', '—', 'Aún no hay semanas para comparar');
+
+      // Último entrenamiento
+      const u = d.ultima;
+      const tonoU = !u || u.dias === null ? 'ojo' : u.dias >= DIAS_ALERTA_ENTRENO ? 'mal' : u.dias >= DIAS_AVISO_ENTRENO ? 'ojo' : 'bien';
+      const bordeU = tonoU === 'mal' ? 'border-rose-500/60' : tonoU === 'ojo' ? 'border-amber-400/60' : 'border-slate-800';
+      const bloqueEntreno = `
+        <section class="bg-slate-900 border-2 ${bordeU} rounded-2xl p-4" aria-labelledby="tUltEnt-${id}">
+          <div class="flex items-center justify-between gap-2">
+            <h4 id="tUltEnt-${id}" class="text-sm font-extrabold text-white inline-flex items-center gap-2">${ico('dumbbell', 'w-4 h-4 text-emerald-400')} Último entrenamiento</h4>
+            <button type="button" onclick="cambiarSubTabExpediente('expRutina')" class="text-xs font-bold text-emerald-300 min-h-[32px]">Ver rutina</button>
+          </div>
+          ${!u ? `<p class="mt-3 text-sm text-amber-300 font-bold">Sin entrenamientos registrados</p>` : `
+            <p class="mt-3 text-lg font-black text-white">${escHtml(haceDias(u.dias).replace(/^./, x => x.toUpperCase()))}${u.dia ? ` <span class="text-slate-400 font-bold">— ${escHtml(nombreDia(u.dia))}${u.grupos && u.grupos.length ? ': ' + escHtml(u.grupos.join(', ').toLowerCase()) : ''}</span>` : ''}</p>
+            <p class="text-xs text-slate-400">${escHtml(fechaLarga(u.fecha))}</p>
+            ${u.total ? `<div class="mt-3">
+              <div class="flex items-end justify-between text-sm"><span class="font-black text-white">${u.hechas} / ${u.total} <span class="text-slate-400 font-bold">series</span></span><span class="text-xs text-slate-400">${u.ejHechos} de ${u.ejTotal} ejercicios</span></div>
+              <div class="h-2 rounded-full bg-slate-800 mt-1.5 overflow-hidden"><div class="h-full rounded-full ${u.completo ? 'bg-emerald-500' : 'bg-amber-400'}" style="width:${Math.round(u.hechas / u.total * 100)}%"></div></div>
+            </div>` : ''}
+            ${u.minutos ? `<p class="mt-2 text-xs text-slate-300 inline-flex items-center gap-1.5">${ico('timer', 'w-4 h-4')} Duración: ${u.minutos} min (modo guiado)</p>` : ''}`}
+          ${tonoU === 'mal' || tonoU === 'ojo' ? `<p class="mt-3 text-xs font-bold ${tonoU === 'mal' ? 'text-rose-300' : 'text-amber-300'} inline-flex items-center gap-1.5">${ico('triangle-alert', 'w-4 h-4')} ${u && u.dias !== null ? `Lleva ${u.dias} días sin entrenar` : 'Aún no entrena con la app'}</p>` : ''}
+        </section>`;
+
+      // Evaluación y check-in
+      const e = d.evaluacion, ck = d.checkin;
+      const tonoE = !e ? 'ojo' : e.faltan < 0 ? 'mal' : e.faltan <= 3 ? 'ojo' : 'bien';
+      const textoE = !e ? 'Aún no tiene evaluación' : e.faltan < 0 ? `Vencida hace ${-e.faltan} día${e.faltan === -1 ? '' : 's'}` : e.faltan === 0 ? 'Toca hoy' : `Toca en ${e.faltan} día${e.faltan === 1 ? '' : 's'}`;
+      const a2 = alumnoPorId(idAlumno) || {};
+      const bloqueEval = `
+        <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4 space-y-4" aria-labelledby="tEval-${id}">
+          <div>
+            <h4 id="tEval-${id}" class="text-sm font-extrabold text-white inline-flex items-center gap-2">${ico('clipboard-pen', 'w-4 h-4 text-emerald-400')} Evaluación</h4>
+            <div class="mt-2 flex items-end justify-between gap-2">
+              <div><p class="text-xs text-slate-400">Última</p><p class="text-sm font-black text-white">${e ? escHtml(fechaLarga(e.fecha)) + ` <span class="text-slate-400 font-bold">· ${escHtml(haceDias(e.dias))}</span>` : '—'}</p></div>
+              <span class="shrink-0 text-xs font-extrabold px-2.5 py-1 rounded-full border ${tonoE === 'mal' ? 'bg-rose-500/15 text-rose-300 border-rose-500/40' : tonoE === 'ojo' ? 'bg-amber-500/15 text-amber-300 border-amber-500/40' : 'bg-emerald-500/15 text-emerald-300 border-emerald-500/40'}">${textoE}</span>
+            </div>
+            ${tonoE !== 'bien' ? `<button type="button" onclick="abrirEvaluacionPara('${id}')" class="mt-3 w-full min-h-[44px] rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold">Evaluar ahora</button>` : ''}
+          </div>
+          <div class="pt-4 border-t border-slate-800">
+            <h4 class="text-sm font-extrabold text-white inline-flex items-center gap-2">${ico('calendar-check', 'w-4 h-4 text-emerald-400')} Check-in de la semana</h4>
+            ${ck ? `
+              <p class="mt-2 text-sm font-bold text-emerald-300 inline-flex items-center gap-1.5">${ico('circle-check', 'w-4 h-4')} Recibido${ck.fecha ? ' · ' + escHtml(fechaLarga(ck.fecha)) : ''}</p>
+              <p class="text-xs text-slate-400 mt-1">${[ck.peso ? 'Peso ' + escHtml(ck.peso) + ' kg' : '', ck.energia ? 'Energía ' + escHtml(ck.energia) : '', ck.sueno ? 'Sueño ' + escHtml(ck.sueno) : ''].filter(Boolean).join(' · ')}</p>
+              ${!ck.respuesta ? `<button type="button" onclick="cambiarSubTabExpediente('expComunicacion')" class="mt-3 w-full min-h-[44px] rounded-xl bg-slate-950 border border-emerald-500/40 text-emerald-300 text-sm font-extrabold">Responder check-in</button>` : '<p class="text-xs text-slate-500 mt-1">Ya lo respondiste</p>'}`
+            : `
+              <p class="mt-2 text-sm font-bold text-amber-300 inline-flex items-center gap-1.5">${ico('clock', 'w-4 h-4')} Pendiente esta semana</p>
+              <button type="button" onclick="${telWhatsApp(a2.whatsapp) ? `abrirWhatsApp('${escHtml(a2.whatsapp)}', textoRecordatorioCheckin('${id}'))` : `pedirWhatsApp('${id}')`}" class="mt-3 w-full min-h-[44px] rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold inline-flex items-center justify-center gap-2">${ico('message-circle', 'w-4 h-4')} ${telWhatsApp(a2.whatsapp) ? 'Recordar por WhatsApp' : 'Agregar WhatsApp para recordarle'}</button>`}
+          </div>
+        </section>`;
+
+      return `
+        <div class="grid grid-cols-2 2xl:grid-cols-4 gap-2.5">${kAdh}${kPeso}${kComp}${kFza}</div>
+        <div class="grid md:grid-cols-2 gap-3 mt-3">${bloqueEntreno}${bloqueEval}</div>
+        <div class="mt-3" id="bloqueNotasCoach">${htmlNotasCoach(idAlumno, d)}</div>`;
+    }
+
+    function textoRecordatorioCheckin(idAlumno) {
+      const a = alumnoPorId(idAlumno) || {};
+      return `Hola ${primerNombreDe(a.nombre)} 👋 Te recuerdo enviar tu check-in de esta semana desde la app (peso, energía, sueño y molestias). ¡Me ayuda a ajustar tu plan! 💪`;
+    }
+
+    // ---- Alerta física y bitácora (solo el coach) ----
+    let editandoAlerta = false;
+    function htmlNotasCoach(idAlumno, d) {
+      d = d || datosResumenFicha(idAlumno);
+      const n = d.notas || {}, id = escHtml(idAlumno);
+      const etiqueta = n.alerta
+        ? `<span class="inline-flex items-center gap-2 max-w-full bg-amber-500/15 text-amber-200 border border-amber-500/50 rounded-full px-3 py-1.5 text-sm font-extrabold">${ico('triangle-alert', 'w-4 h-4 shrink-0')}<span class="truncate">${escHtml(n.alerta)}</span></span>`
+        : `<span class="inline-flex items-center gap-2 bg-emerald-500/10 text-emerald-300 border border-emerald-500/40 rounded-full px-3 py-1.5 text-sm font-extrabold">${ico('shield', 'w-4 h-4')} Sin molestias registradas</span>`;
+      const aviso = d.ultCheckin && d.ultCheckin.molestias && d.sugerencias.indexOf(String(d.ultCheckin.molestias).trim()) >= 0 && n.alerta !== String(d.ultCheckin.molestias).trim()
+        ? `<p class="mt-2 text-xs text-slate-300">${ico('info', 'w-3.5 h-3.5')} Último check-in: «${escHtml(d.ultCheckin.molestias)}»</p>` : '';
+      const editor = editandoAlerta ? `
+        <div class="mt-3 space-y-2">
+          <label for="inpAlerta-${id}" class="block text-xs font-bold text-slate-400">Alerta física o lesión activa</label>
+          <input id="inpAlerta-${id}" type="text" maxlength="120" value="${escHtml(n.alerta || '')}" placeholder="Ej. Cuidado lumbar en peso muerto" class="w-full min-h-[44px] px-3 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white">
+          ${d.sugerencias.length ? `<div class="flex flex-wrap gap-2">${d.sugerencias.map(t => `<button type="button" onclick="document.getElementById('inpAlerta-${id}').value = this.dataset.t" data-t="${escHtml(t)}" class="min-h-[36px] px-3 rounded-full bg-slate-800 text-slate-200 text-xs font-bold max-w-full truncate">Usar: ${escHtml(t)}</button>`).join('')}</div>` : ''}
+          <div class="flex flex-wrap gap-2">
+            <button type="button" onclick="guardarAlertaCoach('${id}')" class="min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold">Guardar alerta</button>
+            ${n.alerta ? `<button type="button" onclick="guardarAlertaCoach('${id}', '')" class="min-h-[44px] px-4 rounded-xl bg-slate-800 text-slate-200 text-sm font-bold">Quitar (sin molestias)</button>` : ''}
+            <button type="button" onclick="editandoAlerta = false; refrescarNotasCoach('${id}')" class="min-h-[44px] px-4 rounded-xl text-slate-400 text-sm font-bold">Cancelar</button>
+          </div>
+        </div>` : '';
+      return `
+        <div class="grid md:grid-cols-2 gap-3">
+          <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tAlerta-${id}">
+            <div class="flex items-center justify-between gap-2">
+              <h4 id="tAlerta-${id}" class="text-sm font-extrabold text-white inline-flex items-center gap-2">${ico('bandage', 'w-4 h-4 text-emerald-400')} Alertas físicas</h4>
+              ${editandoAlerta ? '' : `<button type="button" onclick="editandoAlerta = true; refrescarNotasCoach('${id}')" class="text-xs font-bold text-emerald-300 min-h-[32px] inline-flex items-center gap-1">${ico('pencil', 'w-3.5 h-3.5')} Editar</button>`}
+            </div>
+            <div class="mt-3">${etiqueta}</div>
+            ${n.alerta && n.fechaAlerta ? `<p class="mt-1.5 text-[11px] text-slate-500">Desde el ${escHtml(fechaLarga(n.fechaAlerta))}</p>` : ''}
+            ${aviso}${editor}
+          </section>
+          <section class="bg-slate-900 border border-slate-800 rounded-2xl p-4" aria-labelledby="tBitacora-${id}">
+            <h4 id="tBitacora-${id}" class="text-sm font-extrabold text-white inline-flex items-center gap-2">${ico('notebook-pen', 'w-4 h-4 text-emerald-400')} Bitácora del coach</h4>
+            <label for="txtNota-${id}" class="sr-only">Próximo ajuste para el alumno</label>
+            <textarea id="txtNota-${id}" rows="3" maxlength="600" placeholder="Próximo ajuste: subir 2,5 kg en press inclinado, revisar técnica de sentadilla hack…" class="mt-3 w-full px-3 py-2.5 bg-slate-950 border border-slate-700 rounded-xl text-sm text-white resize-y">${escHtml(n.nota || '')}</textarea>
+            <div class="flex items-center justify-between gap-2 mt-2">
+              <span class="text-[11px] text-slate-500">${n.fechaNota ? 'Guardada el ' + escHtml(fechaLarga(n.fechaNota)) : 'Solo la ves tú'}</span>
+              <button type="button" id="btnNota-${id}" onclick="guardarNotaCoach('${id}')" class="min-h-[44px] px-4 rounded-xl bg-emerald-500 text-slate-950 text-sm font-extrabold">Guardar nota</button>
+            </div>
+          </section>
+        </div>`;
+    }
+    function refrescarNotasCoach(idAlumno) {
+      const c = document.getElementById('bloqueNotasCoach'); if (c) c.innerHTML = htmlNotasCoach(idAlumno);
+      const inp = document.getElementById('inpAlerta-' + idAlumno); if (inp) inp.focus();
+    }
+    function enviarNotasCoach(idAlumno, cambios, alTerminar) {
+      GS().withFailureHandler(err => { alTerminar(false); avisar((err && err.message) || 'No se pudo guardar.', 'error'); })
+        .withSuccessHandler(res => {
+          if (!res || !res.success) { alTerminar(false); return avisar((res && res.error) || 'No se pudo guardar.', 'error'); }
+          if (estadoGlobal.notasCoach && estadoGlobal.notasCoach.idAlumno === idAlumno) Object.assign(estadoGlobal.notasCoach, res.notas);
+          alTerminar(true);
+        })
+        .guardarNotasCoach(Object.assign({ idAlumno }, cambios));
+    }
+    function guardarAlertaCoach(idAlumno, valor) {
+      const inp = document.getElementById('inpAlerta-' + idAlumno);
+      const alerta = valor !== undefined ? valor : (inp ? inp.value.trim() : '');
+      enviarNotasCoach(idAlumno, { alerta }, ok => {
+        if (!ok) return;
+        editandoAlerta = false; refrescarNotasCoach(idAlumno);
+        mostrarToast(alerta ? '✅ Alerta guardada' : '✅ Marcado sin molestias');
+      });
+    }
+    function guardarNotaCoach(idAlumno) {
+      const t = document.getElementById('txtNota-' + idAlumno), b = document.getElementById('btnNota-' + idAlumno);
+      if (!t) return;
+      if (b) { b.disabled = true; b.textContent = 'Guardando…'; }
+      enviarNotasCoach(idAlumno, { nota: t.value.trim() }, ok => {
+        if (b) { b.disabled = false; b.textContent = 'Guardar nota'; }
+        if (!ok) return;
+        refrescarNotasCoach(idAlumno);
+        mostrarToast('✅ Nota guardada');
+      });
     }

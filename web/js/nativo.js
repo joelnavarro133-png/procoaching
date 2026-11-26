@@ -82,6 +82,35 @@
     if (LN) LN.cancel({ notifications: [{ id: ID_DESCANSO }] }).catch(() => {});
   }
 
+  // --- v19 · Recordatorio al ALUMNO: al tercer día sin entrenar (6 p. m.) le llega una notificación ---
+  // Se reprograma cada vez que marca una serie; si vuelve a entrenar antes, la anterior se cancela.
+  const ID_RECORDATORIO = 7003;
+  window.programarRecordatorioEntreno = async function (ultimoISO, sinPedirPermiso) {
+    try {
+      const u = estadoGlobal.user;
+      if (!LN || !u || u.rol !== 'ALUMNO' || !(estadoGlobal.rutinaActual || []).length) return;
+      const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(ultimoISO || ''));
+      if (!m) return;
+      const cuando = new Date(+m[1], +m[2] - 1, +m[3] + 3, 18, 0, 0);
+      if (sinPedirPermiso) { const s = await LN.checkPermissions(); if (s.display !== 'granted') return; }
+      if (!(await prepararNotificaciones())) return;
+      await LN.cancel({ notifications: [{ id: ID_RECORDATORIO }] }).catch(() => {});
+      if (cuando.getTime() < Date.now() + 60000) return;   // ya pasó: se programa de nuevo cuando vuelva a entrenar
+      try { await LN.createChannel({ id: 'recordatorios', name: 'Recordatorios de entrenamiento', description: 'Aviso cuando llevas días sin entrenar', importance: 4, visibility: 1, vibration: true }); } catch (e) {}
+      const nombre = String(u.nombre || '').trim().split(/\s+/)[0] || '';
+      await LN.schedule({ notifications: [{
+        id: ID_RECORDATORIO, channelId: 'recordatorios',
+        title: '💪 ¡Tu rutina te espera!',
+        body: (nombre ? nombre.charAt(0) + nombre.slice(1).toLowerCase() + ', llevas' : 'Llevas') + ' 3 días sin entrenar. Hoy es un buen día para volver.',
+        smallIcon: 'ic_stat_procoaching', iconColor: '#10B981',
+        schedule: { at: cuando, allowWhileIdle: true }
+      }] });
+    } catch (e) {}
+  };
+  window.cancelarRecordatorioEntreno = function () {
+    if (LN) LN.cancel({ notifications: [{ id: ID_RECORDATORIO }] }).catch(() => {});
+  };
+
   if (typeof iniciarCronometro === 'function' && LN) {
     const iniciarWeb = iniciarCronometro, detenerWeb = detenerCronometro, avisarWeb = avisarFinDescanso;
 
