@@ -9,7 +9,7 @@
       const vistaActual = vistaVisible ? vistaVisible.id.replace('vista-alumno-', '') : 'INICIO';
       document.getElementById('alumnoView').classList.remove('hidden');
       if (!refresco || !senalIntervalo) iniciarSenalActividad();
-      if (!refresco) precargarMediosRutina(rutina);
+      if (!refresco) { precargarMediosRutina(rutina); precargarRecords(); }
       
       const nombreLimpio = (user.nombre || '').toUpperCase();
       const primerNombre = (user.nombre || '').trim().split(/\s+/)[0] || '';
@@ -1672,7 +1672,7 @@
       detenerSenalActividad();
       if (typeof detenerActividadCoach === 'function') detenerActividadCoach();
       if (typeof detenerVivoCoach === 'function') detenerVivoCoach();
-      recordsData = null; recordsEdicion = null; clubesEdicion = null;
+      recordsData = null; recordsEdicion = null; clubesEdicion = null; precargaRecordsEn = '';
       LS.del(CLAVE_MARCAS_HOY);
       Object.values(estadoGlobal.charts || {}).forEach(c => { if (c) c.destroy(); });
       estadoGlobal = {
@@ -2009,16 +2009,13 @@ function calcularComposicionAutomatica() {
       const cont = document.getElementById(idCont);
       if (!cont) return;
       if (!recordsData) cont.innerHTML = esqueleto('tarjetas', 3, 'Cargando récords');
+      else if (!cont.childElementCount) renderRecords();   // v18.1: ya se trajo en segundo plano → se ve al instante
       // v18: mientras llega la respuesta, se muestra el último muro guardado en el teléfono
       const claveRec = 'records/' + ((estadoGlobal.user && estadoGlobal.user.id) || '');
       let llegoServidor = false;
       if (!recordsData) CajaLocal.leerJSON(CAJA_VISTAS, claveRec).then(g => {
         if (!g || !g.success || llegoServidor || recordsData || recordsContenedor !== idCont) return;
-        recordsData = g;
-        if (g.esCoach) {
-          recordsEdicion = (g.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre }));
-          clubesEdicion = (g.clubes || []).map(c => ({ idEjercicio: c.idEjercicio, nombre: c.ejercicio, kg: c.kg }));
-        }
+        aplicarDatosRecords(g);
         renderRecords();
       });
       GS().withSuccessHandler(res => {
@@ -2027,15 +2024,39 @@ function calcularComposicionAutomatica() {
           cont.innerHTML = '<div class="ko"><p class="t-err text-sm">' + escHtml((res && res.error) || 'No se pudieron cargar los récords.') + '</p></div>';
           return;
         }
-        recordsData = res;
+        aplicarDatosRecords(res);
         if (estadoGlobal.user) CajaLocal.guardarJSON(CAJA_VISTAS, claveRec, res);
-        if (recordsEjSel >= (res.ranking || []).length) recordsEjSel = -1;
-        if (res.esCoach) {
-          recordsEdicion = (res.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre }));
-          clubesEdicion = (res.clubes || []).map(c => ({ idEjercicio: c.idEjercicio, nombre: c.ejercicio, kg: c.kg }));
-        }
         renderRecords();
       }).obtenerRecords();
+    }
+    function aplicarDatosRecords(res) {
+      recordsData = res;
+      if (recordsEjSel >= (res.ranking || []).length) recordsEjSel = -1;
+      if (res.esCoach) {
+        recordsEdicion = (res.ejercicios || []).map(e => ({ idEjercicio: e.idEjercicio, nombre: e.nombre }));
+        clubesEdicion = (res.clubes || []).map(c => ({ idEjercicio: c.idEjercicio, nombre: c.ejercicio, kg: c.kg }));
+      }
+    }
+    // v18.1 · El muro se trae en segundo plano unos segundos después de abrir la app,
+    // así al tocar «Récords» ya está listo (y queda guardado en el teléfono para la próxima vez).
+    let precargaRecordsEn = '';
+    function precargarRecords() {
+      const quien = estadoGlobal.user && estadoGlobal.user.id;
+      if (!quien || precargaRecordsEn === quien) return;   // una vez por sesión
+      precargaRecordsEn = quien;
+      setTimeout(() => {
+        if (recordsData || !estadoGlobal.user) return;
+        const id = estadoGlobal.user.id;
+        GS().withFailureHandler(() => {})
+          .withSuccessHandler(res => {
+            if (!res || !res.success || recordsData || !estadoGlobal.user || estadoGlobal.user.id !== id) return;
+            aplicarDatosRecords(res);
+            CajaLocal.guardarJSON(CAJA_VISTAS, 'records/' + id, res);
+            const cont = recordsContenedor && document.getElementById(recordsContenedor);
+            if (cont && cont.offsetParent !== null) renderRecords();   // si justo está mirando el muro
+          })
+          .obtenerRecords();
+      }, 4000);
     }
 
     const kgRec = n => (Math.round(Number(n) * 10) / 10).toString().replace('.', ',') + ' kg';

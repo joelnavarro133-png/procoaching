@@ -1,6 +1,7 @@
     // coach.js · Panel del coach: alumnos, evaluaciones, constructor de rutinas, editar/duplicar, PDF y WhatsApp.
     // ==================== COACH ====================
     function inicializarPanelCoach() {
+      if (typeof precargarRecords === 'function') precargarRecords();   // v18.1: muro listo antes de tocarlo
       document.getElementById('coachView').classList.remove('hidden');
       actualizarAvataresUI();
       actualizarSelectoresAlumnos();
