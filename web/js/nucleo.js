@@ -1297,6 +1297,7 @@ function GS() {
           </div>
           <div id="resumenSemanas" class="grid grid-cols-1 sm:grid-cols-3 gap-3"></div>
           <div id="tablaSemanas"></div>
+          <div id="evolucionEjercicio"></div>
           <div id="zonaReporteAlumno"></div>
           <details class="bg-slate-950 border border-slate-800 rounded-xl">
             <summary class="p-3 text-xs font-bold text-slate-300 cursor-pointer">Semanas subidas (${semanas.length})</summary>
@@ -1306,11 +1307,92 @@ function GS() {
           </details>
         </div>`;
       actualizarTablaSemanas();
+      renderEvolucionEjercicio();
       // El alumno genera su propio reporte desde aquí; el coach ya lo tiene en el expediente.
       const zona = document.getElementById('zonaReporteAlumno');
       if (zona && !esCoach() && estadoGlobal.user && estadoGlobal.user.id) {
         zona.innerHTML = bloqueReportePDF(estadoGlobal.user.id, false);
       }
+    }
+
+    // ==================== v20 · EVOLUCIÓN DEL PESO POR EJERCICIO ====================
+    // Un punto por semana subida: la serie más pesada de ese ejercicio (si está en dos días, la mayor).
+    let chartEvolucionEj = null;
+    function datosEvolucionEjercicios() {
+      const semanas = (estadoGlobal.semanas || []).slice().sort((a, b) => (a.semanaISO < b.semanaISO ? -1 : 1));
+      const porEj = {};
+      semanas.forEach(s => {
+        const g = agruparSemana(s), mejor = {};
+        Object.keys(g).forEach(k => {
+          const n = valorNumerico(g[k]);
+          if (n === null || !(n > 0)) return;
+          const base = g[k].base.replace(/~\d+$/, '');
+          if (!(mejor[base] >= n)) mejor[base] = n;
+        });
+        Object.keys(mejor).forEach(b => (porEj[b] = porEj[b] || []).push({ s, kg: Math.round(mejor[b] * 100) / 100 }));
+      });
+      return porEj;
+    }
+    function renderEvolucionEjercicio() {
+      const cont = document.getElementById('evolucionEjercicio');
+      if (!cont) return;
+      if (chartEvolucionEj) { try { chartEvolucionEj.destroy(); } catch (e) {} chartEvolucionEj = null; }
+      const datos = datosEvolucionEjercicios();
+      const titulo = `<h5 class="text-sm font-bold text-emerald-400 uppercase tracking-wider">${ico('chart-line', 'w-4 h-4')} Evolución por ejercicio</h5>`;
+      const bases = Object.keys(datos);
+      if (!bases.length) {
+        cont.innerHTML = `<div class="bg-slate-950 border border-slate-800 rounded-2xl p-4">${titulo}<p class="text-xs text-slate-400 mt-1">Cuando se registren pesos en las series, aquí se verá cómo sube cada ejercicio semana a semana.</p></div>`;
+        return;
+      }
+      // Por defecto, el ejercicio con más semanas registradas
+      const masDatos = bases.slice().sort((a, b) => datos[b].length - datos[a].length || nombreEjercicio(a).localeCompare(nombreEjercicio(b)))[0];
+      const previo = (document.getElementById('selEvolEj') || {}).value;
+      const sel = datos[previo] ? previo : masDatos;
+      const opciones = bases.slice().sort((a, b) => nombreEjercicio(a).localeCompare(nombreEjercicio(b), 'es'))
+        .map(b => `<option value="${escHtml(b)}" ${b === sel ? 'selected' : ''}>${escHtml(nombreEjercicio(b))} (${datos[b].length} sem.)</option>`).join('');
+      const pts = datos[sel];
+      const primero = pts[0], ultimo = pts[pts.length - 1];
+      const mejor = pts.reduce((m, p) => (p.kg > m.kg ? p : m), pts[0]);
+      const dif = Math.round((ultimo.kg - primero.kg) * 100) / 100;
+      const pct = primero.kg > 0 ? Math.round((ultimo.kg - primero.kg) / primero.kg * 100) : null;
+      const colorDif = dif > 0 ? 'text-emerald-400' : dif < 0 ? 'text-rose-400' : 'text-white';
+      const tarjeta = (t, v, sub, c = 'text-white') => `<div class="bg-slate-900 border border-slate-800 rounded-xl p-3 min-w-0"><span class="block text-[11px] uppercase tracking-wider text-slate-400 font-bold">${t}</span><span class="block text-lg sm:text-xl font-black ${c}">${v}</span><span class="block text-xs text-slate-400 leading-snug">${sub}</span></div>`;
+      cont.innerHTML = `
+        <div class="bg-slate-950 border border-slate-800 rounded-2xl p-4 space-y-3">
+          <div class="flex flex-wrap items-end justify-between gap-3">
+            <div>${titulo}<p class="text-xs text-slate-400">La serie más pesada de cada semana.</p></div>
+            <div class="w-full sm:w-80"><label for="selEvolEj" class="block text-xs text-slate-400 mb-1">Ejercicio</label>
+              <select id="selEvolEj" onchange="renderEvolucionEjercicio()" class="w-full p-3 bg-slate-950 border border-slate-800 rounded-xl text-xs font-bold text-emerald-400">${opciones}</select></div>
+          </div>
+          <div class="grid grid-cols-3 gap-2">
+            ${tarjeta('Cambio', pts.length > 1 ? (dif > 0 ? '+' : '') + dif + ' kg' : '—', pts.length > 1 ? (pct !== null ? (pct > 0 ? '+' : '') + pct + '% desde sem. ' + primero.s.numero : '') : 'falta 1 semana', pts.length > 1 ? colorDif : 'text-slate-400')}
+            ${tarjeta('Última', ultimo.kg + ' kg', 'Sem. ' + ultimo.s.numero)}
+            ${tarjeta('Mejor', mejor.kg + ' kg', 'Sem. ' + mejor.s.numero, 'text-amber-300')}
+          </div>
+          <div class="relative h-56 sm:h-64"><canvas id="chartEvolucionEj" role="img" aria-label="Peso de ${escHtml(nombreEjercicio(sel))} por semana: de ${primero.kg} a ${ultimo.kg} kg"></canvas></div>
+          ${pts.length < 2 ? '<p class="text-xs text-slate-400">Con una sola semana registrada todavía no hay curva: aparece desde la segunda.</p>' : ''}
+        </div>`;
+      if (typeof Chart === 'undefined') return;
+      chartEvolucionEj = new Chart(document.getElementById('chartEvolucionEj'), {
+        type: 'line',
+        data: {
+          labels: pts.map(p => 'Sem. ' + p.s.numero),
+          datasets: [{ label: 'kg', data: pts.map(p => p.kg), borderColor: '#10b981', backgroundColor: 'rgba(16,185,129,0.12)', fill: true, cubicInterpolationMode: 'monotone', borderWidth: 2.5,
+            pointRadius: pts.map(p => (p === mejor ? 6 : 4)), pointBackgroundColor: pts.map(p => (p === mejor ? '#fcd34d' : '#10b981')), pointBorderColor: '#0f172a' }]
+        },
+        options: {
+          responsive: true, maintainAspectRatio: false,
+          plugins: {
+            legend: { display: false },
+            tooltip: { backgroundColor: '#0f172a', titleColor: '#10b981', bodyColor: '#f1f5f9', borderColor: '#334155', borderWidth: 1, padding: 10,
+              callbacks: { title: it => { const p = pts[it[0].dataIndex]; return 'Semana ' + p.s.numero + (p.s.rango ? ' · ' + p.s.rango : ''); }, label: c => c.parsed.y + ' kg' } }
+          },
+          scales: {
+            x: { grid: { color: '#1e293b' }, ticks: { color: '#cbd5e1', font: { size: 10 } } },
+            y: { beginAtZero: false, grace: '10%', grid: { color: '#1e293b' }, ticks: { color: '#94a3b8', font: { size: 10 }, callback: v => v + ' kg' } }
+          }
+        }
+      });
     }
 
     function actualizarTablaSemanas() {
